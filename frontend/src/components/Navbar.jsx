@@ -1,10 +1,20 @@
 import StatusBadge from './StatusBadge';
+import { Link, useLocation } from 'react-router-dom';
 
 export default function Navbar() {
+
+    const { pathname } = useLocation();
+    const isAuthPage = pathname === '/login'
+        || pathname === '/register'
+        || pathname === '/forgot-password'
+        || pathname === '/reset-password'
+        || pathname === '/password-changed'
+        || pathname === '/register-confirmation';
+
     return (
         <header className="navbar">
             <div className="container navbar__inner">
-                <a href="#" className="navbar__logo" aria-label="Inicio jUGamiR">
+                <Link to="/" className="navbar__logo" aria-label="Inicio jUGamiR">
                     <div className="navbar__logo-icon">⚕️</div>
                     <span>
                         <span className="navbar__brand-j">j</span>
@@ -14,13 +24,17 @@ export default function Navbar() {
                         <span className="navbar__brand-i">i</span>
                         <span className="navbar__brand-r">R</span>
                     </span>
-                </a>
+                </Link>
 
-                <nav className="navbar__actions">
-                    <StatusBadge />
-                    <a href="#" className="btn btn--outline" id="btn-login">Iniciar sesión</a>
-                    <a href="#" className="btn btn--primary" id="btn-play">¡Jugar!</a>
-                </nav>
+                {!isAuthPage && (
+                    <>
+                        <StatusBadge />
+                        <nav className="navbar__actions">
+                            <Link to="/login" className="btn btn--outline" id="btn-login">Iniciar sesión</Link>
+                            <Link to="/register" className="btn btn--primary" id="btn-play">¡Jugar!</Link>
+                        </nav>
+                    </>
+                )}
             </div>
         </header>
     );

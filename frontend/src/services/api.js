@@ -11,9 +11,10 @@ const API_BASE = '/api';
  */
 export async function healthCheck() {
     try {
-        const res = await fetch(`${API_BASE}/hello`, { signal: AbortSignal.timeout(5000) });
+        const res = await fetch('/actuator/health', { signal: AbortSignal.timeout(5000) });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return await res.text();
+        const data = await res.json();
+        return data.status === 'UP' ? 'Backend online' : null;
     } catch {
         return null;
     }

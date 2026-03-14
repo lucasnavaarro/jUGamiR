@@ -1,0 +1,22 @@
+# Variables de entorno
+.env
+
+# Java / Maven
+backend/target/
+*.class
+*.jar
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# IDEs
+.idea/
+.vscode/
+.iml
+
+# Logs
+*.log
+
+

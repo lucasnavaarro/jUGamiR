@@ -40,6 +40,9 @@ services:
             DB_PASSWORD: jugamir_pw
             SERVER_PORT: 8080
             SHOW_SQL: true
+            MAIL_USERNAME: ${MAIL_USERNAME}
+            MAIL_PASSWORD: ${MAIL_PASSWORD}
+            JWT_SECRET: ${JWT_SECRET}
         ports:
             - "8080:8080"
         depends_on:

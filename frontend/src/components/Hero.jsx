@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+
+
 export default function Hero() {
     return (
         <section className="hero" aria-label="Presentación">
@@ -15,12 +18,12 @@ export default function Hero() {
                 </p>
 
                 <div className="hero__cta">
-                    <a href="#" className="btn btn--primary btn--lg" id="cta-jugar">
+                    <Link to="/register" className="btn btn--primary btn--lg" id="cta-jugar">
                         🎯 Empezar a jugar
-                    </a>
-                    <a href="#categories" className="btn btn--outline btn--lg2">
-                        Ver categorías
-                    </a>
+                    </Link>
+                    <Link to="/login" className="btn btn--outline btn--lg2">
+                        Iniciar Sesión
+                    </Link>
                 </div>
             </div>
         </section>

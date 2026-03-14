@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   apellidos       VARCHAR(120) NOT NULL,
   email           VARCHAR(255) NOT NULL UNIQUE,
   dni             VARCHAR(20)  NOT NULL UNIQUE,
-  contraseña_hash TEXT,
+  contraseña_hash TEXT NOT NULL,
   es_activo       BOOLEAN NOT NULL DEFAULT TRUE,
   creado_en       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   ultimo_login    TIMESTAMPTZ
@@ -42,21 +42,57 @@ CREATE TABLE IF NOT EXISTS usuarios (
 
 CREATE TABLE IF NOT EXISTS jugadores (
   id_usuario  BIGINT PRIMARY KEY REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-  nick        VARCHAR(80),
-  nivel         INT NOT NULL DEFAULT 0
+  nick        VARCHAR(80) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS profesores (
   id_usuario   BIGINT PRIMARY KEY REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-  departamento VARCHAR(120),
-  categoria    VARCHAR(120)
+  departamento VARCHAR(120)
 );
 
 CREATE TABLE IF NOT EXISTS administradores (
   id_usuario  BIGINT PRIMARY KEY REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-  superadmin  BOOLEAN NOT NULL DEFAULT FALSE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- =========================================================
+-- 1.1) CODIGOS DE VERIFICACION
+-- =========================================================
+CREATE TABLE codigos_2fa (
+  id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  id_usuario  BIGINT NOT NULL REFERENCES usuarios(id_usuario) ON DELETE CASCADE UNIQUE,
+  codigo      VARCHAR(6) NOT NULL,        -- el código de 6 dígitos
+  expira_en   TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '10 minutes'),
+  usado       BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+-- =========================================================
+-- 1.1.2) VISTA PARA VER USUARIOS Y CODIGOS_2FA
+-- =========================================================
+CREATE VIEW v_codigos_2fa AS
+SELECT 
+    c.id,
+    c.id_usuario,
+    u.nombre,
+    u.apellidos,
+    c.codigo,
+    c.expira_en,
+    c.usado
+FROM codigos_2fa c
+JOIN usuarios u ON c.id_usuario = u.id_usuario;
+
+
+-- =========================================================
+-- 1.2) Token para reset de contraseña
+-- =========================================================
+CREATE TABLE password_reset_tokens (
+    id        BIGSERIAL PRIMARY KEY,
+    token     VARCHAR(255) NOT NULL UNIQUE,
+    id_usuario BIGINT NOT NULL REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    expira_en TIMESTAMP NOT NULL,
+    usado     BOOLEAN NOT NULL DEFAULT FALSE
+);
+
 
 -- =========================================================
 -- 2) CATEGORIAS + quesitos
