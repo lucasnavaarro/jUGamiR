@@ -25,9 +25,13 @@ export default function VerifyForm({ email }) {
         setIsLoading(false);
 
         if (res.ok) {
-            const { token } = await res.json();
-            localStorage.setItem('jwt', token);
-            navigate('/');
+            const data = await res.json();
+            localStorage.setItem('jwt', data.token);
+            localStorage.setItem('rol', data.rol);
+
+            if (data.rol === "JUGADOR") navigate('/jugador');
+            else navigate('/profesor');
+
         } else {
             setError('Código incorrecto o expirado');
         }
@@ -51,7 +55,9 @@ export default function VerifyForm({ email }) {
                 </div>
 
                 {error && <p className="auth-form__error">{error}</p>}
-                <button type="submit" className="btn btn--secondary btn--full">Verificar</button>
+                <button type="submit" className="btn btn--secondary btn--full" disabled={isLoading}>
+                    {isLoading ? 'Verificando...' : 'Verificar'}
+                </button>
             </form>
         </div>
     );

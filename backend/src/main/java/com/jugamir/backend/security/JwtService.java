@@ -21,9 +21,10 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String email, int tokenVersion) {
         return Jwts.builder()
                 .subject(email)
+                .claim("tokenVersion", tokenVersion)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getKey())
@@ -32,12 +33,20 @@ public class JwtService {
     }
 
     public String getEmailFromToken(String token) {
+        return getClaims(token).getSubject();
+    }
+
+    // Extraer versión de token sin consultar bd
+    public int getTokenVersion(String token) {
+        return getClaims(token).get("tokenVersion", Integer.class);
+    }
+
+    private Claims getClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getKey())
                 .build()
                 .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+                .getPayload();
     }
 
     public void isTokenValid(String token) {

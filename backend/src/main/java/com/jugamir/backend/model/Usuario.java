@@ -39,4 +39,8 @@ public class Usuario {
 
     @Column(name = "ultimo_login")
     private LocalDateTime ultimoLogin;
+
+    @Column(name = "token_version", nullable = false)
+    @Builder.Default
+    private Integer tokenVersion = 1;
 }

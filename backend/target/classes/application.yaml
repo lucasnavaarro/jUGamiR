@@ -48,4 +48,4 @@ management:
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: 86400000
+  expiration: 900000 #15 minutos

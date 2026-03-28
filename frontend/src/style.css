@@ -64,10 +64,14 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  min-width: 0;
+  /*Evita que los elementos se desborden*/
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  /*Evita que el texto se ajuste al tamaño de la pantalla*/
 }
 
 body {
@@ -76,6 +80,8 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   min-height: 100vh;
+  min-height: 100dvh;
+  /*Evita que el body se encoja */
   overflow-x: hidden;
 }
 
@@ -112,8 +118,13 @@ p {
 
 /* ── Layout helpers ───────────────────────────────────────── */
 .container {
-  width: min(1200px, 100% - 3rem);
+  width: 100%;
+  /*Ocupa todo el ancho disponible*/
+  max-width: 1200px;
   margin-inline: auto;
+  /*Centra el contenedor*/
+  padding-inline: clamp(1rem, 3vw, 1.5rem);
+  /*Ajusta el padding según el tamaño de la pantalla*/
 }
 
 /* ── NAVBAR ─────────────────────────────────────────────────── */
@@ -127,9 +138,12 @@ p {
 
 .navbar__inner {
   display: flex;
-  /* align-items: center; */
+  align-items: center;
   justify-content: space-between;
   padding-block: var(--space-md);
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  /*Permite que los elementos se adapten a diferentes tamaños de pantalla*/
 }
 
 .navbar__logo {
@@ -179,7 +193,78 @@ p {
   display: flex;
   gap: var(--space-sm);
   align-items: center;
+  flex-wrap: wrap;
+  /* Permite que los elementos se adapten a diferentes tamaños de pantalla */
+  justify-content: flex-end;
+  /* Alinea los elementos a la derecha */
 }
+
+.navbar__search {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 360px;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  padding: 0.4rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.navbar__search-icon {
+  font-size: 0.9rem;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.navbar__search-input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 16px;
+  width: 100%;
+  min-width: 0;
+  cursor: text;
+}
+
+/* Botón lupa — solo visible en móvil */
+.navbar__search-trigger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1.2rem;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.navbar__search-trigger:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+}
+
+/* Botón cerrar dentro del search expandido en móvil */
+.navbar__search-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0 0.25rem;
+  display: none;
+  flex-shrink: 0;
+}
+
+
 
 /* ── Backend status badge ─────────────────────────────────── */
 .status-badge {
@@ -282,13 +367,17 @@ p {
 }
 
 .btn--lg {
-  padding: 0.85rem 2.2rem;
-  font-size: 1.5rem;
+  padding: clamp(0.75rem, 2vw, 0.85rem) clamp(1rem, 4vw, 2.2rem);
+  /*Ajusta el padding según el tamaño de la pantalla*/
+  font-size: clamp(1rem, 3.5vw, 1.5rem);
+  /*Ajusta el tamaño de la fuente según el tamaño de la pantalla*/
 }
 
 .btn--lg2 {
-  padding: 0.85rem 2.2rem;
-  font-size: 1.2rem;
+  padding: clamp(0.75rem, 2vw, 0.85rem) clamp(1rem, 4vw, 2.2rem);
+  /*Ajusta el padding según el tamaño de la pantalla*/
+  font-size: clamp(0.95rem, 3vw, 1.2rem);
+  /*Ajusta el tamaño de la fuente según el tamaño de la pantalla*/
 }
 
 /* ── HERO ─────────────────────────────────────────────────── */
@@ -307,8 +396,8 @@ p {
   filter: blur(90px);
   pointer-events: none;
   z-index: 0;
-  width: 750px;
-  height: 750px;
+  width: min(750px, 100vw);
+  height: min(750px, 100vw);
   background: rgba(245, 158, 11, 0.12);
   top: 50%;
   left: 50%;
@@ -442,6 +531,7 @@ p {
 
 .categories__grid {
   display: grid;
+  /*Siempre 3 comlumnas si el espacio lo permite*/
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-md);
 }
@@ -547,19 +637,21 @@ p {
   background: var(--bg-surface);
 }
 
-/* .steps {
+.steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-lg);
   margin-top: var(--space-xl);
   counter-reset: steps;
-} */
+}
 
 .step {
   text-align: center;
   padding: var(--space-lg);
   counter-increment: steps;
   position: relative;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .step::before {
@@ -608,13 +700,134 @@ main {
 }
 
 /* ── Responsive tweaks ────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .categories__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 640px) {
-  .navbar__actions .btn--outline {
+  .navbar__actions .btn {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    /*Evita que el texto se rompa en varias líneas*/
+  }
+
+  .navbar__logo {
+    font-size: 1.3rem;
+  }
+
+  .navbar__logo-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 1.1rem;
+  }
+
+  /* En móvil la barra está oculta por defecto */
+  .navbar__search {
     display: none;
+  }
+
+  /* La lupa sí es visible en móvil */
+  .navbar__search-trigger {
+    display: flex;
+  }
+
+  /* Cuando el usuario pulsa la lupa, el search se despliega
+     cubriendo toda la barra de navegación */
+  .navbar__search--open {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    max-width: 100%;
+    border-radius: 0;
+    padding: 0.75rem 1rem;
+    background: var(--bg-base);
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 500;
+  }
+
+  .navbar__search--open .navbar__search-close {
+    display: block;
+    /* Muestra el botón × para cerrar */
+  }
+
+
+  .stats__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .status-badge {
+    display: none;
+  }
+
+  .user-menu__avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .user-menu__dropdown {
+    right: 0;
+    min-width: min(190px, 90vw);
+  }
+
+
+
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    padding: var(--space-md);
+    /* Ajusta el padding */
+    align-items: flex-start;
+    /* Alinea la tarjeta arriba */
+    padding-top: var(--space-xl);
+  }
+
+  .auth-card {
+    padding: var(--space-lg);
+    /* Ajusta el padding */
+    border-radius: var(--radius-md);
   }
 
   .stats__grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .auth-form__group label {
+    font-size: 1rem;
+    /* Labels más pequeños */
+  }
+
+  .auth-form__group input {
+    font-size: 16px;
+    /*Se cambia de 1rem a 16px para evitar zoom en IOS */
+    padding: 0.6rem 0.75rem;
+  }
+
+  .categories__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero__cta .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .stats__grid {
+    grid-template-columns: 1fr;
+    text-align: left;
   }
 }
 
@@ -623,7 +836,8 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-2xl);
+  padding: clamp(1rem, 4vw, var(--space-2xl));
+  /* Responsive padding */
 }
 
 
@@ -631,7 +845,8 @@ main {
   background: var(--bg-card);
   border: 3px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-lg);
-  padding: var(--space-2xl);
+  padding: clamp(1.5rem, 5vw, var(--space-2xl));
+  /* Responsive padding */
   width: 100%;
   max-width: 520px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
@@ -639,7 +854,8 @@ main {
 
 
 .auth-card__title {
-  font-size: 2.5rem;
+  /* Responsive font size */
+  font-size: clamp(1.4rem, 5vw, 2.5rem);
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: var(--space-xl);
@@ -714,6 +930,8 @@ main {
   display: flex;
   gap: 0.5rem;
   margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+  /*Permite que los botones se adapten a pantallas pequeñas*/
 }
 
 .auth-tab {
@@ -779,4 +997,94 @@ main {
   display: flex;
   background: none;
   border: none;
+}
+
+/* ── User menu ───────────────────────── */
+
+.user-menu {
+  position: relative;
+  flex-shrink: 0;
+  /*Evita que el avatar se encoja*/
+}
+
+.user-menu__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  padding: 0;
+}
+
+.user-menu__avatar:hover {
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.user-menu__avatar svg {
+  width: 20px;
+  height: 20px;
+}
+
+.user-menu__dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  /*10px debajo del avatar*/
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  min-width: 190px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  /*Corta cualquier contenido que se salga*/
+  z-index: 200;
+  /*Se asegura de que el menú se muestre encima de todo*/
+  animation: fadeUp 0.15s ease;
+  /*Aparece suavemente*/
+}
+
+
+.user-menu__dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  min-height: 44px;
+}
+
+
+.user-menu__dropdown button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+
+.user-menu__divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 0;
+}
+
+
+.user-menu__logout {
+  color: #ef4444 !important;
+}
+
+
+.user-menu__logout:hover {
+  background: rgba(239, 68, 68, 0.08) !important;
 }

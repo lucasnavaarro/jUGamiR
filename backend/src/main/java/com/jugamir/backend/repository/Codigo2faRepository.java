@@ -14,7 +14,7 @@ public interface Codigo2faRepository extends JpaRepository<Codigo2fa, Long> {
     Optional<Codigo2fa> findByUsuarioAndCodigoAndUsadoFalse(Usuario usuario, String codigo);
 
     @Transactional
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Codigo2fa c WHERE c.usuario = :usuario")
     void deleteByUsuario(@Param("usuario") Usuario usuario);
 }

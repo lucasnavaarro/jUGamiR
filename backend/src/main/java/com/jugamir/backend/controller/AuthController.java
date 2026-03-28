@@ -4,8 +4,12 @@ import com.jugamir.backend.dto.*;
 import com.jugamir.backend.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,7 +41,52 @@ public class AuthController {
     @PostMapping("/verify")
     public ResponseEntity<AuthResponse> verify(@Valid @RequestBody VerifyRequest request) {
 
-        return ResponseEntity.ok(authService.verify(request));
+        AuthService.VerifyResult result = authService.verify(request);
+
+        // EL REFRESH TOKEN VIAJA EN UNA COOKIE
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", result.refreshToken())
+                .httpOnly(true)
+                .secure(false) // false en localhost, true en producción
+                .path("/api/auth") // solo se envía en peticiones a /api/auth/*
+                .maxAge(Duration.ofDays(30))
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(result.authResponse());
+
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, String>> refresh(
+            @CookieValue(name = "refreshToken", required = false) String refreshToken) {
+
+        if (refreshToken == null || refreshToken.isBlank())
+            return ResponseEntity.status(401).build();
+
+        return ResponseEntity.ok(authService.renovarToken(refreshToken));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
+
+        if (refreshToken != null) {
+            authService.logout(refreshToken);
+        }
+
+        // Destruye la cookie en el navegador: maxAge(0) hace que caduque inmediatamente
+        ResponseCookie cookieBorrada = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/api/auth")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookieBorrada.toString())
+                .build();
     }
 
     @PostMapping("/forgot-password")

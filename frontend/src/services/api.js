@@ -20,7 +20,48 @@ export async function healthCheck() {
     }
 }
 
-// ── Próximas llamadas ──────────────────────────────────────────────────────
-// export async function login(email, password) { ... }
-// export async function getPartidas() { ... }
-// export async function getPregunta(id) { ... }
+
+export async function apiFetch(url, options = {}) {
+
+    const jwt = localStorage.getItem("jwt");
+
+    const res = await fetch(url, {
+        ...options,
+        headers: {
+            ...options.headers,
+            Authorization: `Bearer ${jwt}`
+        },
+    });
+
+    if (res.status === 401) {
+
+        const refreshRes = await fetch(API_BASE + "/auth/refresh", {
+            method: "POST",
+        });
+
+        if (refreshRes.ok) {
+            const { token } = await refreshRes.json();
+            localStorage.setItem("jwt", token);
+
+            // Reintentamos la petición original con el nuevo token
+            return fetch(url, {
+                ...options,
+                headers: {
+                    ...options.headers,
+                    Authorization: `Bearer ${token}`
+                },
+            });
+
+        } else {
+            // Si el refresh falla, cerramos sesión
+            localStorage.removeItem("jwt");
+            localStorage.removeItem("rol");
+            window.location.href = "/";
+        }
+
+    }
+
+    return res;
+
+
+}

@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Random;
+import java.util.Map;
+import java.util.UUID;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +26,12 @@ public class AuthService {
     private final Codigo2faRepository codigo2faRepository;
     private final EmailService emailService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    // Contenedor que devuelve verify(): el AuthResponse (sin refreshToken)
+    // y el refreshToken para que el controlador lo inyecte en la cookie
+    public record VerifyResult(AuthResponse authResponse, String refreshToken) {
+    }
 
     @Transactional
     public void registerJugador(RegisterJugadorRequest request) {
@@ -75,7 +84,7 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponse verify(VerifyRequest request) {
+    public VerifyResult verify(VerifyRequest request) {
 
         Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -92,7 +101,59 @@ public class AuthService {
         usuario.setEsActivo(true);
         usuarioRepository.save(usuario);
 
-        return new AuthResponse(jwtService.generateToken(usuario.getEmail()), usuario.getEmail(), "");
+        // Determinar qué tipo de usuario es
+        String rol = jugadorRepository.existsByUsuario(usuario) ? "JUGADOR" : "PROFESOR";
+
+        // El JWT incluye la versión actual. Si el usuario hace logout, la versión
+        // sube y este JWT queda inválido en la siguiente petición de cualquier
+        // dispositivo.
+        String jwt = jwtService.generateToken(usuario.getEmail(), usuario.getTokenVersion());
+
+        // Si el usuario tiene sesion iniciada en otro dispositivo, se le asigna ese
+        // token
+        // Si no, se crea uno nuevo
+        Optional<RefreshToken> rtExistente = refreshTokenRepository.findByUsuario(usuario);
+        RefreshToken rt = rtExistente.orElseGet(() -> refreshTokenRepository.save(
+                RefreshToken.builder()
+                        .token(UUID.randomUUID().toString())
+                        .usuario(usuario)
+                        .expiraEn(LocalDateTime.now().plusDays(30))
+                        .build()));
+
+        // El refreshToken se envia en la cookie, nunca en el body
+        return new VerifyResult(
+                new AuthResponse(jwt, usuario.getEmail(), "", rol),
+                rt.getToken());
+    }
+
+    @Transactional
+    public Map<String, String> renovarToken(String refreshToken) {
+
+        RefreshToken rt = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new RuntimeException("Token no encontrado"));
+
+        if (rt.getExpiraEn().isBefore(LocalDateTime.now()))
+            throw new RuntimeException("El token ha expirado");
+
+        Usuario usuario = rt.getUsuario();
+        String nuevoJwt = jwtService.generateToken(usuario.getEmail(), usuario.getTokenVersion());
+
+        return Map.of("token", nuevoJwt);
+    }
+
+    @Transactional
+    public void logout(String refreshToken) {
+
+        RefreshToken rt = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new RuntimeException("Token no encontrado"));
+
+        Usuario usuario = rt.getUsuario();
+        // Al subir la versión, todos los JWT con versión anterior son rechazados
+        // inmediatamente en la siguiente petición
+        usuario.setTokenVersion(usuario.getTokenVersion() + 1);
+        usuarioRepository.save(usuario);
+
+        refreshTokenRepository.delete(rt);
     }
 
     private void validarUsuario(RegisterRequest request) {
