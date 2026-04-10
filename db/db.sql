@@ -4,7 +4,7 @@
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'nivel_pregunta') THEN
-    CREATE TYPE nivel_pregunta AS ENUM ('FÁCIL','MEDIO','DIFÍCIL');
+    CREATE TYPE nivel_pregunta AS ENUM ('FACIL','MEDIO','DIFICIL');
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'estado_pregunta') THEN
@@ -16,11 +16,15 @@ BEGIN
   --END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'estado_partida') THEN
-    CREATE TYPE estado_partida AS ENUM ('CREADA','RUNNING','TERMINADA','CANCELADA');
+    CREATE TYPE estado_partida AS ENUM ('ESPERANDO','EN_CURSO','TERMINADA','CANCELADA');
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'resultado_jugador') THEN
-    CREATE TYPE resultado_jugador AS ENUM ('VICTORIA','DERROTA','EMPATE','PENDIENTE');
+    CREATE TYPE resultado_jugador AS ENUM ('VICTORIA','DERROTA','EMPATE','PENDIENTE','ABANDONADA','EXPULSADO');
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tipo_partida') THEN
+    CREATE TYPE tipo_partida AS ENUM ('PUBLICA', 'PRIVADA');
   END IF;
 
 END $$;
@@ -100,7 +104,7 @@ CREATE TABLE password_reset_tokens (
 CREATE TABLE IF NOT EXISTS categorias (
   id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   nombre      VARCHAR(120) NOT NULL UNIQUE,
-  color       VARCHAR(30)  NOT NULL,
+  color       VARCHAR(30)  NOT NULL UNIQUE,
   descripcion TEXT
 );
 
@@ -115,7 +119,7 @@ CREATE TABLE IF NOT EXISTS quesitos (
 CREATE TABLE IF NOT EXISTS asignaturas (
   id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   nombre       VARCHAR(255) NOT NULL UNIQUE,
-  categoria_id BIGINT REFERENCES categorias(id) ON DELETE RESTRICT  -- nullable: el usuario asigna la categoría manualmente
+  categoria_id BIGINT NOT NULL REFERENCES categorias(id) ON DELETE RESTRICT
 );
 
 -- =========================================================
@@ -133,7 +137,7 @@ CREATE TABLE IF NOT EXISTS preguntas (
   dificultad     nivel_pregunta  NOT NULL DEFAULT 'MEDIO',
   estado         estado_pregunta NOT NULL DEFAULT 'BORRADOR',
   asignatura_id  BIGINT NOT NULL REFERENCES asignaturas(id) ON DELETE RESTRICT,
-  creada_por     BIGINT REFERENCES usuarios(id_usuario) ON DELETE SET NULL,
+  creada_por     BIGINT NOT NULL REFERENCES usuarios(id_usuario) ON DELETE RESTRICT,
   creada_el      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   actualizada_el TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT chk_preguntas_imagen_url
@@ -254,18 +258,21 @@ FOR EACH ROW EXECUTE FUNCTION asegurar_pregunta_unica_correcta_YA_publicada();
 -- =========================================================
 CREATE TABLE IF NOT EXISTS partidas (
   id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  codigo_union       VARCHAR(12) NOT NULL UNIQUE,
+  codigo_union       VARCHAR(12) UNIQUE,
   max_jugadores      INT NOT NULL DEFAULT 6,
+  tipo               tipo_partida NOT NULL DEFAULT 'PUBLICA',  -- PUBLICA | PRIVADA
+  dificultad         nivel_pregunta NOT NULL DEFAULT 'MEDIO',    -- FÁCIL | MEDIO | DIFÍCIL
+  tiempo_respuesta   INT NOT NULL DEFAULT 30,                 -- segundos por pregunta
   --modo               modo_juego NOT NULL DEFAULT 'MULTI',
-  estado             estado_partida NOT NULL DEFAULT 'CREADA',
+  estado             estado_partida NOT NULL DEFAULT 'ESPERANDO',
   duracion           INT CHECK (duracion IS NULL OR duracion > 0),
   total_preguntas    INT NOT NULL DEFAULT 0 CHECK (total_preguntas >= 0),
   empezada_en        TIMESTAMPTZ,
   terminada_en       TIMESTAMPTZ,
   creada_por         BIGINT REFERENCES usuarios(id_usuario) ON DELETE SET NULL,
   creada_en          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CONSTRAINT chk_partidas_max_jugadores CHECK (max_jugadores = 6),
-  CONSTRAINT chk_partidas_codigo_union_len CHECK (char_length(codigo_union) BETWEEN 4 AND 12)
+  CONSTRAINT chk_partidas_max_jugadores CHECK (max_jugadores BETWEEN 2 AND 6),
+  CONSTRAINT chk_partidas_codigo_union_len CHECK (codigo_union IS NULL OR char_length(codigo_union) BETWEEN 4 AND 12)
 );
 
 CREATE INDEX IF NOT EXISTS idx_partidas_estado ON partidas(estado);
@@ -276,6 +283,7 @@ CREATE TABLE IF NOT EXISTS jugadores_partida (
   partida_id     BIGINT NOT NULL REFERENCES partidas(id) ON DELETE CASCADE,
   jugador_id     BIGINT NOT NULL REFERENCES jugadores(id_usuario) ON DELETE CASCADE,
   orden_union    INT,
+  orden_turno    INT,  -- orden de juego asignado al iniciar la partida (1 = primero)
   puntos         INT NOT NULL DEFAULT 0,
   num_acertadas  INT NOT NULL DEFAULT 0 CHECK (num_acertadas >= 0),
   num_falladas   INT NOT NULL DEFAULT 0 CHECK (num_falladas >= 0),
@@ -341,7 +349,6 @@ CREATE TABLE IF NOT EXISTS preguntas_partida (
   partida_id         BIGINT NOT NULL REFERENCES partidas(id) ON DELETE CASCADE,
   pregunta_id        BIGINT NOT NULL REFERENCES preguntas(id) ON DELETE RESTRICT,
   orden_pregunta     INT NOT NULL CHECK (orden_pregunta > 0),
-  duracion INT CHECK (duracion IS NULL OR duracion > 0),
   CONSTRAINT uq_pregunta_partida_orden UNIQUE (partida_id, orden_pregunta),
   CONSTRAINT uq_partida_pregunta_no_repetida UNIQUE (partida_id, pregunta_id)
 );
@@ -413,3 +420,17 @@ CREATE TABLE IF NOT EXISTS quesitos_ganados (
 );
 
 CREATE INDEX IF NOT EXISTS idx_quesitos_ganados_categoria ON quesitos_ganados(categoria_id);
+
+-- =========================================================
+-- 9) Progreso por categoría (aciertos hacia el quesito, 0-4)
+--    Cuando llega a 5 se crea la fila en quesitos_ganados y se resetea.
+-- =========================================================
+CREATE TABLE IF NOT EXISTS progreso_categoria (
+  id                 BIGSERIAL PRIMARY KEY,
+  jugador_partida_id BIGINT NOT NULL REFERENCES jugadores_partida(id) ON DELETE CASCADE,
+  categoria_id       BIGINT NOT NULL REFERENCES categorias(id),
+  aciertos           INT NOT NULL DEFAULT 0 CHECK (aciertos BETWEEN 0 AND 5),
+  CONSTRAINT uq_progreso UNIQUE (jugador_partida_id, categoria_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_progreso_jugador ON progreso_categoria(jugador_partida_id);

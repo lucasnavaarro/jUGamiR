@@ -11,7 +11,4 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     Optional<RefreshToken> findByUsuario(Usuario usuario); // Busca el refresh token de un usuario
 
-    void deleteByUsuario(Usuario usuario); // Borra todos los refresh tokens de un usuario, antes de generar nuevos
-
-    void deleteByToken(String token); // Borra un refresh token específico. LogOut
 }

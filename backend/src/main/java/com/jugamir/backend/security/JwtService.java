@@ -43,9 +43,10 @@ public class JwtService {
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getKey())
+                .verifyWith(getKey()) // Obtiene la llave para verificar la firma
                 .build()
-                .parseSignedClaims(token)
+                .parseSignedClaims(token) // Verifica la firma del token
+                // Una vez verificado, obtenemos el payload
                 .getPayload();
     }
 

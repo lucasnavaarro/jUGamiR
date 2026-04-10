@@ -37,6 +37,7 @@ export async function apiFetch(url, options = {}) {
 
         const refreshRes = await fetch(API_BASE + "/auth/refresh", {
             method: "POST",
+            //credentials: "include"
         });
 
         if (refreshRes.ok) {

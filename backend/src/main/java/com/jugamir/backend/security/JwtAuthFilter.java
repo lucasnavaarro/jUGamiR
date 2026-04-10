@@ -29,7 +29,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response); // Pasa al siguiente filtro
             return;
         }
 
@@ -44,7 +44,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 if (usuario == null) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    // response.getWriter().write("Usuario no encontrado");
+                    response.getWriter().write("Usuario no encontrado");
                     return;
                 }
 
@@ -56,9 +56,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
 
                 // Token válido
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, null,
-                        List.of());
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        email, null, List.of());
+                // Añadimos los detalles de la petición
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                // Establecemos la autenticación en el contexto de seguridad
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
 
