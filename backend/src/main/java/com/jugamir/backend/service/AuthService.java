@@ -74,10 +74,10 @@ public class AuthService {
     @Transactional
     public void login(LoginRequest request) {
 
-        Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
+        Usuario usuario = usuarioRepository.findByEmail(request.email())
                 .orElseThrow(() -> new RuntimeException("Las credenciales no coinciden con nuestros registros"));
 
-        if (!passwordEncoder.matches(request.getPassword(), usuario.getContrasenaHash()))
+        if (!passwordEncoder.matches(request.password(), usuario.getContrasenaHash()))
             throw new RuntimeException("Las credenciales no coinciden con nuestros registros");
 
         generarYEnviarCodigo(usuario);
@@ -86,10 +86,10 @@ public class AuthService {
     @Transactional
     public VerifyResult verify(VerifyRequest request) {
 
-        Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
+        Usuario usuario = usuarioRepository.findByEmail(request.email())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Codigo2fa codigo = codigo2faRepository.findByUsuarioAndCodigoAndUsadoFalse(usuario, request.getCodigo())
+        Codigo2fa codigo = codigo2faRepository.findByUsuarioAndCodigoAndUsadoFalse(usuario, request.codigo())
                 .orElseThrow(() -> new RuntimeException("Código incorrecto o ya usado"));
 
         if (codigo.getExpiraEn().isBefore(LocalDateTime.now()))
@@ -101,8 +101,11 @@ public class AuthService {
         usuario.setEsActivo(true);
         usuarioRepository.save(usuario);
 
-        // Determinar qué tipo de usuario es
+        // Determinar qué tipo de usuario es y obtener su nick si es jugador
         String rol = jugadorRepository.existsByUsuario(usuario) ? "JUGADOR" : "PROFESOR";
+        String nick = jugadorRepository.findByUsuario_IdUsuario(usuario.getIdUsuario())
+                .map(j -> j.getNick())
+                .orElse("");
 
         // El JWT incluye la versión actual. Si el usuario hace logout, la versión
         // sube y este JWT queda inválido en la siguiente petición de cualquier
@@ -122,7 +125,7 @@ public class AuthService {
 
         // El refreshToken se envia en la cookie, nunca en el body
         return new VerifyResult(
-                new AuthResponse(jwt, usuario.getEmail(), "", rol),
+                new AuthResponse(jwt, usuario.getEmail(), nick, rol, usuario.getNombre()),
                 rt.getToken());
     }
 
@@ -196,7 +199,7 @@ public class AuthService {
     @Transactional
     public void contrasenaOlvidada(ForgotPasswordRequest request) {
 
-        Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
+        Usuario usuario = usuarioRepository.findByEmail(request.email())
                 .orElseThrow(() -> new RuntimeException("No existe ninguna cuenta asociada a ese email"));
 
         passwordResetTokenRepository.deleteByUsuario(usuario);
@@ -216,14 +219,14 @@ public class AuthService {
     @Transactional
     public void resetearContrasena(ResetPasswordRequest request) {
 
-        PasswordResetToken resetToken = passwordResetTokenRepository.findByTokenAndUsadoFalse(request.getToken())
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByTokenAndUsadoFalse(request.token())
                 .orElseThrow(() -> new RuntimeException("Token inválido o ya usado"));
 
         if (resetToken.getExpiraEn().isBefore(LocalDateTime.now()))
             throw new RuntimeException("El enlace ha expirado");
 
         Usuario usuario = resetToken.getUsuario();
-        usuario.setContrasenaHash(passwordEncoder.encode(request.getNuevaPassword()));
+        usuario.setContrasenaHash(passwordEncoder.encode(request.nuevaPassword()));
         usuarioRepository.save(usuario);
 
         resetToken.setUsado(true);

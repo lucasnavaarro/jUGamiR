@@ -19,4 +19,17 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Long> {
                         @Param("asignaturaId") Long asignaturaId,
                         @Param("estado") EstadoPregunta estado,
                         @Param("limite") int limite);
+
+        @Query("SELECT p FROM Pregunta p " +
+                        "WHERE p.asignatura.categoria.id = :categoriaId " +
+                        "AND p.estado = :estado " +
+                        "AND p.anulada = false " +
+                        "AND p.id NOT IN :usadas " +
+                        "ORDER BY FUNCTION('RANDOM') " +
+                        "LIMIT :limite")
+        List<Pregunta> findAleatoriasByCategoria(
+                        @Param("categoriaId") Long categoriaId,
+                        @Param("estado") EstadoPregunta estado,
+                        @Param("usadas") List<Long> usadas,
+                        @Param("limite") int limite);
 }

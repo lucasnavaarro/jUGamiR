@@ -1,8 +1,7 @@
 package com.jugamir.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -10,6 +9,9 @@ import java.time.OffsetDateTime;
 @IdClass(QuesitosGanadosId.class)
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class QuesitosGanados {
 
     @Id

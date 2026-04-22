@@ -28,6 +28,9 @@ export default function VerifyForm({ email }) {
             const data = await res.json();
             localStorage.setItem('jwt', data.token);
             localStorage.setItem('rol', data.rol);
+            localStorage.setItem('email', data.email);
+            localStorage.setItem('nick', data.nick);
+            localStorage.setItem('nombre', data.nombre);
 
             if (data.rol === "JUGADOR") navigate('/jugador');
             else navigate('/profesor');

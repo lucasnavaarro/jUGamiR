@@ -1,14 +1,16 @@
 package com.jugamir.backend.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "respuestas_jugador")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RespuestaJugador {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

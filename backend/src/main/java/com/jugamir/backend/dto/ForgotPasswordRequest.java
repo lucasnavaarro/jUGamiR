@@ -1,9 +1,6 @@
 package com.jugamir.backend.dto;
 
-import lombok.Data;
+public record ForgotPasswordRequest(
 
-@Data
-public class ForgotPasswordRequest {
-
-    private String email;
+        String email) {
 }

@@ -52,6 +52,9 @@ public class Partida {
     @Column(name = "terminada_en")
     private OffsetDateTime terminadaEn; // nullable
 
+    @Column(name = "turno_actual", nullable = false)
+    private Integer turnoActual;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creada_por") // nullable — ON DELETE SET NULL
     private Usuario creadaPor;

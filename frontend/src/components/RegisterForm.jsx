@@ -98,6 +98,7 @@ export default function RegisterForm() {
 
     return (
         <div className="auth-card">
+            <Link to="/" className="join-card__back">Cancelar</Link>
             <div className="auth-card__header">
                 <h1 className="auth-card__title"> Crear cuenta</h1>
             </div>

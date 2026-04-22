@@ -48,6 +48,7 @@ export default function LoginForm({ onEmailSent }) {
     return (
 
         <div className="auth-card">
+            <Link to="/" className="join-card__back">Cancelar</Link>
             <div className="auth-card__header">
                 <h1 className="auth-card__title"> Iniciar sesión</h1>
             </div>

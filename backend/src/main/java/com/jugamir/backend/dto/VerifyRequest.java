@@ -2,15 +2,8 @@ package com.jugamir.backend.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
 
-@Data
-public class VerifyRequest {
-
-    @Email
-    @NotBlank
-    private String email;
-
-    @NotBlank
-    private String codigo;
-}
+public record VerifyRequest(
+        @NotBlank @Email String email,
+        @NotBlank String codigo
+) {}

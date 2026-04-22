@@ -1,8 +1,6 @@
 package com.jugamir.backend.dto;
 
-import lombok.Data;
+public record RefreshTokenRequest(
 
-@Data
-public class RefreshTokenRequest {
-    private String refreshToken;
+        String refreshToken) {
 }

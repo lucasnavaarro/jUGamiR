@@ -71,22 +71,6 @@ CREATE TABLE codigos_2fa (
 );
 
 -- =========================================================
--- 1.1.2) VISTA PARA VER USUARIOS Y CODIGOS_2FA
--- =========================================================
-CREATE VIEW v_codigos_2fa AS
-SELECT 
-    c.id,
-    c.id_usuario,
-    u.nombre,
-    u.apellidos,
-    c.codigo,
-    c.expira_en,
-    c.usado
-FROM codigos_2fa c
-JOIN usuarios u ON c.id_usuario = u.id_usuario;
-
-
--- =========================================================
 -- 1.2) Token para reset de contraseña
 -- =========================================================
 CREATE TABLE password_reset_tokens (
@@ -269,6 +253,7 @@ CREATE TABLE IF NOT EXISTS partidas (
   total_preguntas    INT NOT NULL DEFAULT 0 CHECK (total_preguntas >= 0),
   empezada_en        TIMESTAMPTZ,
   terminada_en       TIMESTAMPTZ,
+  turno_actual       INT NOT NULL DEFAULT 1,
   creada_por         BIGINT REFERENCES usuarios(id_usuario) ON DELETE SET NULL,
   creada_en          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT chk_partidas_max_jugadores CHECK (max_jugadores BETWEEN 2 AND 6),
@@ -434,3 +419,33 @@ CREATE TABLE IF NOT EXISTS progreso_categoria (
 );
 
 CREATE INDEX IF NOT EXISTS idx_progreso_jugador ON progreso_categoria(jugador_partida_id);
+
+-- =========================================================
+-- 10) Vistas
+-- =========================================================
+
+CREATE VIEW v_usuarios_profesores AS
+SELECT 
+	u.*,
+	p.departamento
+FROM Usuarios u
+JOIN Profesores p ON u.id_usuario = p.id_usuario;
+
+CREATE VIEW v_usuarios_jugadores AS
+SELECT 
+	u.*,
+	j.nick
+FROM Usuarios u
+JOIN Jugadores j ON u.id_usuario = j.id_usuario;
+
+CREATE VIEW v_codigos_2fa AS
+SELECT 
+    c.id,
+    c.id_usuario,
+    u.nombre,
+    u.apellidos,
+    c.codigo,
+    c.expira_en,
+    c.usado
+FROM codigos_2fa c
+JOIN usuarios u ON c.id_usuario = u.id_usuario;

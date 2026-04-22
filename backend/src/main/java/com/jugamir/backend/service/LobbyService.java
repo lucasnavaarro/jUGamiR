@@ -1,9 +1,11 @@
 package com.jugamir.backend.service;
 
+import com.jugamir.backend.dto.PartidaPublicaDTO;
 import com.jugamir.backend.model.*;
 import com.jugamir.backend.model.enums.*;
 import com.jugamir.backend.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
@@ -11,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Optional;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class LobbyService {
     private final PartidaRepository partidaRepository;
     private final JugadorRepository jugadorRepository;
     private final JugadorPartidaRepository jugadorPartidaRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public Partida crearPartida(Long usuarioId, TipoPartida tipo, Dificultad dificultad, int tiempoRespuesta,
             int maxJugadores) {
@@ -42,6 +46,10 @@ public class LobbyService {
                 .build();
 
         partida = partidaRepository.save(partida);
+        if (tipo == TipoPartida.PUBLICA) {
+            List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
+            messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
+        }
 
         JugadorPartida jugadorPartida = JugadorPartida.builder()
                 .jugador(jugador)
@@ -70,7 +78,7 @@ public class LobbyService {
         unirJugador(partida, usuarioId);
     }
 
-    public void unirseApartidaPublica(Long partidaId, Long usuarioId) {
+    public void unirseAPartidaPublica(Long partidaId, Long usuarioId) {
         Partida partida = partidaRepository.findById(partidaId)
                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
 
@@ -81,8 +89,18 @@ public class LobbyService {
     }
 
     @Transactional(readOnly = true)
-    public List<Partida> obtenerPartidasPublicas() {
-        return partidaRepository.findByTipoAndEstado(TipoPartida.PUBLICA, EstadoPartida.ESPERANDO);
+    public List<PartidaPublicaDTO> obtenerPartidasPublicas() {
+        return partidaRepository.findByTipoAndEstado(TipoPartida.PUBLICA, EstadoPartida.ESPERANDO)
+                .stream()
+                .map(partida -> new PartidaPublicaDTO(
+                        partida.getId(),
+                        partida.getCreadaPor() != null ? partida.getCreadaPor().getNombre() : "Desconocido",
+                        partida.getCreadaPor() != null ? partida.getCreadaPor().getEmail() : "",
+                        jugadorPartidaRepository.countByPartidaAndResultado(partida, ResultadoJugador.PENDIENTE),
+                        partida.getMaxJugadores(),
+                        partida.getDificultad().toString()))
+                .toList();
+
     }
 
     public void iniciarPartida(Long partidaId, Long usuarioId) {
@@ -108,9 +126,21 @@ public class LobbyService {
         }
 
         jugadorPartidaRepository.saveAll(jugadores);
+        partida.setTurnoActual(1);
         partida.setEstado(EstadoPartida.EN_CURSO);
         partida.setEmpezadaEn(OffsetDateTime.now());
         partidaRepository.save(partida);
+
+        Map<String, Object> estadoLobby = construirEstadoLobby(partida);
+        messagingTemplate.convertAndSend(
+                "/topic/lobby/" + partida.getId(),
+                (Object) estadoLobby);
+
+        // Si es publica, actualizamos la lista de partidas publicas
+        if (partida.getTipo() == TipoPartida.PUBLICA) {
+            List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
+            messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
+        }
 
     }
 
@@ -133,6 +163,13 @@ public class LobbyService {
                 partida.setEstado(EstadoPartida.CANCELADA);
                 partidaRepository.save(partida);
             }
+
+            // Si es publica, actualizamos la lista de partidas publicas
+            if (partida.getTipo() == TipoPartida.PUBLICA) {
+                List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
+                messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
+            }
+
         } else if (estado.equals(EstadoPartida.EN_CURSO)) {
             jugadorPartida.setResultado(ResultadoJugador.ABANDONADA);
             jugadorPartidaRepository.save(jugadorPartida);
@@ -221,6 +258,31 @@ public class LobbyService {
                 .build();
 
         jugadorPartidaRepository.save(jugadorPartida);
+
+        // Notificar a todos los jugadores del lobby que se ha unido uno nuevo
+        Map<String, Object> estadoLobby = construirEstadoLobby(partida);
+        messagingTemplate.convertAndSend(
+                "/topic/lobby/" + partida.getId(),
+                (Object) estadoLobby);
+    }
+
+    private Map<String, Object> construirEstadoLobby(Partida partida) {
+
+        List<JugadorPartida> participantes = jugadorPartidaRepository.findByPartida(partida);
+        List<Map<String, String>> jugadores = participantes.stream()
+                .filter(jp -> jp.getResultado() == ResultadoJugador.PENDIENTE) // Descarta a los expulsados y
+                                                                               // abandonados
+                .map(jp -> Map.of("nick", jp.getJugador().getNick())) // Obtiene el nick del jugador
+                .toList(); // Convierte la lista de jugadores a una lista de maps
+
+        return Map.of(
+                "idPartida", partida.getId(),
+                "codigo", partida.getCodigoUnion() != null ? partida.getCodigoUnion() : "",
+                "anfitrion", partida.getCreadaPor().getNombre(),
+                "jugadores", jugadores,
+                "maxJugadores", partida.getMaxJugadores(),
+                "estado", partida.getEstado().name());
+
     }
 
     private String generarCodigoUnico() {

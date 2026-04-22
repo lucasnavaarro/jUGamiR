@@ -18,6 +18,10 @@ public interface JugadorPartidaRepository extends JpaRepository<JugadorPartida, 
     // Obtiene un jugador de una partida por el id del usuario
     Optional<JugadorPartida> findByPartidaAndJugador_Usuario_IdUsuario(Partida partida, Long usuarioId);
 
-    // Obtiene el jugador creador de la partida
+    // Obtiene el numero de jugadores excluyendo los que tienen
+    // resultado='resultado'
     int countByPartidaAndResultadoNot(Partida partida, ResultadoJugador resultado);
+
+    // Obtiene el numero de jugadores que tienen resultado='resultado'
+    int countByPartidaAndResultado(Partida partida, ResultadoJugador resultado);
 }

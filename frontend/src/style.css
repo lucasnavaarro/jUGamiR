@@ -15,7 +15,7 @@
   --bg-card-hover: #222236;
 
   /* Texto */
-  --text-primary: #F1F0FB;
+  --text-primary: #ffffff;
   --text-secondary: #A09BB8;
   --text-muted: #5E5870;
 
@@ -150,7 +150,7 @@ p {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  font-size: 1.75rem;
+  font-size: clamp(1.3rem, 4vw, 1.75rem);
   font-weight: 800;
   letter-spacing: -0.5px;
 }
@@ -162,7 +162,7 @@ p {
   border-radius: var(--radius-sm);
   display: grid;
   place-items: center;
-  font-size: 1.5rem;
+  font-size: clamp(1.1rem, 3.5vw, 1.5rem);
 }
 
 .navbar__brand-j {
@@ -247,10 +247,7 @@ p {
   flex-shrink: 0;
 }
 
-.navbar__search-trigger:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: white;
-}
+
 
 /* Botón cerrar dentro del search expandido en móvil */
 .navbar__search-close {
@@ -349,11 +346,7 @@ p {
   color: #fff;
 }
 
-.btn--primary:hover {
-  background: rgb(28, 94, 43);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgb(28, 94, 43);
-}
+
 
 .btn--outline {
   background: transparent;
@@ -361,10 +354,7 @@ p {
   border: 2px solid rgba(255, 255, 255, 0.16);
 }
 
-.btn--outline:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.3);
-}
+
 
 .btn--lg {
   padding: clamp(0.75rem, 2vw, 0.85rem) clamp(1rem, 4vw, 2.2rem);
@@ -498,7 +488,7 @@ p {
 }
 
 .stat__number {
-  font-size: 2.2rem;
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
   font-weight: 800;
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   -webkit-background-clip: text;
@@ -555,14 +545,6 @@ p {
   transition: var(--transition);
 }
 
-.cat-card:hover {
-  background: var(--bg-card-hover);
-  transform: translateY(-6px);
-}
-
-.cat-card:hover::before {
-  opacity: 1;
-}
 
 /* Un color para cada categoría */
 .cat-card:nth-child(1) {
@@ -601,12 +583,12 @@ p {
   border: 1px solid color-mix(in srgb, var(--cat-color) 40%, transparent);
   display: grid;
   place-items: center;
-  font-size: 1.6rem;
+  font-size: clamp(1.3rem, 4vw, 1.6rem);
   margin-bottom: var(--space-md);
 }
 
 .cat-card__name {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 3vw, 1.2rem);
   font-weight: 700;
   color: white;
   margin-bottom: var(--space-xs);
@@ -627,9 +609,7 @@ p {
   transition: transform 0.4s ease;
 }
 
-.cat-card:hover .cat-card__bar {
-  transform: scaleX(1);
-}
+
 
 /* ── CÓMO JUGAR ─────────────────────────────────────────── */
 .how-to {
@@ -699,138 +679,6 @@ main {
   flex: 1;
 }
 
-/* ── Responsive tweaks ────────────────────────────────────── */
-
-@media (max-width: 768px) {
-  .categories__grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .navbar__actions .btn {
-    padding: 0.4rem 0.9rem;
-    font-size: 0.82rem;
-    white-space: nowrap;
-    /*Evita que el texto se rompa en varias líneas*/
-  }
-
-  .navbar__logo {
-    font-size: 1.3rem;
-  }
-
-  .navbar__logo-icon {
-    width: 28px;
-    height: 28px;
-    font-size: 1.1rem;
-  }
-
-  /* En móvil la barra está oculta por defecto */
-  .navbar__search {
-    display: none;
-  }
-
-  /* La lupa sí es visible en móvil */
-  .navbar__search-trigger {
-    display: flex;
-  }
-
-  /* Cuando el usuario pulsa la lupa, el search se despliega
-     cubriendo toda la barra de navegación */
-  .navbar__search--open {
-    display: flex !important;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    max-width: 100%;
-    border-radius: 0;
-    padding: 0.75rem 1rem;
-    background: var(--bg-base);
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    z-index: 500;
-  }
-
-  .navbar__search--open .navbar__search-close {
-    display: block;
-    /* Muestra el botón × para cerrar */
-  }
-
-
-  .stats__grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .status-badge {
-    display: none;
-  }
-
-  .user-menu__avatar {
-    width: 34px;
-    height: 34px;
-  }
-
-  .user-menu__dropdown {
-    right: 0;
-    min-width: min(190px, 90vw);
-  }
-
-
-
-}
-
-@media (max-width: 480px) {
-  .login-page {
-    padding: var(--space-md);
-    /* Ajusta el padding */
-    align-items: flex-start;
-    /* Alinea la tarjeta arriba */
-    padding-top: var(--space-xl);
-  }
-
-  .auth-card {
-    padding: var(--space-lg);
-    /* Ajusta el padding */
-    border-radius: var(--radius-md);
-  }
-
-  .stats__grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .auth-form__group label {
-    font-size: 1rem;
-    /* Labels más pequeños */
-  }
-
-  .auth-form__group input {
-    font-size: 16px;
-    /*Se cambia de 1rem a 16px para evitar zoom en IOS */
-    padding: 0.6rem 0.75rem;
-  }
-
-  .categories__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .hero__cta {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .hero__cta .btn {
-    width: 100%;
-  }
-}
-
-@media (max-width: 400px) {
-  .stats__grid {
-    grid-template-columns: 1fr;
-    text-align: left;
-  }
-}
-
 /* ── Autenticación Card ───────────────────────────────────────── */
 .login-page {
   display: flex;
@@ -878,7 +726,7 @@ main {
 
 
 .auth-form__group label {
-  font-size: 1.3rem;
+  font-size: clamp(0.95rem, 3vw, 1.3rem);
   font-weight: 500;
   color: var(--text-primary);
 }
@@ -921,9 +769,7 @@ main {
   font-size: 1rem;
 }
 
-.auth-link:hover {
-  text-decoration: underline;
-}
+
 
 /* ── Auth tabs ────────────────────────────────────────────────── */
 .auth-tabs {
@@ -946,9 +792,7 @@ main {
   transition: background 0.2s, color 0.2s;
 }
 
-.auth-tab:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
+
 
 .auth-tab--active {
   background: var(--color-primary);
@@ -1021,10 +865,7 @@ main {
   padding: 0;
 }
 
-.user-menu__avatar:hover {
-  border-color: var(--color-primary);
-  color: white;
-}
+
 
 .user-menu__avatar svg {
   width: 20px;
@@ -1068,9 +909,7 @@ main {
 }
 
 
-.user-menu__dropdown button:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
+
 
 
 .user-menu__divider {
@@ -1085,6 +924,758 @@ main {
 }
 
 
-.user-menu__logout:hover {
-  background: rgba(239, 68, 68, 0.08) !important;
+
+
+/* ── DASHBOARD ────────────────────────────────────────────── */
+/* Bienvenida */
+.dashboard__hero {
+  padding-block: var(--space-2xl) var(--space-xl);
+}
+
+/*Círculo de fondo*/
+.dashboard__hero::before {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  /*Redondea el círculo*/
+  filter: blur(90px);
+  /*Difumina el círculo*/
+  pointer-events: none;
+  /*No bloquea el click*/
+  z-index: 0;
+  /*Para que el círculo esté detrás del contenido*/
+  width: min(600px, 100vw);
+  height: min(600px, 100vw);
+  background: rgba(124, 58, 237, 0.1);
+  /*Color del círculo*/
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /*Centra el círculo*/
+}
+
+/* Título y subtítulo del dashboard */
+.dashboard__hero-inner {
+  position: relative;
+  z-index: 1;
+  animation: fadeUp 0.5s ease both;
+}
+
+/* .dashboard__eyebrow {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: var(--space-sm);
+} */
+
+.dashboard__title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.1;
+  margin-bottom: var(--space-md);
+}
+
+.dashboard__subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 520px;
+}
+
+.dashboard__actions {
+  padding-block: var(--space-xl) var(--space-2xl);
+}
+
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  /* min(100%, 280px) evita desbordamiento en pantallas muy pequeñas */
+  gap: var(--space-lg);
+}
+
+/* ── ACTION CARD ─────────────────────────────────────────── */
+.action-card {
+  background: var(--bg-card);
+  border: 2px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl) var(--space-lg);
+  display: flex;
+  /*los hijos se colocan en línea*/
+  flex-direction: column;
+  /*los hijos se apilan verticalmente*/
+  gap: var(--space-sm);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+  cursor: default;
+}
+
+/* Efecto de brillo al pasar el ratón */
+.action-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left,
+      /* empieza en la esquina superior izquierda */
+      color-mix(in srgb, var(--action-color) 10%, transparent),
+      /* 10% del color de la acción */
+      transparent);
+  /* Para que se desvanezca en el centro */
+  opacity: 0;
+  transition: var(--transition);
+  /* aparece al pasar el ratón */
+  pointer-events: none;
+  /* no bloquea el click */
+}
+
+
+
+.action-card__icon {
+  width: 55px;
+  height: 55px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--action-color) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--action-color) 35%, transparent);
+  display: grid;
+  place-items: center;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin-bottom: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.action-card__title {
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.action-card__desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  /* Espaciado entre líneas */
+  flex: 1;
+  /* Ocupa todo el espacio disponible */
+}
+
+.action-card__btn {
+  margin-top: var(--space-md);
+  background: color-mix(in srgb, var(--action-color) 85%, #000);
+  align-self: flex-start;
+  /* Alinea el botón a la izquierda, no se estira al ancho completo */
+}
+
+
+.action-card__bar {
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: var(--action-color);
+  margin-top: var(--space-md);
+  transform-origin: left;
+  /* el punto de origen es la izquierda */
+  transform: scaleX(0);
+  /* invisible por defecto, anchura = 0 */
+  transition: transform 0.4s ease;
+}
+
+/* ── UNIRSE A PARTIDA ─────────────────────────────────────── */
+.join-card {
+  background: var(--bg-card);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+  animation: fadeUp 0.4s ease both;
+}
+
+.join-card__back {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-bottom: var(--space-lg);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  transition: color 0.3s;
+  margin-left: -0.5rem;
+  /* Compensa el padding para que el texto siga alineado a la izquierda */
+  min-height: 44px;
+  /* Garantiza el estándar táctil */
+}
+
+.join-card__header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+
+}
+
+.join-card__icon {
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  margin-bottom: var(--space-md);
+}
+
+.join-card__title {
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.join-card__subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  /* Espaciado entre líneas */
+}
+
+.join-card__inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.3rem, 1.5vw, 0.6rem);
+  margin-bottom: var(--space-lg);
+  justify-content: center;
+}
+
+.join-card__box {
+  width: clamp(40px, 10vw, 56px);
+  height: clamp(40px, 10vw, 56px);
+  background: var(--bg-surface);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+  font-family: inherit;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  caret-color: transparent;
+}
+
+.join-card__box:focus {
+  border-color: var(--color-primary);
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.join-card__box--filled {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--text-primary)
+}
+
+.join-card__error {
+  color: var(--color-offline);
+  font-size: 0.88rem;
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+.join-card__submit {
+  width: 100%;
+  justify-content: center;
+  font-size: clamp(0.9rem, 3.5vw, 1.5rem);
+  padding: 0.8rem;
+}
+
+.join-card__divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-block: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.join-card__divider::before,
+.join-card__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.lobby__hero {
+  padding-block: var(--space-xl);
+  text-align: center;
+}
+
+.lobby__hero-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.lobby__label {
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.lobby__title {
+  font-size: clamp(1.8rem, 4.5vw, 3rem);
+  font-weight: 800;
+}
+
+.lobby__host {
+  color: var(--color-primary);
+}
+
+
+/* ── Código de la partida ─────────────────────────────────────── */
+.lobby__code-section {
+  text-align: center;
+  padding-block: var(--space-lg);
+}
+
+.lobby_code-label {
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.lobby__code-boxes {
+  display: flex;
+  justify-content: center;
+  gap: clamp(0.3rem, 1.5vw, 0.6rem);
+  flex-wrap: wrap;
+}
+
+.lobby__code-box {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ── Jugadores en lobby ─────────────────────────────────────────────── */
+.lobby__players-section {
+  padding-block: var(--space-xl);
+}
+
+.lobby__players-label {
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  margin-bottom: var(--space-md);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.lobby__players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr));
+  gap: clamp(1rem, 3vw, 2rem);
+  margin-inline: auto;
+  max-width: 700px;
+}
+
+.lobby__player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border: 2px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  animation: opacity 0.3s;
+}
+
+.lobby__player--empty {
+  opacity: 0.3;
+}
+
+.lobby__player--active {
+  opacity: 1;
+}
+
+.lobby__player-avatar {
+  width: clamp(44px, 10vw, 60px);
+  height: clamp(44px, 10vw, 60px);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text-primary);
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  font-weight: 700;
+}
+
+.lobby__player-nick {
+  width: 100%;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.lobby__loading,
+.lobby__error {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  padding: var(--space-xl);
+}
+
+.partidas-publicas__hero {
+  padding-block: var(--space-xl);
+  text-align: center;
+}
+
+.partidas-publicas__list {
+  padding-block: var(--space-lg);
+}
+
+.partidas-publicas__header,
+.partidas-publicas__row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.partidas-publicas__header {
+  font-size: clamp(0.8rem, 2vw, 0.85rem);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-sm);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.partidas-publicas__row {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-sm);
+  transition: border-color 0.2s;
+}
+
+.partidas-publicas__cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ── Solo en dispositivos con ratón real (no táctil) ───────── */
+@media (hover: hover) and (pointer: fine) {
+
+  /* Navbar */
+  .navbar__search-trigger:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: white;
+  }
+
+  /* Botones */
+  .btn--primary:hover {
+    background: rgb(28, 94, 43);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgb(28, 94, 43);
+  }
+
+  .btn--outline:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Formularios de autenticación */
+  .auth-link:hover {
+    text-decoration: underline;
+  }
+
+  .auth-tab:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  /* Menú de usuario */
+  .user-menu__avatar:hover {
+    border-color: var(--color-primary);
+    color: white;
+  }
+
+  .user-menu__dropdown button:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .user-menu__logout:hover {
+    background: rgba(239, 68, 68, 0.08) !important;
+  }
+
+  /* Action cards (dashboard) */
+  .action-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-6px);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .action-card:hover::before {
+    opacity: 1;
+  }
+
+  .action-card__btn:hover {
+    background: var(--action-color);
+    transform: translateY(-2px);
+  }
+
+  .action-card:hover .action-card__bar {
+    transform: scaleX(1);
+  }
+
+  /* Cat cards (landing page) */
+  .cat-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-6px);
+  }
+
+  .cat-card:hover::before {
+    opacity: 1;
+  }
+
+  .cat-card:hover .cat-card__bar {
+    transform: scaleX(1);
+  }
+
+  .join-card__box:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .join-card__back:hover {
+    color: var(--text-primary);
+  }
+
+  .partidas-publicas__row:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+  }
+
+
+}
+
+/* ── Feedback táctil en móvil (sin ratón) ────────────────── */
+@media (hover: none) {
+
+  /* Botones — se hunden al tocar */
+  .btn--primary:active,
+  .btn--outline:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+  }
+
+  /* Lupa del navbar */
+  .navbar__search-trigger:active {
+    background: rgba(255, 255, 255, 0.06);
+    color: white;
+  }
+
+  /* Tabs de registro */
+  .auth-tab:active {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  /* Links de auth */
+  .auth-link:active {
+    text-decoration: underline;
+  }
+
+  /* Avatar del menú de usuario */
+  .user-menu__avatar:active {
+    border-color: var(--color-primary);
+  }
+
+  /* Botones del dropdown de usuario */
+  .user-menu__dropdown button:active {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .user-menu__logout:active {
+    background: rgba(239, 68, 68, 0.08) !important;
+  }
+
+  /* Action cards (dashboard) — se hunden al tocar */
+  .action-card:active {
+    transform: scale(0.98);
+    background: var(--bg-card-hover);
+    transition: transform 0.1s;
+  }
+
+  .join-card__back:active {
+    color: var(--text-primary);
+  }
+
+  .join-card__box:active {
+    border-color: var(--color-primary);
+    background: rgba(124, 58, 237, 0.08);
+    transform: scale(0.95);
+    transition: transform 0.1s;
+  }
+}
+
+/* ── Responsive tweaks ────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .categories__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Reduce el espaciado grande en móvil */
+  :root {
+    --space-xl: 1.5rem;
+    /* 2.5rem → 1.5rem */
+    --space-2xl: 2rem;
+    /* 4rem   → 2rem   */
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar__actions .btn {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    /*Evita que el texto se rompa en varias líneas*/
+  }
+
+  .navbar__logo {
+    font-size: 1.3rem;
+  }
+
+  .navbar__logo-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 1.1rem;
+  }
+
+  /* En móvil la barra está oculta por defecto */
+  .navbar__search {
+    display: none;
+  }
+
+  /* La lupa sí es visible en móvil */
+  .navbar__search-trigger {
+    display: flex;
+  }
+
+  /* Cuando el usuario pulsa la lupa, el search se despliega
+     cubriendo toda la barra de navegación */
+  .navbar__search--open {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    max-width: 100%;
+    border-radius: 0;
+    padding: 0.75rem 1rem;
+    background: var(--bg-base);
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 500;
+  }
+
+  .navbar__search--open .navbar__search-close {
+    display: block;
+    /* Muestra el botón × para cerrar */
+  }
+
+
+  .stats__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .status-badge {
+    display: none;
+  }
+
+  .user-menu__avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .user-menu__dropdown {
+    right: 0;
+    min-width: min(190px, 90vw);
+  }
+
+  .partidas-publicas__header {
+    display: none;
+  }
+
+  .partidas-publicas__row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    position: relative;
+  }
+
+  .partidas-publicas__cell {
+    white-space: normal;
+  }
+
+  .partidas-publicas__cell:last-child {
+    align-self: flex-end;
+    margin-top: var(--space-sm);
+    width: 100%;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    padding: var(--space-md);
+    /* Ajusta el padding */
+    align-items: flex-start;
+    /* Alinea la tarjeta arriba */
+    padding-top: var(--space-xl);
+  }
+
+  .auth-card {
+    padding: var(--space-lg);
+    /* Ajusta el padding */
+    border-radius: var(--radius-md);
+  }
+
+  .stats__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .auth-form__group label {
+    font-size: 1rem;
+    /* Labels más pequeños */
+  }
+
+  .auth-form__group input {
+    font-size: 16px;
+    /*Se cambia de 1rem a 16px para evitar zoom en IOS */
+    padding: 0.6rem 0.75rem;
+  }
+
+  .categories__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero__cta .btn {
+    width: 100%;
+  }
+
+}
+
+@media (max-width: 400px) {
+  .stats__grid {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
 }
