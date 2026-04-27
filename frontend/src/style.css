@@ -1326,6 +1326,20 @@ main {
 .partidas-publicas__hero {
   padding-block: var(--space-xl);
   text-align: center;
+  position: relative;
+}
+
+.partidas-publicas__hero .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* h1 y p centrados */
+}
+
+.partidas-publicas__hero .join-card__back {
+  align-self: flex-start;
+  /* solo el botón va a la izquierda */
+  margin-bottom: var(--space-md);
 }
 
 .partidas-publicas__list {
@@ -1364,6 +1378,59 @@ main {
   white-space: nowrap;
 }
 
+/* ── Modal de sesión expirada ─────────────────── */
+.session-modal-overlay {
+  position: fixed;
+  /* ocupa toda la pantalla */
+  inset: 0;
+  /* centra el contenido */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* fondo oscuro semitransparente */
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  /* difumina el fondo */
+  z-index: 9999;
+  /* siempre encima de todo */
+}
+
+.session-modal {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.session-modal__title {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+}
+
+.session-modal__text {
+  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+  color: var(--text-secondary);
+}
 
 /* ── Solo en dispositivos con ratón real (no táctil) ───────── */
 @media (hover: hover) and (pointer: fine) {

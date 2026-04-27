@@ -90,13 +90,13 @@ public class LobbyService {
 
     @Transactional(readOnly = true)
     public List<PartidaPublicaDTO> obtenerPartidasPublicas() {
-        return partidaRepository.findByTipoAndEstado(TipoPartida.PUBLICA, EstadoPartida.ESPERANDO)
+        return partidaRepository.findByTipoAndEstado(TipoPartida.PUBLICA.name(), EstadoPartida.ESPERANDO.name())
                 .stream()
                 .map(partida -> new PartidaPublicaDTO(
                         partida.getId(),
                         partida.getCreadaPor() != null ? partida.getCreadaPor().getNombre() : "Desconocido",
                         partida.getCreadaPor() != null ? partida.getCreadaPor().getEmail() : "",
-                        jugadorPartidaRepository.countByPartidaAndResultado(partida, ResultadoJugador.PENDIENTE),
+                        jugadorPartidaRepository.countByPartidaAndResultado(partida, ResultadoJugador.PENDIENTE.name()),
                         partida.getMaxJugadores(),
                         partida.getDificultad().toString()))
                 .toList();
@@ -229,7 +229,8 @@ public class LobbyService {
         if (!partida.getEstado().equals(EstadoPartida.ESPERANDO))
             throw new IllegalStateException("La partida ya ha comenzado o ha terminado");
 
-        int numJugadores = jugadorPartidaRepository.countByPartidaAndResultadoNot(partida, ResultadoJugador.EXPULSADO);
+        int numJugadores = jugadorPartidaRepository.countByPartidaAndResultadoNot(partida,
+                ResultadoJugador.EXPULSADO.name());
         if (numJugadores >= partida.getMaxJugadores())
             throw new IllegalStateException("La sala está llena");
 
@@ -258,6 +259,12 @@ public class LobbyService {
                 .build();
 
         jugadorPartidaRepository.save(jugadorPartida);
+
+        // Si es publica, actualizamos el contador en la lista de partidas publicas
+        if (partida.getTipo() == TipoPartida.PUBLICA) {
+            List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
+            messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
+        }
 
         // Notificar a todos los jugadores del lobby que se ha unido uno nuevo
         Map<String, Object> estadoLobby = construirEstadoLobby(partida);

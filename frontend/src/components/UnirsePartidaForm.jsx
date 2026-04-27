@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react'; //para poder acceder a los inputs del DOM
 import { useNavigate, Link } from 'react-router-dom';
+import { apiFetch } from '../services/api';
+
 
 const LONGITUD_CODIGO = 6;
 
@@ -64,16 +66,14 @@ export default function UnirsePartidaForm() {
             return;
         }
         setIsLoading(true);
-        const jwt = localStorage.getItem('jwt');
-        const res = await fetch(`api/lobby/unirse/privada/${codigo}`, {
+        const res = await apiFetch(`/api/lobby/unirse/privada/${codigo}`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${jwt}` },
         });
         setIsLoading(false);
-        if (res.ok) {
+        if (res && res.ok) {
             const data = await res.json();
             navigate(`/partida/${data.idPartida}`);
-        } else if (res.status === 404) {
+        } else if (res && res.status === 404) {
             setError('Código de partida no encontrado');
         } else {
             setError('Error al unirse a la partida');

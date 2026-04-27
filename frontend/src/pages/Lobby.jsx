@@ -17,9 +17,15 @@ export default function Lobby() {
             setError('Debes iniciar sesión para acceder al lobby');
             return;
         }
-
+        /*CONSTRUIR LA URL CON EL PROTOCOLO CORRECTO BASADO EN EL ENTORNO*/
+        //Si estamos en desarrollo, usamos localhost
+        //Si estamos en producción, usamos el protocolo correcto (https o wss)
+        const wsUrl = import.meta.env.DEV
+            ? 'ws://localhost:8080/ws'
+            : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`;
+        /******************************************************************/
         const client = new Client({
-            webSocketFactory: () => new WebSocket('/ws'), //Crea conexión apuntando a la ruta /ws del backend
+            webSocketFactory: () => new WebSocket(wsUrl), //Crea conexión apuntando a la ruta /ws del backend
             connectHeaders: { Authorization: `Bearer ${jwt}` }, //Envía el token para autenticarse
             onConnect: () => {
                 //Suscribirse al canal de esta partida

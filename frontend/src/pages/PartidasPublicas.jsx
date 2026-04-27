@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
+import { apiFetch } from '../services/api';
 
 
 export default function PartidasPublicas() {
@@ -13,12 +14,8 @@ export default function PartidasPublicas() {
 
     useEffect(() => {
 
-        const jwt = localStorage.getItem('jwt');
-
-        fetch('api/lobby/publicas', {
-            headers: { Authorization: `Bearer ${jwt}` }
-        })
-            .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+        apiFetch('/api/lobby/publicas')
+            .then(res => { if (!res || !res.ok) throw new Error(); return res.json(); })
             .then(data => setPartidas(data))
             .catch(() => setError("No se pudieron cargar las partidas públicas"))
             .finally(() => setIsLoading(false));
@@ -27,8 +24,15 @@ export default function PartidasPublicas() {
     //Segundo useEffect para actualizar la lista cuando se cree una partida publica nueva
     useEffect(() => {
         const jwt = localStorage.getItem('jwt');
+        /*CONSTRUIR LA URL CON EL PROTOCOLO CORRECTO BASADO EN EL ENTORNO*/
+        //Si estamos en desarrollo, usamos localhost
+        //Si estamos en producción, usamos el protocolo correcto (https o wss)
+        const wsUrl = import.meta.env.DEV
+            ? 'ws://localhost:8080/ws'
+            : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`;
+        /******************************************************************/
         const client = new Client({
-            webSocketFactory: () => new WebSocket('/ws'),
+            webSocketFactory: () => new WebSocket(wsUrl),
             connectHeaders: { Authorization: `Bearer ${jwt}` },
             onConnect: () => {
                 client.subscribe('/topic/partidas-publicas', (message) => {
@@ -42,13 +46,9 @@ export default function PartidasPublicas() {
     }, []);
 
     function entrar(idPartida) {
-        const jwt = localStorage.getItem('jwt');
-        fetch(`api/lobby/unirse/publica/${idPartida}`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${jwt}` }
-        })
-            .then(res => { if (!res.ok) throw new Error(); })
-            .then(() => navigate(`/partida/${idPartida}`)) //Redirige al lobby creado
+        apiFetch(`/api/lobby/unirse/publica/${idPartida}`, { method: 'POST' })
+            .then(res => { if (!res || !res.ok) throw new Error(); })
+            .then(() => navigate(`/partida/${idPartida}`))
             .catch(() => setError("No se pudo unir a la partida"));
     }
 
@@ -67,7 +67,6 @@ export default function PartidasPublicas() {
                         Volver
                     </Link>
                     <h1 className="partidas-publicas__title">Partidas públicas</h1>
-                    <p className="partidas-publicas__subtitle">Únete a una partida pública</p>
                 </div>
             </section>
 
@@ -84,7 +83,15 @@ export default function PartidasPublicas() {
                                 <span>Partida</span>
                                 <span>Creador</span>
                                 <span>Jugadores</span>
-                                <span></span>
+                                <span aria-hidden="true">
+                                    <button
+                                        className="btn btn--primary"
+                                        style={{ visibility: 'hidden', pointerEvents: 'none' }}
+                                        tabIndex={-1}
+                                    >
+                                        Entrar
+                                    </button>
+                                </span>
 
                             </div>
                             {partidas.map(p => (

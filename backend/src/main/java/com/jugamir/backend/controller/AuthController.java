@@ -101,4 +101,12 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    // Endpoint ligero para validar que el JWT sigue siendo válido.
+    // Spring Security ya valida el JWT antes de llegar aquí:
+    // si el token es inválido o tiene tokenVersion viejo → 401 automático.
+    @GetMapping("/me")
+    public ResponseEntity<Void> me() {
+        return ResponseEntity.ok().build();
+    }
+
 }

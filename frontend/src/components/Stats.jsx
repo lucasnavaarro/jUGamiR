@@ -1,5 +1,5 @@
 const stats = [
-    { number: '3.448', value: 'Preguntas MIR reales' },
+    { number: '4.000+', value: 'Preguntas MIR reales' },
     { number: '6', value: 'Categorías de preguntas' },
     { number: '30+', value: 'Años de exámenes' },
 ];

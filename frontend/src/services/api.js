@@ -37,7 +37,7 @@ export async function apiFetch(url, options = {}) {
 
         const refreshRes = await fetch(API_BASE + "/auth/refresh", {
             method: "POST",
-            //credentials: "include"
+            //credentials: "include" en producción con HTTPS 
         });
 
         if (refreshRes.ok) {
@@ -57,7 +57,7 @@ export async function apiFetch(url, options = {}) {
             // Si el refresh falla, cerramos sesión
             localStorage.removeItem("jwt");
             localStorage.removeItem("rol");
-            window.location.href = "/";
+            window.dispatchEvent(new CustomEvent('session-expired'));
         }
 
     }
