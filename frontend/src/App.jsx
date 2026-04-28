@@ -19,6 +19,7 @@ import AppLayout from './layouts/AppLayout';
 import PartidasPublicas from './pages/PartidasPublicas';
 import PublicRoute from './components/PublicRoute';
 import SessionExpiredModal from './components/SessionExpiredModal';
+import CrearPartida from './pages/CrearPartida';
 
 export default function App() {
 
@@ -82,6 +83,9 @@ export default function App() {
           } />
           <Route path="/unirse/partida/publica" element={
             <ProtectedRoute><PartidasPublicas /></ProtectedRoute>
+          } />
+          <Route path="/crear/partida" element={
+            <ProtectedRoute rolRequerido="JUGADOR"><CrearPartida /></ProtectedRoute>
           } />
         </Route>
         <Route path="/partida/:idPartida" element={

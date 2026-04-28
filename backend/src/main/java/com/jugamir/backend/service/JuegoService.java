@@ -24,14 +24,13 @@ public class JuegoService {
     private final RespuestaJugadorRepository respuestaJugadorRepository;
     private final ProgresoCategoriaRepository progresoCategoriaRepository;
     private final QuesitosGanadosRepository quesitosGanadosRepository;
-    private final CategoriaRepository categoriaRepository;
 
     public GirarRuletaResponse girarRuleta(Long partidaId, Long usuarioId) {
 
         Partida partida = getPartidaEnCurso(partidaId);
         validarTurno(partida, usuarioId);
 
-        List<Categoria> categorias = categoriaRepository.findAll();
+        List<Categoria> categorias = partida.getCategorias();
         if (categorias.isEmpty())
             throw new IllegalStateException("No hay categorías disponibles");
 
@@ -64,9 +63,6 @@ public class JuegoService {
                 .build();
 
         preguntaPartidaRepository.save(preguntaPartida);
-
-        partida.setTotalPreguntas(partida.getTotalPreguntas() + 1);
-        partidaRepository.save(partida);
 
         return new GirarRuletaResponse(categoria, pregunta);
     }
@@ -146,9 +142,9 @@ public class JuegoService {
             progreso.setAciertos(0);
 
             int quesitosJugador = quesitosGanadosRepository.countByJugadorPartida(jugador);
-            long totalCategorias = categoriaRepository.count();
+            long totalCategoriasPartida = partida.getCategorias().size();
 
-            if (quesitosJugador >= totalCategorias) {
+            if (quesitosJugador >= totalCategoriasPartida) {
                 terminarPartida(partida, jugador);
                 return;
             }

@@ -24,12 +24,19 @@ public class LobbyService {
     private final JugadorRepository jugadorRepository;
     private final JugadorPartidaRepository jugadorPartidaRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final CategoriaRepository categoriaRepository;
 
     public Partida crearPartida(Long usuarioId, TipoPartida tipo, Dificultad dificultad, int tiempoRespuesta,
-            int maxJugadores) {
+            int maxJugadores, List<Long> categoriaIds) {
 
         Jugador jugador = jugadorRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalStateException("El usuario no es un jugador"));
+
+        List<Categoria> categorias = categoriaRepository.findAllById(categoriaIds);
+        if (categorias.isEmpty()) {
+            throw new IllegalArgumentException("Debes seleccionar al menos una categoria");
+        }
+
 
         String codigoUnion = (tipo == TipoPartida.PRIVADA) ? generarCodigoUnico() : null;
 
@@ -40,7 +47,7 @@ public class LobbyService {
                 .tiempoRespuesta(tiempoRespuesta)
                 .maxJugadores(maxJugadores)
                 .estado(EstadoPartida.ESPERANDO)
-                .totalPreguntas(0)
+                .categorias(categorias)
                 .creadaPor(jugador.getUsuario())
                 .creadaEn(OffsetDateTime.now())
                 .build();

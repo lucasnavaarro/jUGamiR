@@ -1432,6 +1432,183 @@ main {
   color: var(--text-secondary);
 }
 
+/* ── Crear partida ─────────────────── */
+.crear-partida {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: var(--bg-base);
+  padding: 3rem 1rem;
+}
+
+.crear-partida__container {
+  width: 100%;
+  max-width: 700px;
+}
+
+.crear-partida__back {
+  display: inline-block;
+  margin-bottom: var(--space-lg);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  transition: color 0.2s;
+  padding: 0.5rem;
+  margin-left: -0.5rem;
+  min-height: 44px;
+}
+
+.crear-partida__title {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  margin-bottom: var(--space-lg);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  /* para navegadores basados en WebKit */
+  -webkit-text-fill-color: transparent;
+  /* para navegadores basados en WebKit */
+}
+
+.crear-partida__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.crear-partida__fieldset {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: clamp(0.75rem, 3vw, 1.25rem) clamp(1rem, 4vw, 1.5rem);
+  background: var(--bg-card);
+}
+
+.crear-partida__legend {
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.crear-partida__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: clamp(0.75rem, 3vw, 1.25rem) clamp(1rem, 4vw, 1.5rem);
+}
+
+.crear-partida__label {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.crear-partida__label strong {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.crear-partida__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.crear-partida__option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.crear-partida__option input {
+  display: none;
+}
+
+.crear-partida__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(28, 94, 43, 0.15);
+}
+
+.crear-partida__categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.crear-partida__cat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  color: var(--text-muted);
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.crear-partida__cat input {
+  display: none;
+}
+
+.crear-partida__cat-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.crear-partida__range {
+  width: 100%;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.crear-partida__range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: clamp(0.75rem, 2.5vw, 1.1rem);
+  color: var(--text-muted);
+}
+
+.crear-partida__error {
+  color: #ef4444;
+  font-size: clamp(0.75rem, 2.5vw, 1.1rem);
+  text-align: center;
+}
+
+/* Estados activos — universales (escritorio y móvil) */
+.crear-partida__option--active {
+  border-color: var(--color-primary);
+  background: rgba(124, 58, 237, 0.15);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.crear-partida__cat--active {
+  border-color: var(--color-primary);
+  background: rgba(124, 58, 237, 0.15);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
 /* ── Solo en dispositivos con ratón real (no táctil) ───────── */
 @media (hover: hover) and (pointer: fine) {
 
@@ -1523,6 +1700,20 @@ main {
     transform: translateY(-2px);
   }
 
+  .crear-partida__back:hover {
+    color: var(--color-primary);
+  }
+
+  .crear-partida__option:hover {
+    border-color: var(--color-primary);
+    color: var(--text-primary);
+  }
+
+  .crear-partida__cat:hover {
+    border-color: var(--color-primary);
+    color: var(--text-primary);
+  }
+
 
 }
 
@@ -1582,6 +1773,57 @@ main {
     background: rgba(124, 58, 237, 0.08);
     transform: scale(0.95);
     transition: transform 0.1s;
+  }
+
+  .cat-card:active {
+    background: var(--bg-card-hover);
+    transform: translateY(0.97);
+    transition: transform 0.1s;
+  }
+
+  .cat-card:active::before {
+    opacity: 1;
+  }
+
+  .cat-card:active .cat-card__bar {
+    transform: scaleX(1);
+  }
+
+  /* Fila de partidas públicas */
+  .partidas-publicas__row:active {
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(0.98);
+    transition: transform 0.1s;
+  }
+
+  /* Botón de acción del dashboard */
+  .action-card__btn:active {
+    background: var(--action-color);
+    transform: translateY(0.95);
+    transition: transform 0.1s;
+  }
+
+  .action-card:active .action-card__bar {
+    transform: scaleX(1);
+  }
+
+  /* Botón Volver de crear partida */
+  .crear-partida__back:active {
+    color: var(--color-primary);
+  }
+
+  /* Opciones de tipo/dificultad */
+  .crear-partida__option:active {
+    border-color: var(--color-primary);
+    color: var(--text-primary);
+    transform: scale(0.96);
+  }
+
+  /* Chips de categorías */
+  .crear-partida__cat:active {
+    border-color: var(--color-primary);
+    color: var(--text-primary);
+    transform: scale(0.96);
   }
 }
 

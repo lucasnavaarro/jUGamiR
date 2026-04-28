@@ -2,6 +2,7 @@ package com.jugamir.backend.controller;
 
 import com.jugamir.backend.dto.CrearPartidaRequest;
 import com.jugamir.backend.dto.PartidaPublicaDTO;
+import com.jugamir.backend.dto.CrearPartidaResponse;
 import com.jugamir.backend.model.Partida;
 import com.jugamir.backend.model.Usuario;
 import com.jugamir.backend.service.LobbyService;
@@ -27,9 +28,10 @@ public class LobbyController {
                 request.tipo(),
                 request.dificultad(),
                 request.tiempoRespuesta(),
-                request.maxJugadores());
+                request.maxJugadores(),
+                request.categoriaIds());
 
-        return ResponseEntity.ok(partida);
+        return ResponseEntity.ok(new CrearPartidaResponse(partida.getId(), partida.getCodigoUnion()));
 
     }
 

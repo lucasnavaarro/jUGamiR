@@ -6,6 +6,8 @@ import com.jugamir.backend.model.enums.TipoPartida;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "partidas")
@@ -43,8 +45,10 @@ public class Partida {
 
     private Integer duracion; // nullable
 
-    @Column(name = "total_preguntas", nullable = false)
-    private int totalPreguntas;
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "partidas_categorias", joinColumns = @JoinColumn(name = "partida_id"), inverseJoinColumns = @JoinColumn(name = "categoria_id"))
+    private List<Categoria> categorias = new ArrayList<>();
 
     @Column(name = "empezada_en")
     private OffsetDateTime empezadaEn; // nullable

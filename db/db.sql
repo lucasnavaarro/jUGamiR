@@ -250,7 +250,6 @@ CREATE TABLE IF NOT EXISTS partidas (
   --modo               modo_juego NOT NULL DEFAULT 'MULTI',
   estado             estado_partida NOT NULL DEFAULT 'ESPERANDO',
   duracion           INT CHECK (duracion IS NULL OR duracion > 0),
-  total_preguntas    INT NOT NULL DEFAULT 0 CHECK (total_preguntas >= 0),
   empezada_en        TIMESTAMPTZ,
   terminada_en       TIMESTAMPTZ,
   turno_actual       INT NOT NULL DEFAULT 1,
@@ -262,6 +261,12 @@ CREATE TABLE IF NOT EXISTS partidas (
 
 CREATE INDEX IF NOT EXISTS idx_partidas_estado ON partidas(estado);
 CREATE INDEX IF NOT EXISTS idx_partidas_codigo_union ON partidas(codigo_union);
+
+CREATE TABLE IF NOT EXISTS partidas_categorias (
+  partida_id   BIGINT NOT NULL REFERENCES partidas(id) ON DELETE CASCADE,
+  categoria_id BIGINT NOT NULL REFERENCES categorias(id) ON DELETE RESTRICT,
+  PRIMARY KEY (partida_id, categoria_id)
+);
 
 CREATE TABLE IF NOT EXISTS jugadores_partida (
   id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
