@@ -23,7 +23,7 @@ export default function DashboardJugador() {
             descripcion: 'Crea una nueva partida pública o privada e invita a tus estudiantes a jugar.',
             boton: 'Crear partida',
             color: 'var(--color-primary)',
-            onClick: () => navigate('/crear-partida'),
+            onClick: () => navigate('/crear/partida'),
         },
         {
             id: 'clasificacion',

@@ -37,7 +37,6 @@ public class LobbyService {
             throw new IllegalArgumentException("Debes seleccionar al menos una categoria");
         }
 
-
         String codigoUnion = (tipo == TipoPartida.PRIVADA) ? generarCodigoUnico() : null;
 
         Partida partida = Partida.builder()
@@ -50,6 +49,7 @@ public class LobbyService {
                 .categorias(categorias)
                 .creadaPor(jugador.getUsuario())
                 .creadaEn(OffsetDateTime.now())
+                .turnoActual(0)
                 .build();
 
         partida = partidaRepository.save(partida);

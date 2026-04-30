@@ -3,6 +3,8 @@ package com.jugamir.backend.model;
 import com.jugamir.backend.model.enums.Dificultad;
 import com.jugamir.backend.model.enums.EstadoPartida;
 import com.jugamir.backend.model.enums.TipoPartida;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.OffsetDateTime;
@@ -29,10 +31,12 @@ public class Partida {
     private int maxJugadores;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     private TipoPartida tipo; // PUBLICA | PRIVADA
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     private Dificultad dificultad; // FÁCIL | MEDIO | DIFÍCIL
 
@@ -40,6 +44,7 @@ public class Partida {
     private int tiempoRespuesta;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     private EstadoPartida estado; // CREADA | RUNNING | TERMINADA | CANCELADA
 

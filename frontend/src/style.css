@@ -1460,7 +1460,7 @@ main {
 }
 
 .crear-partida__title {
-  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-size: clamp(1rem, 4vw, 2.5rem);
   font-weight: 700;
   margin-bottom: var(--space-lg);
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
@@ -1476,15 +1476,15 @@ main {
   gap: var(--space-lg);
 }
 
-.crear-partida__fieldset {
+.crear-partida__group {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: clamp(0.75rem, 3vw, 1.25rem) clamp(1rem, 4vw, 1.5rem);
   background: var(--bg-card);
 }
 
-.crear-partida__legend {
-  font-size: clamp(1rem, 3vw, 1.25rem);
+.crear-partida__group-title {
+  font-size: clamp(0.75rem, 3vw, 1.25rem);
   font-weight: 600;
   color: var(--text-muted);
   padding: 0 0.5rem;
@@ -1500,16 +1500,6 @@ main {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: clamp(0.75rem, 3vw, 1.25rem) clamp(1rem, 4vw, 1.5rem);
-}
-
-.crear-partida__label {
-  font-size: 0.95rem;
-  color: var(--text-muted);
-}
-
-.crear-partida__label strong {
-  color: var(--text-primary);
-  font-size: 1.1rem;
 }
 
 .crear-partida__options {
@@ -1528,19 +1518,13 @@ main {
   border-radius: 50px;
   cursor: pointer;
   color: var(--text-muted);
-  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  font-size: clamp(0.75rem, 2.5vw, 1.1rem);
   transition: all 0.2s;
   user-select: none;
 }
 
 .crear-partida__option input {
   display: none;
-}
-
-.crear-partida__input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(28, 94, 43, 0.15);
 }
 
 .crear-partida__categories {
@@ -1558,7 +1542,7 @@ main {
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   cursor: pointer;
-  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  font-size: clamp(0.75rem, 2.5vw, 1.1rem);
   color: var(--text-muted);
   transition: all 0.2s;
   user-select: none;
@@ -1581,11 +1565,42 @@ main {
   cursor: pointer;
 }
 
-.crear-partida__range-labels {
+.crear-partida__range-row {
   display: flex;
-  justify-content: space-between;
-  font-size: clamp(0.75rem, 2.5vw, 1.1rem);
-  color: var(--text-muted);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.crear-partida__range-row .crear-partida__range {
+  flex: 1;
+}
+
+.crear-partida__number-input {
+  width: 70px;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+  -moz-appearance: textfield;
+  /* Quitr flechas en Firefox */
+}
+
+/* Quitar flechas en Chrome, Safari, Edge */
+.crear-partida__number-input::-webkit-outer-spin-button,
+.crear-partida__number-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.crear-partida__number-input:focus {
+  border-color: var(--color-primary);
 }
 
 .crear-partida__error {
@@ -1777,7 +1792,7 @@ main {
 
   .cat-card:active {
     background: var(--bg-card-hover);
-    transform: translateY(0.97);
+    transform: scale(0.97);
     transition: transform 0.1s;
   }
 
@@ -1792,14 +1807,14 @@ main {
   /* Fila de partidas públicas */
   .partidas-publicas__row:active {
     border-color: rgba(255, 255, 255, 0.12);
-    transform: translateY(0.98);
+    transform: scale(0.98);
     transition: transform 0.1s;
   }
 
   /* Botón de acción del dashboard */
   .action-card__btn:active {
     background: var(--action-color);
-    transform: translateY(0.95);
+    transform: scale(0.95);
     transition: transform 0.1s;
   }
 
@@ -1950,10 +1965,6 @@ main {
     padding: var(--space-lg);
     /* Ajusta el padding */
     border-radius: var(--radius-md);
-  }
-
-  .stats__grid {
-    grid-template-columns: repeat(2, 1fr);
   }
 
   .auth-form__group label {

@@ -39,7 +39,7 @@ export default function UserMenu() {
             {open && (
                 <div className="user-menu__dropdown">
                     <button onClick={() => { navigate("/perfil"); setOpen(false); }}>👤 Editar perfil</button>
-                    <button onClick={() => { navigate("/crear-partida"); setOpen(false); }}>🎮 Crear partida</button>
+                    <button onClick={() => { navigate("/crear/partida"); setOpen(false); }}>🎮 Crear partida</button>
                     <button onClick={() => { navigate("/unirse/partida/privada"); setOpen(false); }}>🏆 Unirse a partida</button>
                     <hr className="user-menu__divider" />
                     <button className="user-menu__logout" onClick={handleLogout}>🚪 Cerrar sesión</button>
