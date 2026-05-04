@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
@@ -51,8 +52,8 @@ public class LobbyController {
     @PostMapping("/unirse/privada/{codigo}")
     public ResponseEntity<?> unirsePrivada(@AuthenticationPrincipal Usuario usuario, @PathVariable String codigo) {
 
-        lobbyService.unirseAPartidaPrivada(codigo, usuario.getIdUsuario());
-        return ResponseEntity.ok().build();
+        Long partidaId = lobbyService.unirseAPartidaPrivada(codigo, usuario.getIdUsuario());
+        return ResponseEntity.ok(Map.of("idPartida", partidaId));
 
     }
 
@@ -79,6 +80,11 @@ public class LobbyController {
         lobbyService.expulsarJugador(partidaId, usuario.getIdUsuario(), jugadorId);
         return ResponseEntity.ok().build();
 
+    }
+
+    @GetMapping("/{partidaId}")
+    public ResponseEntity<Map<String, Object>> obtenerEstadoLobby(@PathVariable Long partidaId) {
+        return ResponseEntity.ok(lobbyService.obtenerEstadoLobby(partidaId));
     }
 
 }

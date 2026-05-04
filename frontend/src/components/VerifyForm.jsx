@@ -31,6 +31,7 @@ export default function VerifyForm({ email }) {
             localStorage.setItem('email', data.email);
             localStorage.setItem('nick', data.nick);
             localStorage.setItem('nombre', data.nombre);
+            localStorage.setItem('idUsuario', data.idUsuario);
 
             if (data.rol === "JUGADOR") navigate('/jugador');
             else navigate('/profesor');

@@ -125,7 +125,7 @@ public class AuthService {
 
         // El refreshToken se envia en la cookie, nunca en el body
         return new VerifyResult(
-                new AuthResponse(jwt, usuario.getEmail(), nick, rol, usuario.getNombre()),
+                new AuthResponse(jwt, usuario.getEmail(), nick, rol, usuario.getNombre(), usuario.getIdUsuario()),
                 rt.getToken());
     }
 

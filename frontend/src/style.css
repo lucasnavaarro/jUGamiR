@@ -329,7 +329,7 @@ p {
   padding: 0.6rem 1.4rem;
   border-radius: var(--radius-full);
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: clamp(0.45rem, 4vw, 1.1rem);
   font-weight: 600;
   cursor: pointer;
   border: none;
@@ -368,6 +368,12 @@ p {
   /*Ajusta el padding según el tamaño de la pantalla*/
   font-size: clamp(0.95rem, 3vw, 1.2rem);
   /*Ajusta el tamaño de la fuente según el tamaño de la pantalla*/
+}
+
+.btn--danger {
+  background: #ef4444;
+  /* Color rojo */
+  color: white;
 }
 
 /* ── HERO ─────────────────────────────────────────────────── */
@@ -1227,6 +1233,26 @@ main {
   color: var(--color-primary);
 }
 
+.lobby_buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-top: 3rem;
+  flex-wrap: wrap;
+  max-width: 800px;
+  margin-inline: auto;
+}
+
+.lobby__player {
+  position: relative;
+}
+
+.lobby__player-crown {
+  position: absolute;
+  top: -15px;
+  font-size: 1.8rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
 
 /* ── Código de la partida ─────────────────────────────────────── */
 .lobby__code-section {
@@ -1234,7 +1260,7 @@ main {
   padding-block: var(--space-lg);
 }
 
-.lobby_code-label {
+.lobby__code-label {
   font-size: clamp(0.9rem, 2vw, 1rem);
   color: var(--text-secondary);
   margin-bottom: var(--space-md);
@@ -1266,10 +1292,11 @@ main {
 
 .lobby__players-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
   gap: clamp(1rem, 3vw, 2rem);
+  margin-top: 2.5rem;
   margin-inline: auto;
-  max-width: 700px;
+  max-width: 800px;
 }
 
 .lobby__player {
@@ -1313,6 +1340,14 @@ main {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
+
+.lobby__player-expulsar {
+  margin-top: 0.5rem;
+  padding: clamp(0.1rem, 0.75vw, 0.3rem) clamp(0.3rem, 1.5vw, 0.6rem);
+  font-size: clamp(0.75rem, 2vw, 0.95rem);
+  width: 80%;
+  justify-content: center;
 }
 
 .lobby__loading,
@@ -1645,6 +1680,14 @@ main {
     border-color: rgba(255, 255, 255, 0.3);
   }
 
+  .btn--danger:hover {
+    background: #dc2626;
+    /* Rojo más oscuro al pasar el ratón */
+    transform: translateY(-2px);
+    /* Pequeño saltito */
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
   /* Formularios de autenticación */
   .auth-link:hover {
     text-decoration: underline;
@@ -1740,6 +1783,13 @@ main {
   .btn--outline:active {
     transform: scale(0.95);
     transition: transform 0.1s;
+  }
+
+  .btn--danger:active {
+    background: #dc2626;
+    /* Rojo más oscuro al tocar */
+    transform: scale(0.95);
+    /* Pequeño hundimiento */
   }
 
   /* Lupa del navbar */

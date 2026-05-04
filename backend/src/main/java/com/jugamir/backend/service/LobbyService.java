@@ -75,7 +75,14 @@ public class LobbyService {
         return partida;
     }
 
-    public void unirseAPartidaPrivada(String codigoUnion, Long usuarioId) {
+    @Transactional(readOnly = true)
+    public Map<String, Object> obtenerEstadoLobby(Long partidaId) {
+        Partida partida = partidaRepository.findById(partidaId)
+                .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
+        return construirEstadoLobby(partida);
+    }
+
+    public Long unirseAPartidaPrivada(String codigoUnion, Long usuarioId) {
         Partida partida = partidaRepository.findByCodigoUnion(codigoUnion)
                 .orElseThrow(() -> new IllegalArgumentException("Código de partida incorrecto"));
 
@@ -83,6 +90,7 @@ public class LobbyService {
             throw new IllegalStateException("Esta partida no es privada");
 
         unirJugador(partida, usuarioId);
+        return partida.getId();
     }
 
     public void unirseAPartidaPublica(Long partidaId, Long usuarioId) {
@@ -164,12 +172,32 @@ public class LobbyService {
 
         if (estado.equals(EstadoPartida.ESPERANDO)) {
             jugadorPartidaRepository.delete(jugadorPartida);
+            jugadorPartidaRepository.flush();
 
             // Si no quedan jugadores, se cancela la partida
             if (jugadorPartidaRepository.countByPartida(partida) == 0) {
                 partida.setEstado(EstadoPartida.CANCELADA);
                 partidaRepository.save(partida);
+            } else if (partida.getCreadaPor().getIdUsuario().equals(usuarioId)) {
+                // Si el que abandona es el anfitrión, transferir el rol al siguiente jugador
+                List<JugadorPartida> restantes = jugadorPartidaRepository.findByPartida(partida)
+                        .stream()
+                        .filter(jp -> jp.getResultado() == ResultadoJugador.PENDIENTE)
+                        .sorted((a, b) -> Integer.compare(a.getOrdenUnion(), b.getOrdenUnion()))
+                        .toList();
+
+                if (!restantes.isEmpty()) {
+                    partida.setCreadaPor(restantes.get(0).getJugador().getUsuario());
+                    partidaRepository.save(partida);
+                } else {
+                    // Solo quedan jugadores expulsados, cancelar la partida
+                    partida.setEstado(EstadoPartida.CANCELADA);
+                    partidaRepository.save(partida);
+                }
             }
+
+            Map<String, Object> estadoLobby = construirEstadoLobby(partida);
+            messagingTemplate.convertAndSend("/topic/lobby/" + partida.getId(), (Object) estadoLobby);
 
             // Si es publica, actualizamos la lista de partidas publicas
             if (partida.getTipo() == TipoPartida.PUBLICA) {
@@ -229,6 +257,18 @@ public class LobbyService {
 
         jugadorPartida.setResultado(ResultadoJugador.EXPULSADO);
         jugadorPartidaRepository.save(jugadorPartida);
+
+        // Notificar a todos los jugadores del lobby que se ha expulsado a alguien
+        Map<String, Object> estadoLobby = construirEstadoLobby(partida);
+        messagingTemplate.convertAndSend(
+                "/topic/lobby/" + partida.getId(),
+                (Object) estadoLobby);
+
+        // Si es publica, actualizamos el contador en la lista de partidas publicas
+        if (partida.getTipo() == TipoPartida.PUBLICA) {
+            List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
+            messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
+        }
     }
 
     private void unirJugador(Partida partida, Long usuarioId) {
@@ -283,16 +323,19 @@ public class LobbyService {
     private Map<String, Object> construirEstadoLobby(Partida partida) {
 
         List<JugadorPartida> participantes = jugadorPartidaRepository.findByPartida(partida);
-        List<Map<String, String>> jugadores = participantes.stream()
+        List<Map<String, Object>> jugadores = participantes.stream()
                 .filter(jp -> jp.getResultado() == ResultadoJugador.PENDIENTE) // Descarta a los expulsados y
                                                                                // abandonados
-                .map(jp -> Map.of("nick", jp.getJugador().getNick())) // Obtiene el nick del jugador
+                .map(jp -> Map.<String, Object>of(
+                        "idJugador", jp.getJugador().getIdUsuario(),
+                        "nick", jp.getJugador().getNick())) // Obtiene el nick del jugador
                 .toList(); // Convierte la lista de jugadores a una lista de maps
 
         return Map.of(
                 "idPartida", partida.getId(),
                 "codigo", partida.getCodigoUnion() != null ? partida.getCodigoUnion() : "",
                 "anfitrion", partida.getCreadaPor().getNombre(),
+                "idAnfitrion", partida.getCreadaPor().getIdUsuario(),
                 "jugadores", jugadores,
                 "maxJugadores", partida.getMaxJugadores(),
                 "estado", partida.getEstado().name());

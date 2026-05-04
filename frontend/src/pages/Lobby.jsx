@@ -1,14 +1,19 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
+import { apiFetch } from '../services/api';
 import JuegoEnCurso from '../components/JuegoEnCurso';
 import LobbyEspera from '../components/LobbyEspera';
+import ExpulsadoModal from '../components/ExpulsadoModal';
 
 export default function Lobby() {
 
+    const navigate = useNavigate();
     const { idPartida } = useParams();
     const [lobby, setLobby] = useState(null);
     const [error, setError] = useState('');
+    const [expulsado, setExpulsado] = useState(false);
+    const abandonandoRef = useRef(false);
 
     useEffect(() => {
         const jwt = localStorage.getItem('jwt');
@@ -17,6 +22,14 @@ export default function Lobby() {
             setError('Debes iniciar sesión para acceder al lobby');
             return;
         }
+        //Cargar datos iniciales usando fetch directo
+        apiFetch(`/api/lobby/${idPartida}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Error al cargar el lobby');
+                return res.json(); //devuelve los datos en formato JSON
+            })
+            .then(data => setLobby(data))
+            .catch(err => setError(err.message));
         /*CONSTRUIR LA URL CON EL PROTOCOLO CORRECTO BASADO EN EL ENTORNO*/
         //Si estamos en desarrollo, usamos localhost
         //Si estamos en producción, usamos el protocolo correcto (https o wss)
@@ -33,6 +46,19 @@ export default function Lobby() {
                     (message) => {
                         const data = JSON.parse(message.body); //Saca el texto y lo convierte a objeto JS
                         setLobby(data); //metemos los nuevos datos en la memoria
+
+                        //Detecta si han echado al usuario
+                        const miIdUsuario = parseInt(localStorage.getItem('idUsuario'), 10);
+                        const soyAnfitrion = data.idAnfitrion === miIdUsuario;
+
+                        //Comprueba si el usuario está en la lista de jugadores
+                        const estaEnLobby = data.jugadores.some(j => j.idJugador === miIdUsuario);
+
+                        //Si ya no está en el lobby, lo echa
+                        if (!abandonandoRef.current && !soyAnfitrion && !estaEnLobby) {
+                            setExpulsado(true);
+                            client.deactivate(); //Cierra la conexión al ser expulsado
+                        }
                     });
             },
         });
@@ -62,10 +88,20 @@ export default function Lobby() {
         );
     }
 
+    if (expulsado) {
+        return (
+            <main>
+                <ExpulsadoModal onAceptar={() => navigate('/jugador')} />
+                <LobbyEspera lobby={lobby} /> {/* Se renderiza de fondo para que no quede la pantalla en blanco */}
+            </main>
+        )
+
+    }
+
     if (lobby.estado === 'EN_CURSO') {
         return <JuegoEnCurso lobby={lobby} />;
     }
 
-    return <LobbyEspera lobby={lobby} />;
+    return <LobbyEspera lobby={lobby} onAbandonar={() => { abandonandoRef.current = true; }} />;
 
 }
