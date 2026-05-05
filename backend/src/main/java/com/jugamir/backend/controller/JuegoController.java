@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/juego")
@@ -18,7 +19,7 @@ public class JuegoController {
 
     private final JuegoService juegoService;
 
-    @PostMapping("/{partidaId}/tirar")
+    @PostMapping("/{partidaId}/girar")
     public ResponseEntity<GirarRuletaResponse> girarRuleta(@AuthenticationPrincipal Usuario usuario,
             @PathVariable Long partidaId) {
         GirarRuletaResponse respuesta = juegoService.girarRuleta(partidaId, usuario.getIdUsuario());
@@ -30,6 +31,17 @@ public class JuegoController {
             @PathVariable Long partidaId, @RequestBody ResponderPreguntaRequest request) {
 
         juegoService.responderPregunta(partidaId, usuario.getIdUsuario(), request.respuestaId(), request.tiempoMs());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{partidaId}/estado")
+    public ResponseEntity<Map<String, Object>> obtenerEstadoJuego(@PathVariable Long partidaId) {
+        return ResponseEntity.ok(juegoService.obtenerEstadoJuego(partidaId));
+    }
+
+    @PostMapping("/{partidaId}/pasarse")
+    public ResponseEntity<Void> pasarTurno(@AuthenticationPrincipal Usuario usuario, @PathVariable Long partidaId) {
+        juegoService.pasarTurno(partidaId, usuario.getIdUsuario());
         return ResponseEntity.ok().build();
     }
 }

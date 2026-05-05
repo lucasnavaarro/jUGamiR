@@ -81,7 +81,7 @@ export default function LobbyEspera({ lobby, onAbandonar }) {
                             Abandonar
                         </button>
                         {esAnfitrion && (
-                            <button className="btn btn--primary" onClick={empezarPartida} disabled={lobby.jugadores.length < lobby.maxJugadores}>
+                            <button className="btn btn--primary" onClick={empezarPartida} disabled={lobby.jugadores.length < 2}>
                                 Empezar partida
                             </button>
                         )}

@@ -277,6 +277,7 @@ CREATE TABLE IF NOT EXISTS jugadores_partida (
   puntos         INT NOT NULL DEFAULT 0,
   num_acertadas  INT NOT NULL DEFAULT 0 CHECK (num_acertadas >= 0),
   num_falladas   INT NOT NULL DEFAULT 0 CHECK (num_falladas >= 0),
+  num_no_respondidas INT NOT NULL DEFAULT 0 CHECK (num_no_respondidas >= 0),
   tiempo_total   INT NOT NULL DEFAULT 0 CHECK (tiempo_total >= 0),
   resultado      resultado_jugador NOT NULL DEFAULT 'PENDIENTE',
   unido_en       TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -40,6 +40,9 @@ public class JugadorPartida {
     @Column(name = "num_falladas", nullable = false)
     private int numFalladas;
 
+    @Column(name = "num_no_respondidas", nullable = false)
+    private int numNoRespondidas;
+
     @Column(name = "tiempo_total", nullable = false)
     private int tiempoTotal;
 

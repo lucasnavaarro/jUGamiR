@@ -1,14 +1,17 @@
 package com.jugamir.backend.service;
 
 import com.jugamir.backend.dto.GirarRuletaResponse;
+import com.jugamir.backend.dto.PreguntaDTO;
 import com.jugamir.backend.model.*;
 import com.jugamir.backend.model.enums.*;
 import com.jugamir.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 @Service
@@ -24,6 +27,7 @@ public class JuegoService {
     private final RespuestaJugadorRepository respuestaJugadorRepository;
     private final ProgresoCategoriaRepository progresoCategoriaRepository;
     private final QuesitosGanadosRepository quesitosGanadosRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public GirarRuletaResponse girarRuleta(Long partidaId, Long usuarioId) {
 
@@ -64,7 +68,41 @@ public class JuegoService {
 
         preguntaPartidaRepository.save(preguntaPartida);
 
-        return new GirarRuletaResponse(categoria, pregunta);
+        List<Map<String, Object>> opciones = respuestaRepository.findByPregunta(pregunta)
+                .stream()
+                .sorted((a, b) -> Integer.compare(a.getOrden(), b.getOrden()))
+                .map(r -> Map.<String, Object>of(
+                        "id", r.getId(),
+                        "texto", r.getTextoRespuesta(),
+                        "orden", r.getOrden()))
+                .toList();
+
+        messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) Map.of(
+                "evento", "PREGUNTA",
+                "categoria", Map.of(
+                        "id", categoria.getId(),
+                        "nombre", categoria.getNombre(),
+                        "color", categoria.getColor()),
+                "pregunta", Map.of(
+                        "id", pregunta.getId(),
+                        "enunciado", pregunta.getEnunciado()),
+                "respuestas", opciones,
+                "turnoActual", partida.getTurnoActual()));
+
+        return new GirarRuletaResponse(categoria,
+                new PreguntaDTO(
+                        pregunta.getId(),
+                        pregunta.getIdentificador(),
+                        pregunta.getTituloIndice(),
+                        pregunta.getEnunciado(),
+                        pregunta.getImagenUrl(),
+                        pregunta.getAnio(),
+                        pregunta.getComentario(),
+                        pregunta.isAnulada(),
+                        pregunta.getDificultad(),
+                        pregunta.getEstado(),
+                        pregunta.getAsignatura().getId()),
+                opciones);
     }
 
     public void responderPregunta(Long partidaId, Long usuarioId, Long respuestaId, int tiempoMs) {
@@ -105,7 +143,7 @@ public class JuegoService {
             actualizarProgreso(jugador, categoria, partida);
 
         } else {
-            jugador.setNumFalladas(jugador.getNumFalladas() + 1);
+            jugador.setNumNoRespondidas(jugador.getNumNoRespondidas() + 1);
             if (partida.getEstado() == EstadoPartida.EN_CURSO) {
                 avanzarTurno(partida);
             }
@@ -113,6 +151,94 @@ public class JuegoService {
 
         jugador.setTiempoTotal(jugador.getTiempoTotal() + tiempoMs);
         jugadorPartidaRepository.save(jugador);
+
+        Long respuestaCorrectaId = respuestaRepository.findByPregunta(preguntaPartida.getPregunta())
+                .stream()
+                .filter(Respuesta::getEsCorrecta)
+                .findFirst()
+                .map(Respuesta::getId)
+                .orElse(null);
+
+        List<Map<String, Object>> quesitosActualizados = quesitosGanadosRepository.findByJugadorPartida(jugador)
+                .stream()
+                .map(q -> Map.<String, Object>of(
+                        "categoriaId", q.getCategoria().getId(),
+                        "color", q.getCategoria().getColor()))
+                .toList();
+
+        messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) Map.of(
+                "evento", "RESULTADO",
+                "esCorrecta", respuesta.getEsCorrecta(),
+                "respuestaCorrectaId", respuestaCorrectaId,
+                "respuestaElegidaId", respuestaId,
+                "jugadorId", usuarioId,
+                "turnoActual", partida.getTurnoActual(),
+                "estado", partida.getEstado().name(),
+                "tiempoMs", tiempoMs,
+                "quesitos", quesitosActualizados));
+
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> obtenerEstadoJuego(Long partidaId) {
+
+        Partida partida = getPartidaEnCurso(partidaId);
+
+        List<Map<String, Object>> jugadores = jugadorPartidaRepository.findByPartida(partida)
+                .stream()
+                .filter(jp -> jp.getResultado() != ResultadoJugador.ABANDONADA
+                        && jp.getResultado() != ResultadoJugador.EXPULSADO)
+                .map(jp -> {
+                    List<Map<String, Object>> quesitos = quesitosGanadosRepository
+                            .findByJugadorPartida(jp)
+                            .stream()
+                            .map(q -> Map.<String, Object>of(
+                                    "categoriaId", q.getCategoria().getId(),
+                                    "nombre", q.getCategoria().getNombre(),
+                                    "color", q.getCategoria().getColor()))
+                            .toList();
+
+                    return Map.<String, Object>of(
+                            "idJugador", jp.getJugador().getIdUsuario(),
+                            "nick", jp.getJugador().getNick(),
+                            "ordenTurno", jp.getOrdenTurno(),
+                            "quesitos", quesitos);
+                })
+                .toList();
+
+        List<Map<String, Object>> categorias = partida.getCategorias()
+                .stream()
+                .map(c -> Map.<String, Object>of(
+                        "id", c.getId(),
+                        "nombre", c.getNombre(),
+                        "color", c.getColor()))
+                .toList();
+
+        return Map.of(
+                "idPartida", partida.getId(),
+                "estado", partida.getEstado().name(),
+                "turnoActual", partida.getTurnoActual(),
+                "tiempoRespuesta", partida.getTiempoRespuesta(),
+                "jugadores", jugadores,
+                "categorias", categorias);
+    }
+
+    public void pasarTurno(Long partidaId, Long usuarioId) {
+
+        Partida partida = getPartidaEnCurso(partidaId);
+        JugadorPartida jugador = validarTurno(partida, usuarioId);
+
+        jugador.setNumFalladas(jugador.getNumFalladas() + 1);
+        jugadorPartidaRepository.save(jugador);
+
+        avanzarTurno(partida);
+
+        messagingTemplate.convertAndSend(
+                "/topic/juego/" + partidaId,
+                (Object) Map.of(
+                        "evento", "TURNO_PASADO",
+                        "turnoActual", partida.getTurnoActual(),
+                        "jugadorId", usuarioId));
 
     }
 
