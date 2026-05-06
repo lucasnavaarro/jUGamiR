@@ -138,7 +138,7 @@ public class LobbyService {
         Collections.shuffle(jugadores);
 
         for (int i = 0; i < jugadores.size(); i++) {
-            jugadores.get(i).setOrdenUnion(i + 1);
+            jugadores.get(i).setOrdenTurno(i + 1);
         }
 
         jugadorPartidaRepository.saveAll(jugadores);

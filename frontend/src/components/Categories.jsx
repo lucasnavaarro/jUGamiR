@@ -1,10 +1,10 @@
 const categorias = [
-    { icon: '🧠', name: 'Metabolismo y Mente', info: 'Digestivo · Cirugía Endocrina · Psiquiatría' },
-    { icon: '❤️', name: 'Cardio y Sangre', info: 'Cardiología · Hematología · Vascular' },
-    { icon: '🧠', name: 'Neuro, Renal e Infecciosas', info: 'Urología · Nefrología · Infecciosas · Neurología' },
-    { icon: '🫁', name: 'Respiratorio y Reproducción', info: 'Obstetricia · Ginecología · Respiratorio' },
-    { icon: '🦴', name: 'Locomotor, Piel y Defensas', info: 'Reumatología · Traumatología · Dermatología · Inmunología' },
-    { icon: '👶', name: 'Pediatría y Primaria', info: 'Pediatría I · Pediatría II · Atención Primaria' },
+    { icon: '🧠', name: 'Sentidos y Metabolismo', info: 'Digestivo · Cirugía Endocrina · ORL · Oftalmología' },
+    { icon: '❤️', name: 'Cardio, Sangre y Piel', info: 'Cardiología · Dermatología · Hematología · Inmunología · Cirugía Vascular' },
+    { icon: '🦴', name: 'Riñón, Infección y Autoinmunidad', info: 'Nefrología · Enfermedades Infecciosas · Urología · Reumatología Y Enfermedades Sistemáticas' },
+    { icon: '👶', name: 'Pediatría, Primaria y Reproducción', info: 'Obstetricia · Ginecología · Pediatría I · Pediatría II · Atención Primaria' },
+    { icon: '🫁', name: 'Cuerpo y Mente', info: 'Respiratorio · Psiquiatría · Traumatología · Neurología Y Neurocirugía' },
+    { icon: '🧬', name: 'Ciencias Básicas', info: 'Anatomía · Bioquímica Y Bioquímica Médica · Fisiología · Farmacología · Biología Molecular' },
 ];
 
 export default function Categories() {

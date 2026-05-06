@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
 import { apiFetch } from '../services/api';
 import ScoreboardJugador from './ScoreboardJugador';
@@ -10,6 +11,7 @@ import RespuestaCard from './RespuestaCard';
 
 export default function JuegoEnCurso({ lobby }) {
 
+    const navigate = useNavigate();
     const [estadoJuego, setEstadoJuego] = useState(null);
     const [fase, setFase] = useState('ESPERANDO_TIRADA');
     const [categoriaActual, setCategoriaActual] = useState(null);
@@ -120,7 +122,11 @@ export default function JuegoEnCurso({ lobby }) {
     }
 
     async function tirarRuleta() {
-        await apiFetch(`/api/juego/${lobby.idPartida}/girar`, { method: 'POST' });
+        const res = await apiFetch(`/api/juego/${lobby.idPartida}/girar`, { method: 'POST' });
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            setError(data.error || `Error ${res.status} al girar la ruleta`);
+        }
     }
 
     async function responder(respuestaId) {
@@ -202,6 +208,7 @@ export default function JuegoEnCurso({ lobby }) {
 
     return (
         <main className="juego">
+            {error && <p className="juego__error">{error}</p>}
             {/* Marcadores de jugadores */}
             <section className="juego__scoreboard">
                 {estadoJuego.jugadores.map(j => (
