@@ -89,6 +89,12 @@ public class AuthController {
                 .build();
     }
 
+    @PostMapping("/reenviar-codigo")
+    public ResponseEntity<Void> reenviarCodigo(@RequestBody Map<String, String> body) {
+        authService.reenviarCodigo(body.get("email"));
+        return ResponseEntity.accepted().build();
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         authService.contrasenaOlvidada(request);

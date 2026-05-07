@@ -197,6 +197,13 @@ public class AuthService {
     }
 
     @Transactional
+    public void reenviarCodigo(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("No existe ninguna cuenta asociada a ese email"));
+        generarYEnviarCodigo(usuario);
+    }
+
+    @Transactional
     public void contrasenaOlvidada(ForgotPasswordRequest request) {
 
         Usuario usuario = usuarioRepository.findByEmail(request.email())

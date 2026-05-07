@@ -5,7 +5,18 @@ export default function VerifyForm({ email }) {
     const [codigo, setCodigo] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [reenvCod, setReenvCod] = useState('');
     const navigate = useNavigate();
+
+    async function handleResend() {
+        setReenvCod('');
+        const res = await fetch('/api/auth/reenviar-codigo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+        });
+        setReenvCod(res.ok ? 'Correo reenviado correctamente.' : 'No se pudo reenviar el correo.');
+    }
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -63,6 +74,10 @@ export default function VerifyForm({ email }) {
                     {isLoading ? 'Verificando...' : 'Verificar'}
                 </button>
             </form>
+            {reenvCod && <p className={reenvCod.includes('correctamente') ? 'resend-msg--ok' : 'resend-msg--error'}>{reenvCod}</p>}
+            <button type="button" className="auth-link resend-button" onClick={handleResend}>
+                ¿No has recibido ningún correo? Volver a enviar.
+            </button>
         </div>
     );
 }

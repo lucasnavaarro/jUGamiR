@@ -776,6 +776,26 @@ main {
   font-size: 1rem;
 }
 
+.resend-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: clamp(0.5rem, 1vw, 1.5rem);
+}
+
+.resend-button:hover {
+  color: var(--color-primary-h);
+}
+
+.resend-msg--ok {
+  margin-top: 0.75rem;
+  color: #4ade80;
+}
+
+.resend-msg--error {
+  margin-top: 0.75rem;
+  color: #ef4444;
+}
 
 
 /* ── Auth tabs ────────────────────────────────────────────────── */
