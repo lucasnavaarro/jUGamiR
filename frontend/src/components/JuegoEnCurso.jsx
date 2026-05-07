@@ -20,6 +20,7 @@ export default function JuegoEnCurso({ lobby }) {
     const [respuestaElegida, setRespuestaElegida] = useState(null);
     const [resultado, setResultado] = useState(null);
     const [error, setError] = useState('');
+    const [ganadorId, setGanadorId] = useState(null);
 
     const miIdUsuario = parseInt(localStorage.getItem('idUsuario'), 10);
     const tiempoInicioRef = useRef(null);
@@ -75,11 +76,10 @@ export default function JuegoEnCurso({ lobby }) {
                 setRespuestas(data.respuestas);
                 setRespuestaElegida(null);
                 setResultado(null);
-                setFase('ESPERANDO_ RESPUESTA');
                 setTimeout(() => {
                     setFase('MOSTRANDO_PREGUNTA');
                     tiempoInicioRef.current = Date.now();
-                }, 3000);
+                }, 4200);
                 break;
 
             case 'RESULTADO':
@@ -96,6 +96,7 @@ export default function JuegoEnCurso({ lobby }) {
                     )
                 }));
                 if (data.estado === 'TERMINADA') {
+                    setGanadorId(data.jugadorId);
                     setTimeout(() => setFase('PARTIDA_TERMINADA'), 3000);
                 } else {
                     setTimeout(() => {
@@ -122,6 +123,8 @@ export default function JuegoEnCurso({ lobby }) {
     }
 
     async function tirarRuleta() {
+        setCategoriaActual(null);
+        setFase('GIRANDO_RULETA');
         const res = await apiFetch(`/api/juego/${lobby.idPartida}/girar`, { method: 'POST' });
         if (!res.ok) {
             const data = await res.json().catch(() => ({}));
@@ -170,7 +173,8 @@ export default function JuegoEnCurso({ lobby }) {
 
     if (fase === 'PARTIDA_TERMINADA') {
 
-        const ganador = estadoJuego.jugadores.find(j => j.quesitos.length >= estadoJuego.categorias.length);
+        const ganador = estadoJuego.jugadores.find(j => j.quesitos.length >= estadoJuego.categorias.length)
+            || estadoJuego.jugadores.find(j => j.idJugador === ganadorId);
         const heGanado = ganador?.idJugador === miIdUsuario;
 
         return (
@@ -228,7 +232,7 @@ export default function JuegoEnCurso({ lobby }) {
                 <Ruleta
                     categorias={estadoJuego.categorias}
                     categoriaSeleccionada={categoriaActual}
-                    girando={fase === 'GIRANDO_RULETA'}
+
                 />
 
                 {/* Temporizador */}
@@ -266,7 +270,7 @@ export default function JuegoEnCurso({ lobby }) {
                         {respuestas.map((r, i) => (
                             <RespuestaCard
                                 key={r.id}
-                                letra={['A', 'B', 'C', 'D'][i]}
+                                letra={['A', 'B', 'C', 'D', 'E'][i]}
                                 texto={r.texto}
                                 onClick={() => responder(r.id)}
                                 deshabilitada={!esMiTurno || respuestaElegida !== null || fase === 'MOSTRANDO_RESULTADO'}

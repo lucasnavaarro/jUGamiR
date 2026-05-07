@@ -1,6 +1,6 @@
 export default function RespuestaCard({ letra, texto, onClick, deshabilitada, estado }) {
 
-    const colores = { A: '#22C55E', B: '#3B82F6', C: '#EAB308', D: '#F97316' };
+    const colores = { A: '#14B8A6', B: '#3B82F6', C: '#EAB308', D: '#F97316', E: '#A855F7' };
 
     return (
         <button

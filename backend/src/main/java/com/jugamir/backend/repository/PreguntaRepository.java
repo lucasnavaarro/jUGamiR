@@ -1,6 +1,7 @@
 package com.jugamir.backend.repository;
 
 import com.jugamir.backend.model.Pregunta;
+import com.jugamir.backend.model.enums.Dificultad;
 import com.jugamir.backend.model.enums.EstadoPregunta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,4 +33,20 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Long> {
                         @Param("estado") EstadoPregunta estado,
                         @Param("usadas") List<Long> usadas,
                         @Param("limite") int limite);
+
+        @Query("SELECT p FROM Pregunta p " +
+                        "WHERE p.asignatura.categoria.id = :categoriaId " +
+                        "AND p.estado = :estado " +
+                        "AND p.dificultad = :dificultad " +
+                        "AND p.anulada = false " +
+                        "AND p.id NOT IN :usadas " +
+                        "ORDER BY FUNCTION('RANDOM') " +
+                        "LIMIT :limite")
+        List<Pregunta> findAleatoriasByCategoriaYDificultad(
+                        @Param("categoriaId") Long categoriaId,
+                        @Param("estado") EstadoPregunta estado,
+                        @Param("dificultad") Dificultad dificultad,
+                        @Param("usadas") List<Long> usadas,
+                        @Param("limite") int limite);
+
 }

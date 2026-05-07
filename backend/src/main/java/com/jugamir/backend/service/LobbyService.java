@@ -217,15 +217,33 @@ public class LobbyService {
                     .count();
 
             if (jugadoresActivos < 2) {
-                jugadorPartidaRepository.findByPartida(partida).stream()
+                List<JugadorPartida> activos = jugadorPartidaRepository.findByPartida(partida)
+                        .stream()
                         .filter(jp -> jp.getResultado() != ResultadoJugador.ABANDONADA)
-                        .forEach(jp -> {
-                            jp.setResultado(ResultadoJugador.VICTORIA);
-                            jugadorPartidaRepository.save(jp);
-                        });
+                        .toList();
+                activos.forEach(jp -> {
+                    jp.setResultado(ResultadoJugador.VICTORIA);
+                    jugadorPartidaRepository.save(jp);
+                });
                 partida.setEstado(EstadoPartida.TERMINADA);
                 partida.setTerminadaEn(OffsetDateTime.now());
                 partidaRepository.save(partida);
+
+                Long ganadorId = activos.isEmpty() ? null : activos.get(0).getJugador().getIdUsuario();
+
+                messagingTemplate.convertAndSend(
+                        "/topic/juego/" + partida.getId(),
+                        (Object) Map.of(
+                                "evento", "RESULTADO",
+                                "esCorrecta", false,
+                                "respuestaCorrectaId", -1L,
+                                "respuestaElegidaId", -1L,
+                                "jugadorId", ganadorId != null ? ganadorId : -1L,
+
+                                "turnoActual", partida.getTurnoActual(),
+                                "estado", "TERMINADA", // Para que muestre la pantalla de ganador
+                                "tiempoMs", 0,
+                                "quesitos", java.util.List.of()));
 
             }
 
