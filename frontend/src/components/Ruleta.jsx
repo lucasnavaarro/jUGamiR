@@ -31,31 +31,25 @@ export default function Ruleta({ categorias, categoriaSeleccionada }) {
 
     }, [categoriaSeleccionada]);
 
+    const gradiente = categorias.map((cat, i) => {
+        const start = (ANGULO_COMPLETO / categorias.length) * i;
+        const end = (ANGULO_COMPLETO / categorias.length) * (i + 1);
+
+        return `${cat.color} ${start}deg ${end}deg`
+    }).join(', ');
+
     return (
         <div className="ruleta-contenedor">
             <div className="ruleta__flecha">▼</div>
             <div className="ruleta">
                 <div
                     className={`ruleta__rueda ${animando ? 'ruleta__rueda--girando' : ''}`}
-                    style={{ '--rotacion': `${rotacion}deg` }}
+                    style={{
+                        '--rotacion': `${rotacion}deg`,
+                        background: `conic-gradient(${gradiente})`
+                    }}
                     onTransitionEnd={() => setAnimando(false)}
-                >
-                    {categorias.map((cat, i) => {
-                        const angulo = (ANGULO_COMPLETO / categorias.length) * i;
-                        const seleccionada = categoriaSeleccionada?.id === cat.id;
-
-                        return (
-                            <div
-                                key={cat.id}
-                                className={`ruleta__seccion ${seleccionada ? 'ruleta__seccion--activa' : ''}`}
-                                style={{
-                                    backgroundColor: cat.color,
-                                    transform: `rotate(${angulo}deg) skewY(-${90 - ANGULO_COMPLETO / categorias.length}deg)`
-                                }}
-                            />
-                        );
-                    })}
-                </div>
+                />
             </div>
             {categoriaSeleccionada && !animando && (
                 <p className="ruleta__resultado">

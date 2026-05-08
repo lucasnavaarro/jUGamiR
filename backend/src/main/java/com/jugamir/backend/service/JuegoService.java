@@ -13,6 +13,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -134,14 +135,15 @@ public class JuegoService {
                                 .build();
 
                 respuestaJugadorRepository.save(respuestaJugador);
-
+                
                 // Actualizar estadísticas del jugador
+                Categoria categoriaObtenida = null;
                 if (respuesta.getEsCorrecta()) {
 
                         jugador.setNumAcertadas(jugador.getNumAcertadas() + 1);
                         Categoria categoria = preguntaPartida.getPregunta().getAsignatura().getCategoria();
 
-                        actualizarProgreso(jugador, categoria, partida);
+                        categoriaObtenida = actualizarProgreso(jugador, categoria, partida);
 
                 } else {
                         jugador.setNumNoRespondidas(jugador.getNumNoRespondidas() + 1);
@@ -167,16 +169,34 @@ public class JuegoService {
                                                 "color", q.getCategoria().getColor()))
                                 .toList();
 
-                messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) Map.of(
-                                "evento", "RESULTADO",
-                                "esCorrecta", respuesta.getEsCorrecta(),
-                                "respuestaCorrectaId", respuestaCorrectaId,
-                                "respuestaElegidaId", respuestaId,
-                                "jugadorId", usuarioId,
-                                "turnoActual", partida.getTurnoActual(),
-                                "estado", partida.getEstado().name(),
-                                "tiempoMs", tiempoMs,
-                                "quesitos", quesitosActualizados));
+                List<Map<String, Object>> progresoActualizado = progresoCategoriaRepository
+                                .findByJugadorPartida(jugador)
+                                .stream()
+                                .map(pc -> Map.<String, Object>of(
+                                                "categoriaId", pc.getCategoria().getId(),
+                                                "aciertos", pc.getAciertos()))
+                                .toList();
+
+                
+                Map<String, Object> evento = new HashMap<>();
+                evento.put("evento", "RESULTADO");
+                evento.put("esCorrecta", respuesta.getEsCorrecta());
+                evento.put("respuestaCorrectaId", respuestaCorrectaId);
+                evento.put("respuestaElegidaId", respuestaId);
+                evento.put("jugadorId", usuarioId);
+                evento.put("turnoActual", partida.getTurnoActual());
+                evento.put("estado", partida.getEstado().name());
+                evento.put("tiempoMs", tiempoMs);
+                evento.put("quesitos", quesitosActualizados);
+                evento.put("progreso", progresoActualizado);
+                if(categoriaObtenida!=null){
+                        evento.put("nuevoQuesito", Map.of(
+                                "nombre", categoriaObtenida.getNombre(),
+                                "nick", jugador.getJugador().getNick()));
+                }
+                
+                
+                messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) evento);
 
         }
 
@@ -199,11 +219,20 @@ public class JuegoService {
                                                                         "color", q.getCategoria().getColor()))
                                                         .toList();
 
+                                        List<Map<String, Object>> progreso = progresoCategoriaRepository
+                                                        .findByJugadorPartida(jp)
+                                                        .stream()
+                                                        .map(pc -> Map.<String, Object>of(
+                                                                        "categoriaId", pc.getCategoria().getId(),
+                                                                        "aciertos", pc.getAciertos()))
+                                                        .toList();
+
                                         return Map.<String, Object>of(
                                                         "idJugador", jp.getJugador().getIdUsuario(),
                                                         "nick", jp.getJugador().getNick(),
                                                         "ordenTurno", jp.getOrdenTurno(),
-                                                        "quesitos", quesitos);
+                                                        "quesitos", quesitos,
+                                                        "progreso", progreso);
                                 })
                                 .toList();
 
@@ -243,7 +272,7 @@ public class JuegoService {
 
         }
 
-        private void actualizarProgreso(JugadorPartida jugador, Categoria categoria, Partida partida) {
+        private Categoria actualizarProgreso(JugadorPartida jugador, Categoria categoria, Partida partida) {
 
                 ProgresoCategoria progreso = progresoCategoriaRepository
                                 .findByJugadorPartidaAndCategoria_Id(jugador, categoria.getId())
@@ -267,17 +296,20 @@ public class JuegoService {
                         quesitosGanadosRepository.save(quesito);
 
                         progreso.setAciertos(0);
+                        progresoCategoriaRepository.save(progreso);
 
                         int quesitosJugador = quesitosGanadosRepository.countByJugadorPartida(jugador);
                         long totalCategoriasPartida = partida.getCategorias().size();
 
                         if (quesitosJugador >= totalCategoriasPartida) {
                                 terminarPartida(partida, jugador);
-                                return;
                         }
+
+                        return categoria; // si gana quesito se devuelve la categoria
                 }
 
                 progresoCategoriaRepository.save(progreso);
+                return null; // si no gana quesito no se devuelve nada
         }
 
         private void terminarPartida(Partida partida, JugadorPartida ganador) {

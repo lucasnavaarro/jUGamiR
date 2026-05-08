@@ -245,6 +245,37 @@ public class LobbyService {
                                 "tiempoMs", 0,
                                 "quesitos", java.util.List.of()));
 
+            } else {
+                // Si el turno actual es el jugador que abandona, se pasa al siguiente
+                boolean eraSuTurno = jugadorPartida.getOrdenTurno().equals(partida.getTurnoActual());
+                if (eraSuTurno) {
+                    List<Integer> turnosActivos = jugadorPartidaRepository.findByPartida(partida)
+                            .stream()
+                            .filter(jp -> jp.getResultado() == ResultadoJugador.PENDIENTE)
+                            .map(JugadorPartida::getOrdenTurno)
+                            .sorted() // Ordena los turnos activos de menor a mayor
+                            .toList();
+
+                    if (!turnosActivos.isEmpty()) {
+                        // Busca el primer turno activo mayor que el turno actual
+                        int nuevoTurno = turnosActivos.stream()
+                                .filter(t -> t > partida.getTurnoActual())
+                                .findFirst()
+                                .orElse(turnosActivos.get(0)); // Si no encuentra uno mayor, pone el primero
+
+                        partida.setTurnoActual(nuevoTurno);
+                        partidaRepository.save(partida);
+                    }
+                }
+
+                messagingTemplate.convertAndSend(
+                        "/topic/juego/" + partida.getId(),
+                        (Object) Map.of(
+                                "evento", "JUGADOR_ABANDONO",
+                                "jugadorId", jugadorPartida.getJugador().getIdUsuario(),
+                                "nick", jugadorPartida.getJugador().getNick(),
+                                "turnoActual", partida.getTurnoActual(),
+                                "eraSuTurno", eraSuTurno));
             }
 
         } else {

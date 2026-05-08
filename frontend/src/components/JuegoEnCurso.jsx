@@ -21,6 +21,7 @@ export default function JuegoEnCurso({ lobby }) {
     const [resultado, setResultado] = useState(null);
     const [error, setError] = useState('');
     const [ganadorId, setGanadorId] = useState(null);
+    const [notificacion, setNotificacion] = useState(null);
 
     const miIdUsuario = parseInt(localStorage.getItem('idUsuario'), 10);
     const tiempoInicioRef = useRef(null);
@@ -71,6 +72,7 @@ export default function JuegoEnCurso({ lobby }) {
         switch (data.evento) {
 
             case 'PREGUNTA':
+                setFase('GIRANDO_RULETA');
                 setCategoriaActual(data.categoria);
                 setPreguntaActual(data.pregunta);
                 setRespuestas(data.respuestas);
@@ -91,10 +93,17 @@ export default function JuegoEnCurso({ lobby }) {
                     estado: data.estado,
                     jugadores: prev.jugadores.map(j =>
                         j.idJugador === data.jugadorId
-                            ? { ...j, quesitos: data.quesitos }
+                            ? { ...j, quesitos: data.quesitos, progreso: data.progreso ?? j.progreso }
                             : j
                     )
                 }));
+                if (data.nuevoQuesito) {
+                    const msg = data.jugadorId === miIdUsuario
+                        ? `¡Acabas de conseguir el quesito de ${data.nuevoQuesito.nombre}!`
+                        : `${data.nuevoQuesito.nick} acaba de ganar el quesito de ${data.nuevoQuesito.nombre}`;
+                    setNotificacion(msg);
+                    setTimeout(() => setNotificacion(null), 6500);
+                }
                 if (data.estado === 'TERMINADA') {
                     setGanadorId(data.jugadorId);
                     setTimeout(() => setFase('PARTIDA_TERMINADA'), 3000);
@@ -118,6 +127,27 @@ export default function JuegoEnCurso({ lobby }) {
                 setPreguntaActual(null);
                 setRespuestas([]);
                 setResultado(null);
+                break;
+
+            case 'JUGADOR_ABANDONO':
+                setEstadoJuego(prev => ({
+                    ...prev,
+                    turnoActual: data.turnoActual,
+                    jugadores: prev.jugadores.map(j =>
+                        j.idJugador == data.jugadorId
+                            ? { ...j, abandonado: true }
+                            : j
+                    )
+                }));
+                if (data.eraSuTurno) {
+                    setFase('ESPERANDO_TIRADA');
+                    setPreguntaActual(null);
+                    setRespuestas([]);
+                    setResultado(null);
+                }
+                break;
+
+            default:
                 break;
         }
     }
@@ -197,6 +227,7 @@ export default function JuegoEnCurso({ lobby }) {
                             quesitos={j.quesitos}
                             categorias={estadoJuego.categorias}
                             esTurno={false}
+                            abandonado={j.abandonado ?? false}
                         />
                     ))}
                 </section>
@@ -213,49 +244,21 @@ export default function JuegoEnCurso({ lobby }) {
     return (
         <main className="juego">
             {error && <p className="juego__error">{error}</p>}
-            {/* Marcadores de jugadores */}
-            <section className="juego__scoreboard">
-                {estadoJuego.jugadores.map(j => (
-                    <ScoreboardJugador
-                        key={j.idJugador}
-                        nick={j.nick}
-                        quesitos={j.quesitos}
-                        categorias={estadoJuego.categorias}
-                        esTurno={j.ordenTurno === estadoJuego.turnoActual}
-                    />
-                ))}
-            </section>
-
-            <section className="juego__centro">
-
-                {/* Ruleta */}
-                <Ruleta
-                    categorias={estadoJuego.categorias}
-                    categoriaSeleccionada={categoriaActual}
-
-                />
-
-                {/* Temporizador */}
-                {fase === 'MOSTRANDO_PREGUNTA' && (
-                    <Temporizador
-                        segundos={estadoJuego.tiempoRespuesta}
-                        onFin={onTiempoAgotado}
-                    />
-                )}
-
-                {/* Botón Girar */}
-                {fase === 'ESPERANDO_TIRADA' && esMiTurno && (
-                    <button className="btn btn--primary btn--lg" onClick={tirarRuleta}>
-                        Tirar Ruleta
-                    </button>
-                )}
-
-                {/* Mensaje espera — para los demás */}
-                {fase === 'ESPERANDO_TIRADA' && !esMiTurno && (
-                    <p className="juego__espera">
-                        Esperando a que {jugadorDelTurno?.nick} tire...
-                    </p>
-                )}
+            <div className="juego__columna-izq">
+                {/* Marcadores de jugadores */}
+                <section className="juego__scoreboard">
+                    {estadoJuego.jugadores.map(j => (
+                        <ScoreboardJugador
+                            key={j.idJugador}
+                            nick={j.nick}
+                            quesitos={j.quesitos}
+                            progreso={j.progreso ?? []}
+                            categorias={estadoJuego.categorias}
+                            esTurno={j.ordenTurno === estadoJuego.turnoActual}
+                            abandonado={j.abandonado ?? false}
+                        />
+                    ))}
+                </section>
 
                 {/* Pregunta */}
                 {preguntaActual && fase !== 'GIRANDO_RULETA' && (
@@ -289,10 +292,55 @@ export default function JuegoEnCurso({ lobby }) {
                         ))}
                     </div>
                 )}
-                <button className="btn btn--danger" onClick={abandonarPartida}>
-                    Abandonar partida
-                </button>
-            </section>
+            </div>
+            {/* Columna derecha: temporizador + pasar + ruleta + girar */}
+            <div className="juego__columna-der">
+                <div className="juego__top-der">
+                    {/* Temporizador */}
+                    {fase === 'MOSTRANDO_PREGUNTA' && (
+                        <Temporizador
+                            segundos={estadoJuego.tiempoRespuesta}
+                            onFin={onTiempoAgotado}
+                        />
+                    )}
+                    {fase === 'MOSTRANDO_PREGUNTA' && esMiTurno && !respuestaElegida && (
+                        <button className="btn btn--secondary" onClick={onTiempoAgotado}>
+                            Pasar turno
+                        </button>
+                    )}
+                </div>
+                {/* Ruleta */}
+                <Ruleta
+                    categorias={estadoJuego.categorias}
+                    categoriaSeleccionada={categoriaActual}
+
+                />
+
+                {/* Botón Girar */}
+                {fase === 'ESPERANDO_TIRADA' && esMiTurno && (
+                    <button className="btn btn--primary btn--lg" onClick={tirarRuleta}>
+                        Girar Ruleta
+                    </button>
+                )}
+
+                {/* Mensaje espera — para los demás */}
+                {fase === 'ESPERANDO_TIRADA' && !esMiTurno && (
+                    <p className="juego__espera">
+                        Esperando a que {jugadorDelTurno?.nick} tire...
+                    </p>
+                )}
+            </div>
+            <button className="btn btn--danger juego__abandonar" onClick={abandonarPartida}>
+                Abandonar partida
+            </button>
+
+            {notificacion && (
+                <div className="notificacion-quesito">
+                    <div className="notificacion-quesito__card">
+                        🧀 {notificacion} 🧀
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

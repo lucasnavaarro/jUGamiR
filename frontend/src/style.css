@@ -1682,19 +1682,52 @@ main {
 
 /* ── JUEGO EN CURSO ─────────────────────────────────── */
 .juego {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: var(--space-md);
   min-height: 100vh;
   background: var(--bg-base);
-  padding: var(--space-md);
+  padding: clamp(1.5rem, 4vh, 2.5rem) clamp(1rem, 3vw, 2rem);
+}
+
+.juego__columna-izq {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding-left: var(--space-md);
+}
+
+.juego__columna-der {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding-right: var(--space-md);
+}
+
+.juego__top-der {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+  /* En la misma línea, si no caben, se van abajo */
 }
 
 .juego__scoreboard {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
+  /* A la izquierda */
   margin-bottom: var(--space-lg);
   gap: var(--space-sm);
+}
+
+.juego__abandonar {
+  grid-column: 1/-1;
+  justify-self: center;
+  margin-top: var(--space-md);
 }
 
 .scoreboard__jugador {
@@ -1712,6 +1745,19 @@ main {
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
 }
 
+.scoreboard__jugador--abandonado {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+.scoreboard__abandonado-texto {
+  color: #ef4444;
+  font-weight: 700;
+  font-size: clamp(0.75rem, 2.5vw, 1.1rem);
+  display: block;
+  margin-top: var(--space-lg);
+}
+
 .scoreboard__nick {
   font-weight: 700;
   font-size: clamp(0.75rem, 2.5vw, 1.1rem);
@@ -1726,23 +1772,19 @@ main {
 }
 
 .scoreboard__quesito {
-  width: 14px;
-  height: 14px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .scoreboard__quesito--vacio {
   background: rgba(255, 255, 255, 0.08);
-}
-
-/* ── Zona central ── */
-.juego__centro {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-lg);
 }
 
 .juego__espera {
@@ -1764,8 +1806,8 @@ main {
 }
 
 .ruleta-contenedor {
-  width: min(100%, 200px);
-  /* Nunca será más ancha que la pantalla, tope 200px */
+  width: min(100%, 300px);
+  /* Nunca será más ancha que la pantalla, tope 300px */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1787,26 +1829,11 @@ main {
   position: relative;
   transform: rotate(var(--rotacion, 0deg));
   transition: none;
+  border-radius: 50%;
 }
 
 .ruleta__rueda--girando {
   transition: transform 4s ease-out;
-}
-
-.ruleta__seccion {
-  position: absolute;
-  width: 50%;
-  height: 50%;
-  top: 0;
-  right: 0;
-  transform-origin: bottom left;
-  /* Punto desde donde "sale" cada slice */
-  opacity: 0.8;
-}
-
-.ruleta__seccion--activa {
-  opacity: 1;
-  filter: brightness(1.3);
 }
 
 .ruleta__resultado {
@@ -1916,6 +1943,9 @@ main {
 
 /* ── Fin de partida ──────────────────────── */
 .juego--fin {
+  display: flex !important;
+  /* El !important es para sobreescribir el display:grid del juego */
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -1930,6 +1960,51 @@ main {
 .juego__fin-mensaje {
   font-size: clamp(0.75rem, 2.5vw, 1.1rem);
   color: var(--text-secondary);
+}
+
+/* ── Notificación de quesito ──────────────────────────────── */
+.notificacion-quesito {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeUp 0.3s ease;
+}
+
+.notificacion-quesito__card {
+  /* padding: [Arriba/Abajo] [Izquierda/Derecha] */
+  padding: clamp(1.5rem, 3vh, 2.5rem) clamp(1rem, 5vw, 4rem);
+  background: var(--bg-card);
+  /* --var(bg-card)*/
+  border: 3px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-size: clamp(1rem, 3.5vw, 1.6rem);
+  font-weight: 700;
+  box-shadow: 0 0px 40px rgba(245, 158, 11, 0.4);
+  text-align: center;
+  width: 90%;
+  /* En móviles ocupará el 90% (dejando aire por los lados) */
+  max-width: 500px;
+  /* Pero nunca pasará de 500px en escritorio */
+  margin-inline: auto;
+  /* Nos aseguramos de que siempre esté centrada */
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.7);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
 }
 
 /* ── Solo en dispositivos con ratón real (no táctil) ───────── */
@@ -2184,12 +2259,20 @@ main {
     grid-template-columns: repeat(2, 1fr);
   }
 
+
   /* Reduce el espaciado grande en móvil */
   :root {
     --space-xl: 1.5rem;
     /* 2.5rem → 1.5rem */
     --space-2xl: 2rem;
     /* 4rem   → 2rem   */
+  }
+}
+
+@media (min-width: 768px) {
+  .juego {
+    grid-template-columns: 1fr 350px;
+    align-content: space-between;
   }
 }
 
