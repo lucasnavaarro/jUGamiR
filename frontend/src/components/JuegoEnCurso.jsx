@@ -22,7 +22,8 @@ export default function JuegoEnCurso({ lobby }) {
     const [error, setError] = useState('');
     const [ganadorId, setGanadorId] = useState(null);
     const [notificacion, setNotificacion] = useState(null);
-
+    const [imagenActual, setImagenActual] = useState(null);
+    const baseUrl = import.meta.env.DEV ? 'http://localhost:8080' : ''; // En prod no es necesario, pero nos ahorra tener que poner http://localhost:8080/api en cada fetch
     const miIdUsuario = parseInt(localStorage.getItem('idUsuario'), 10);
     const tiempoInicioRef = useRef(null);
 
@@ -78,6 +79,7 @@ export default function JuegoEnCurso({ lobby }) {
                 setRespuestas(data.respuestas);
                 setRespuestaElegida(null);
                 setResultado(null);
+                setImagenActual(data.pregunta.imagenUrl || null);
                 setTimeout(() => {
                     setFase('MOSTRANDO_PREGUNTA');
                     tiempoInicioRef.current = Date.now();
@@ -113,6 +115,7 @@ export default function JuegoEnCurso({ lobby }) {
                         setPreguntaActual(null);
                         setRespuestas([]);
                         setResultado(null);
+                        setImagenActual(null);
                     }, 3000);
                 }
 
@@ -127,6 +130,7 @@ export default function JuegoEnCurso({ lobby }) {
                 setPreguntaActual(null);
                 setRespuestas([]);
                 setResultado(null);
+                setImagenActual(null);
                 break;
 
             case 'JUGADOR_ABANDONO':
@@ -194,7 +198,7 @@ export default function JuegoEnCurso({ lobby }) {
     }
 
     if (!estadoJuego) {
-        return <p className="juego__loading">Cargando juego...</p>;
+        return <p >Cargando juego...</p>;
     }
 
     const miJugador = estadoJuego.jugadores.find(j => j.idJugador === miIdUsuario);
@@ -243,7 +247,7 @@ export default function JuegoEnCurso({ lobby }) {
 
     return (
         <main className="juego">
-            {error && <p className="juego__error">{error}</p>}
+            {error && <p>{error}</p>}
             <div className="juego__columna-izq">
                 {/* Marcadores de jugadores */}
                 <section className="juego__scoreboard">
@@ -284,12 +288,18 @@ export default function JuegoEnCurso({ lobby }) {
                                             : r.id === respuestaElegida
                                                 ? "incorrecta"
                                                 : 'normal'
-                                        : r.id === respuestaElegida
-                                            ? "seleccionada"
-                                            : "normal"
+                                        : "normal"
                                 }
                             />
                         ))}
+                    </div>
+                )}
+            </div>
+            {/* Centro: imagen */}
+            <div className="juego__columna-centro">
+                {imagenActual && fase !== 'GIRANDO_RULETA' && (
+                    <div className="juego__imagen">
+                        <img src={`${baseUrl}/${imagenActual}`} alt="Imagen de la pregunta" />
                     </div>
                 )}
             </div>
@@ -304,7 +314,7 @@ export default function JuegoEnCurso({ lobby }) {
                         />
                     )}
                     {fase === 'MOSTRANDO_PREGUNTA' && esMiTurno && !respuestaElegida && (
-                        <button className="btn btn--secondary" onClick={onTiempoAgotado}>
+                        <button className="btn btn--outline btn--pasar" onClick={onTiempoAgotado}>
                             Pasar turno
                         </button>
                     )}

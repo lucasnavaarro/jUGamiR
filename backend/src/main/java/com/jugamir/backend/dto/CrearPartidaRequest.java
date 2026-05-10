@@ -5,11 +5,10 @@ import com.jugamir.backend.model.enums.TipoPartida;
 import java.util.List;
 
 public record CrearPartidaRequest(
-        TipoPartida tipo,
-        Dificultad dificultad,
-        int tiempoRespuesta,
-        int maxJugadores,
-        List<Long> categoriaIds
-
-) {
+                TipoPartida tipo,
+                Dificultad dificultad,
+                int tiempoRespuesta,
+                int maxJugadores,
+                List<Long> categoriaIds,
+                int aciertosParaQuesito) {
 }

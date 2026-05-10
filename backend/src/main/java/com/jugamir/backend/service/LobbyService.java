@@ -27,7 +27,7 @@ public class LobbyService {
     private final CategoriaRepository categoriaRepository;
 
     public Partida crearPartida(Long usuarioId, TipoPartida tipo, Dificultad dificultad, int tiempoRespuesta,
-            int maxJugadores, List<Long> categoriaIds) {
+            int maxJugadores, List<Long> categoriaIds, int aciertosParaQuesito) {
 
         Jugador jugador = jugadorRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalStateException("El usuario no es un jugador"));
@@ -50,6 +50,7 @@ public class LobbyService {
                 .creadaPor(jugador.getUsuario())
                 .creadaEn(OffsetDateTime.now())
                 .turnoActual(0)
+                .aciertosParaQuesito(aciertosParaQuesito)
                 .build();
 
         partida = partidaRepository.save(partida);
@@ -179,6 +180,7 @@ public class LobbyService {
             if (jugadorPartidaRepository.countByPartida(partida) == 0) {
                 partida.setEstado(EstadoPartida.CANCELADA);
                 partidaRepository.save(partida);
+
             } else if (partida.getCreadaPor().getIdUsuario().equals(usuarioId)) {
                 // Si el que abandona es el anfitrión, transferir el rol al siguiente jugador
                 List<JugadorPartida> restantes = jugadorPartidaRepository.findByPartida(partida)

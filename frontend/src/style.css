@@ -771,6 +771,12 @@ main {
   justify-content: center;
 }
 
+.btn--pasar {
+  padding: 0.85rem;
+  font-size: 1rem;
+  border-radius: 1.3rem;
+}
+
 .auth-link {
   color: var(--text-primary);
   font-size: 1rem;
@@ -1698,6 +1704,13 @@ main {
   padding-left: var(--space-md);
 }
 
+.juego__columna-centro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: var(--space-xl);
+}
+
 .juego__columna-der {
   display: flex;
   flex-direction: column;
@@ -1705,6 +1718,32 @@ main {
   gap: var(--space-md);
   padding-right: var(--space-md);
 }
+
+/* .juego__columna-izq {
+  grid-area: pregunta;
+}
+
+.juego__columna-centro {
+  grid-area: imagen;
+}
+
+.juego__columna-der {
+  grid-area: derecha;
+}
+
+.juego__abandonar {
+  grid-area: abandonar;
+} */
+
+
+.juego__imagen img {
+  width: 100%;
+  max-height: 550px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+}
+
+
 
 .juego__top-der {
   display: flex;
@@ -1939,6 +1978,7 @@ main {
   font-weight: 800;
   color: var(--color-letra);
   font-size: clamp(0.75rem, 2.5vw, 1.1rem);
+  margin-right: var(--space-sm);
 }
 
 /* ── Fin de partida ──────────────────────── */
@@ -2254,6 +2294,15 @@ main {
 
 /* ── Responsive tweaks ────────────────────────────────────── */
 
+/* @media (min-width: 1200px) {
+  .juego {
+    grid-template-columns: 380px 1fr 350px;
+    grid-template-areas:
+      "pregunta imagen   derecha"
+      "abandonar abandonar abandonar";
+  }
+} */
+
 @media (max-width: 768px) {
   .categories__grid {
     grid-template-columns: repeat(2, 1fr);
@@ -2271,10 +2320,21 @@ main {
 
 @media (min-width: 768px) {
   .juego {
-    grid-template-columns: 1fr 350px;
+    grid-template-columns: 380px 1fr 350px;
     align-content: space-between;
   }
 }
+
+/* @media (min-width: 768px) {
+  .juego {
+    grid-template-columns: 1fr 350px;
+    grid-template-areas:
+      "pregunta  derecha"
+      "imagen    imagen"
+      "abandonar abandonar";
+    align-content: start;
+  }
+} */
 
 @media (max-width: 640px) {
   .navbar__actions .btn {

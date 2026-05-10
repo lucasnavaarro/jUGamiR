@@ -247,7 +247,7 @@ CREATE TABLE IF NOT EXISTS partidas (
   tipo               tipo_partida NOT NULL DEFAULT 'PUBLICA',  -- PUBLICA | PRIVADA
   dificultad         nivel_pregunta NOT NULL DEFAULT 'MEDIO',    -- FÁCIL | MEDIO | DIFÍCIL
   tiempo_respuesta   INT NOT NULL DEFAULT 30,                 -- segundos por pregunta
-  --modo               modo_juego NOT NULL DEFAULT 'MULTI',
+  aciertos_para_quesito INTEGER NOT NULL DEFAULT 5,
   estado             estado_partida NOT NULL DEFAULT 'ESPERANDO',
   duracion           INT CHECK (duracion IS NULL OR duracion > 0),
   empezada_en        TIMESTAMPTZ,

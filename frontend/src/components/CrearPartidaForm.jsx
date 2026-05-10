@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "../services/api";
+import Deslizante from "./Deslizante";
 
 export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
     const [categorias, setCategorias] = useState([]);
     const [localError, setLocalError] = useState('');
     const [jugadoresText, setJugadoresText] = useState('4');
     const [tiempoText, setTiempoText] = useState('30');
+    const [aciertosText, setAciertosText] = useState('5');
     const [form, setForm] = useState({
         tipo: 'PUBLICA',
         maxJugadores: 4,
         dificultad: 'MEDIO',
         categoriaIds: [],
         tiempoRespuesta: 30,
+        aciertosParaQuesito: 5,
     });
 
     useEffect(() => {
@@ -67,6 +70,14 @@ export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
             return;
         }
 
+        if (form.aciertosParaQuesito < 1 || form.aciertosParaQuesito > 30) {
+            const clamped = Math.min(30, Math.max(1, form.aciertosParaQuesito));
+            setAciertosText(String(clamped));
+            setForm(prev => ({ ...prev, aciertosParaQuesito: clamped }));
+            setLocalError('Los aciertos para obtener un quesito deben estar entre 1 y 30');
+            return;
+        }
+
         // Si todo es válido, enviamos el formulario al componente padre
         onSubmit(form);
     }
@@ -90,30 +101,16 @@ export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
             </div>
 
             { /* JUGADORES */}
-            <div className="crear-partida__field">
-                <label className="crear-partida__group-title">Número de jugadores</label>
-                <div className="crear-partida__range-row">
-                    <input type="range" min={2} max={6} value={form.maxJugadores}
-                        onChange={e => {
-                            const v = Number(e.target.value);
-                            setForm(prev => ({ ...prev, maxJugadores: v }));
-                            setJugadoresText(String(v));
-                        }}
-                        className="crear-partida__range"
-                    />
-                    <input type="number" value={jugadoresText}
-                        onChange={e => {
-                            const raw = e.target.value;
-                            setJugadoresText(raw);
-                            const v = parseInt(raw, 10);
-                            if (!isNaN(v)) {
-                                setForm(prev => ({ ...prev, maxJugadores: v }));
-                            }
-                        }}
-                        className="crear-partida__number-input"
-                    />
-                </div>
-            </div>
+            <Deslizante
+                label="Número de jugadores"
+                min={2}
+                max={6}
+                value={form.maxJugadores}
+                text={jugadoresText}
+                onSliderChange={v => { setForm(prev => ({ ...prev, maxJugadores: v })); setJugadoresText(String(v)); }}
+                onTextChange={raw => { setJugadoresText(raw); const v = parseInt(raw, 10); if (!isNaN(v)) { setForm(prev => ({ ...prev, maxJugadores: v })); } }}
+            />
+
             { /*DIFICULTAD*/}
             <div className="crear-partida__group">
                 <label className="crear-partida__group-title">Dificultad</label>
@@ -166,29 +163,26 @@ export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
                 </div>
             </div>
             { /*TIEMPO DE RESPUESTA*/}
-            <div className="crear-partida__field">
-                <label className="crear-partida__group-title">
-                    Tiempo máximo de respuesta (segundos)
-                </label>
-                <div className="crear-partida__range-row">
-                    <input type="range" min={30} max={300} step={5} value={form.tiempoRespuesta}
-                        onChange={e => {
-                            const v = Number(e.target.value);
-                            setForm(prev => ({ ...prev, tiempoRespuesta: v }));
-                            setTiempoText(String(v));
-                        }} className="crear-partida__range" />
-                    <input type="number" value={tiempoText}
-                        onChange={e => {
-                            const raw = e.target.value;
-                            setTiempoText(raw);
-                            const v = parseInt(raw, 10);
-                            if (!isNaN(v)) {
-                                setForm(prev => ({ ...prev, tiempoRespuesta: v }));
-                            }
-                        }}
-                        className="crear-partida__number-input" />
-                </div>
-            </div>
+            <Deslizante
+                label="Tiempo máximo de respuesta (segundos)"
+                min={30}
+                max={300}
+                step={5}
+                value={form.tiempoRespuesta}
+                text={tiempoText}
+                onSliderChange={v => { setForm(prev => ({ ...prev, tiempoRespuesta: v })); setTiempoText(String(v)); }}
+                onTextChange={raw => { setTiempoText(raw); const v = parseInt(raw, 10); if (!isNaN(v)) { setForm(prev => ({ ...prev, tiempoRespuesta: v })); } }}
+            />
+            { /*ACIERTO PARA QUESITO*/}
+            <Deslizante
+                label="Aciertos para obtener un quesito"
+                min={1}
+                max={30}
+                value={form.aciertosParaQuesito}
+                text={aciertosText}
+                onSliderChange={v => { setForm(prev => ({ ...prev, aciertosParaQuesito: v })); setAciertosText(String(v)); }}
+                onTextChange={raw => { setAciertosText(raw); const v = parseInt(raw, 10); if (!isNaN(v)) { setForm(prev => ({ ...prev, aciertosParaQuesito: v })); } }}
+            />
             {displayError && <p className="crear-partida__error">{displayError}</p>}
             { /*BOTON CREAR*/}
             <button type="submit" className="btn btn--primary btn--full" disabled={isLoading}>

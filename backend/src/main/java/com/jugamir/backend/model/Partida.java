@@ -43,6 +43,9 @@ public class Partida {
     @Column(name = "tiempo_respuesta", nullable = false)
     private int tiempoRespuesta;
 
+    @Column(name = "aciertos_para_quesito", nullable = false)
+    private int aciertosParaQuesito;
+
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)

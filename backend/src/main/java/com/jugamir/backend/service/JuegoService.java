@@ -51,15 +51,19 @@ public class JuegoService {
                 // Si todavia no hay preguntas usadas, pasamos -1L para que no filtre nada
                 List<Long> filtro_usadas = idsUsadas.isEmpty() ? List.of(-1L) : idsUsadas;
 
-                List<Pregunta> preguntas = preguntaRepository.findAleatoriasByCategoriaYDificultad(categoria.getId(),
-                                EstadoPregunta.PUBLICADA,
-                                partida.getDificultad(),
-                                filtro_usadas, 1);
+                // List<Pregunta> preguntas =
+                // preguntaRepository.findAleatoriasByCategoriaYDificultad(categoria.getId(),
+                // EstadoPregunta.PUBLICADA,
+                // partida.getDificultad(),
+                // filtro_usadas, 1);
 
-                if (preguntas.isEmpty())
-                        throw new IllegalStateException("No hay preguntas disponibles para esta categoría");
+                // if (preguntas.isEmpty())
+                // throw new IllegalStateException("No hay preguntas disponibles para esta
+                // categoría");
 
-                Pregunta pregunta = preguntas.get(0);
+                // Pregunta pregunta = preguntas.get(0);
+                Pregunta pregunta = preguntaRepository.findById(10624L)
+                                .orElseThrow(() -> new IllegalStateException("Pregunta no encontrada"));
 
                 // Registrar en PreguntasPartida
                 PreguntaPartida preguntaPartida = PreguntaPartida.builder()
@@ -87,7 +91,10 @@ public class JuegoService {
                                                 "color", categoria.getColor()),
                                 "pregunta", Map.of(
                                                 "id", pregunta.getId(),
-                                                "enunciado", pregunta.getEnunciado()),
+                                                "enunciado", pregunta.getEnunciado(),
+                                                "imagenUrl", pregunta.getImagenUrl() != null
+                                                                ? pregunta.getImagenUrl()
+                                                                : ""),
                                 "respuestas", opciones,
                                 "turnoActual", partida.getTurnoActual()));
 
@@ -135,7 +142,7 @@ public class JuegoService {
                                 .build();
 
                 respuestaJugadorRepository.save(respuestaJugador);
-                
+
                 // Actualizar estadísticas del jugador
                 Categoria categoriaObtenida = null;
                 if (respuesta.getEsCorrecta()) {
@@ -146,7 +153,7 @@ public class JuegoService {
                         categoriaObtenida = actualizarProgreso(jugador, categoria, partida);
 
                 } else {
-                        jugador.setNumNoRespondidas(jugador.getNumNoRespondidas() + 1);
+                        jugador.setNumFalladas(jugador.getNumFalladas() + 1);
                         if (partida.getEstado() == EstadoPartida.EN_CURSO) {
                                 avanzarTurno(partida);
                         }
@@ -155,6 +162,7 @@ public class JuegoService {
                 jugador.setTiempoTotal(jugador.getTiempoTotal() + tiempoMs);
                 jugadorPartidaRepository.save(jugador);
 
+                // Mandar al forntend cuál es la respuesta correcta para que lo pueda mostrar
                 Long respuestaCorrectaId = respuestaRepository.findByPregunta(preguntaPartida.getPregunta())
                                 .stream()
                                 .filter(Respuesta::getEsCorrecta)
@@ -162,6 +170,7 @@ public class JuegoService {
                                 .map(Respuesta::getId)
                                 .orElse(null);
 
+                // Mandar al frontend los quesitos ganados y así mostrar los circulitos
                 List<Map<String, Object>> quesitosActualizados = quesitosGanadosRepository.findByJugadorPartida(jugador)
                                 .stream()
                                 .map(q -> Map.<String, Object>of(
@@ -169,6 +178,8 @@ public class JuegoService {
                                                 "color", q.getCategoria().getColor()))
                                 .toList();
 
+                // Mandar al frontend el progreso de los quesitos para poder actualizar los
+                // números dentro del círculo
                 List<Map<String, Object>> progresoActualizado = progresoCategoriaRepository
                                 .findByJugadorPartida(jugador)
                                 .stream()
@@ -177,7 +188,6 @@ public class JuegoService {
                                                 "aciertos", pc.getAciertos()))
                                 .toList();
 
-                
                 Map<String, Object> evento = new HashMap<>();
                 evento.put("evento", "RESULTADO");
                 evento.put("esCorrecta", respuesta.getEsCorrecta());
@@ -189,13 +199,12 @@ public class JuegoService {
                 evento.put("tiempoMs", tiempoMs);
                 evento.put("quesitos", quesitosActualizados);
                 evento.put("progreso", progresoActualizado);
-                if(categoriaObtenida!=null){
+                if (categoriaObtenida != null) {
                         evento.put("nuevoQuesito", Map.of(
-                                "nombre", categoriaObtenida.getNombre(),
-                                "nick", jugador.getJugador().getNick()));
+                                        "nombre", categoriaObtenida.getNombre(),
+                                        "nick", jugador.getJugador().getNick()));
                 }
-                
-                
+
                 messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) evento);
 
         }
@@ -249,6 +258,7 @@ public class JuegoService {
                                 "estado", partida.getEstado().name(),
                                 "turnoActual", partida.getTurnoActual(),
                                 "tiempoRespuesta", partida.getTiempoRespuesta(),
+                                "aciertosParaQuesito", partida.getAciertosParaQuesito(),
                                 "jugadores", jugadores,
                                 "categorias", categorias);
         }
@@ -258,7 +268,7 @@ public class JuegoService {
                 Partida partida = getPartidaEnCurso(partidaId);
                 JugadorPartida jugador = validarTurno(partida, usuarioId);
 
-                jugador.setNumFalladas(jugador.getNumFalladas() + 1);
+                jugador.setNumNoRespondidas(jugador.getNumNoRespondidas() + 1);
                 jugadorPartidaRepository.save(jugador);
 
                 avanzarTurno(partida);
@@ -284,7 +294,7 @@ public class JuegoService {
 
                 progreso.setAciertos(progreso.getAciertos() + 1);
 
-                if (progreso.getAciertos() >= 5) {
+                if (progreso.getAciertos() >= partida.getAciertosParaQuesito()) {
 
                         // Jugador gana quesito de esa categoria
                         QuesitosGanados quesito = QuesitosGanados.builder()
