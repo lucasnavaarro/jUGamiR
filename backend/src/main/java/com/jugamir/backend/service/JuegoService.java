@@ -51,19 +51,22 @@ public class JuegoService {
                 // Si todavia no hay preguntas usadas, pasamos -1L para que no filtre nada
                 List<Long> filtro_usadas = idsUsadas.isEmpty() ? List.of(-1L) : idsUsadas;
 
-                // List<Pregunta> preguntas =
-                // preguntaRepository.findAleatoriasByCategoriaYDificultad(categoria.getId(),
-                // EstadoPregunta.PUBLICADA,
-                // partida.getDificultad(),
-                // filtro_usadas, 1);
+                // TODO: quitar este bloque y descomentar el de abajo cuando no se necesite
+                // probar imágenes
+                // List<Pregunta> preguntasConImagen =
+                // preguntaRepository.findAleatoriasConImagen(1);
+                // if (preguntasConImagen.isEmpty())
+                // throw new IllegalStateException("No hay preguntas con imagen disponibles");
+                // Pregunta pregunta = preguntasConImagen.get(0);
 
-                // if (preguntas.isEmpty())
-                // throw new IllegalStateException("No hay preguntas disponibles para esta
-                // categoría");
-
-                // Pregunta pregunta = preguntas.get(0);
-                Pregunta pregunta = preguntaRepository.findById(10624L)
-                                .orElseThrow(() -> new IllegalStateException("Pregunta no encontrada"));
+                List<Pregunta> preguntas = preguntaRepository.findAleatoriasByCategoriaYDificultad(
+                                categoria.getId(),
+                                EstadoPregunta.PUBLICADA,
+                                partida.getDificultad(),
+                                filtro_usadas, 1);
+                if (preguntas.isEmpty())
+                        throw new IllegalStateException("No hay preguntas disponibles para esta categoría");
+                Pregunta pregunta = preguntas.get(0);
 
                 // Registrar en PreguntasPartida
                 PreguntaPartida preguntaPartida = PreguntaPartida.builder()
@@ -83,20 +86,24 @@ public class JuegoService {
                                                 "orden", r.getOrden()))
                                 .toList();
 
-                messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) Map.of(
-                                "evento", "PREGUNTA",
-                                "categoria", Map.of(
-                                                "id", categoria.getId(),
-                                                "nombre", categoria.getNombre(),
-                                                "color", categoria.getColor()),
-                                "pregunta", Map.of(
-                                                "id", pregunta.getId(),
-                                                "enunciado", pregunta.getEnunciado(),
-                                                "imagenUrl", pregunta.getImagenUrl() != null
-                                                                ? pregunta.getImagenUrl()
-                                                                : ""),
-                                "respuestas", opciones,
-                                "turnoActual", partida.getTurnoActual()));
+                List<String> imagenesUrl = pregunta.getImagenUrl() != null && !pregunta.getImagenUrl().isBlank()
+                                ? List.of(pregunta.getImagenUrl().split(" \\| "))
+                                : List.of();
+
+                Map<String, Object> preguntaMsg = new HashMap<>();
+                preguntaMsg.put("id", pregunta.getId());
+                preguntaMsg.put("enunciado", pregunta.getEnunciado());
+                preguntaMsg.put("imagenesUrl", imagenesUrl);
+
+                Map<String, Object> eventoMsg = new HashMap<>();
+                eventoMsg.put("evento", "PREGUNTA");
+                eventoMsg.put("categoria", Map.of("id", categoria.getId(), "nombre", categoria.getNombre(), "color",
+                                categoria.getColor()));
+                eventoMsg.put("pregunta", preguntaMsg);
+                eventoMsg.put("respuestas", opciones);
+                eventoMsg.put("turnoActual", partida.getTurnoActual());
+
+                messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) eventoMsg);
 
                 return new GirarRuletaResponse(categoria,
                                 new PreguntaDTO(

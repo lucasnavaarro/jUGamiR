@@ -49,4 +49,8 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Long> {
                         @Param("usadas") List<Long> usadas,
                         @Param("limite") int limite);
 
+        // Solo para pruebas — forzar preguntas con imagen
+        @Query("SELECT p FROM Pregunta p WHERE p.imagenUrl IS NOT NULL AND p.imagenUrl != '' AND p.estado = 'PUBLICADA' AND p.anulada = false ORDER BY FUNCTION('RANDOM') LIMIT :limite")
+        List<Pregunta> findAleatoriasConImagen(@Param("limite") int limite);
+
 }

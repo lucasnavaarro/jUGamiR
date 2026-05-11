@@ -255,7 +255,7 @@ CREATE TABLE IF NOT EXISTS partidas (
   turno_actual       INT NOT NULL DEFAULT 1,
   creada_por         BIGINT REFERENCES usuarios(id_usuario) ON DELETE SET NULL,
   creada_en          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CONSTRAINT chk_partidas_max_jugadores CHECK (max_jugadores BETWEEN 2 AND 6),
+  CONSTRAINT chk_partidas_max_jugadores CHECK (max_jugadores BETWEEN 1 AND 6),
   CONSTRAINT chk_partidas_codigo_union_len CHECK (codigo_union IS NULL OR char_length(codigo_union) BETWEEN 4 AND 12)
 );
 

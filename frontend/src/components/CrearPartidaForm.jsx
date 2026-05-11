@@ -55,11 +55,11 @@ export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
             setLocalError('Dificultad inválida');
             return;
         }
-        if (form.maxJugadores < 2 || form.maxJugadores > 6) {
-            const clamped = Math.min(6, Math.max(2, form.maxJugadores));
+        if (form.maxJugadores < 1 || form.maxJugadores > 6) {
+            const clamped = Math.min(6, Math.max(1, form.maxJugadores));
             setJugadoresText(String(clamped));
             setForm(prev => ({ ...prev, maxJugadores: clamped }));
-            setLocalError('El número de jugadores debe estar entre 2 y 6');
+            setLocalError('El número de jugadores debe estar entre 1 y 6');
             return;
         }
         if (form.tiempoRespuesta < 30 || form.tiempoRespuesta > 300) {
@@ -103,7 +103,7 @@ export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
             { /* JUGADORES */}
             <Deslizante
                 label="Número de jugadores"
-                min={2}
+                min={1}
                 max={6}
                 value={form.maxJugadores}
                 text={jugadoresText}

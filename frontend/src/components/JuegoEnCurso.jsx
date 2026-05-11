@@ -22,7 +22,7 @@ export default function JuegoEnCurso({ lobby }) {
     const [error, setError] = useState('');
     const [ganadorId, setGanadorId] = useState(null);
     const [notificacion, setNotificacion] = useState(null);
-    const [imagenActual, setImagenActual] = useState(null);
+    const [imagenesActuales, setImagenesActuales] = useState([]);
     const baseUrl = import.meta.env.DEV ? 'http://localhost:8080' : ''; // En prod no es necesario, pero nos ahorra tener que poner http://localhost:8080/api en cada fetch
     const miIdUsuario = parseInt(localStorage.getItem('idUsuario'), 10);
     const tiempoInicioRef = useRef(null);
@@ -79,7 +79,7 @@ export default function JuegoEnCurso({ lobby }) {
                 setRespuestas(data.respuestas);
                 setRespuestaElegida(null);
                 setResultado(null);
-                setImagenActual(data.pregunta.imagenUrl || null);
+                setImagenesActuales(data.pregunta.imagenesUrl || []);
                 setTimeout(() => {
                     setFase('MOSTRANDO_PREGUNTA');
                     tiempoInicioRef.current = Date.now();
@@ -104,7 +104,7 @@ export default function JuegoEnCurso({ lobby }) {
                         ? `¡Acabas de conseguir el quesito de ${data.nuevoQuesito.nombre}!`
                         : `${data.nuevoQuesito.nick} acaba de ganar el quesito de ${data.nuevoQuesito.nombre}`;
                     setNotificacion(msg);
-                    setTimeout(() => setNotificacion(null), 6500);
+                    setTimeout(() => setNotificacion(null), 5000);
                 }
                 if (data.estado === 'TERMINADA') {
                     setGanadorId(data.jugadorId);
@@ -115,7 +115,7 @@ export default function JuegoEnCurso({ lobby }) {
                         setPreguntaActual(null);
                         setRespuestas([]);
                         setResultado(null);
-                        setImagenActual(null);
+                        setImagenesActuales([]);
                     }, 3000);
                 }
 
@@ -130,7 +130,7 @@ export default function JuegoEnCurso({ lobby }) {
                 setPreguntaActual(null);
                 setRespuestas([]);
                 setResultado(null);
-                setImagenActual(null);
+                setImagenesActuales([]);
                 break;
 
             case 'JUGADOR_ABANDONO':
@@ -213,10 +213,10 @@ export default function JuegoEnCurso({ lobby }) {
 
         return (
             <main className="juego juego--fin">
-                <h1 className="juego__fin--titulo">
+                <h1 className="juego__fin-titulo">
                     {heGanado ? '¡Has ganado!' : 'La partida ha finalizado'}
                 </h1>
-                <p className="juego__fin--mensaje">
+                <p className="juego__fin-mensaje">
                     {heGanado
                         ? '¡Enhorabuena! Has conseguido todos los quesitos.'
                         : `${ganador?.nick} ha ganado la partida.`
@@ -246,7 +246,7 @@ export default function JuegoEnCurso({ lobby }) {
     }
 
     return (
-        <main className="juego">
+        <main className={`juego ${imagenesActuales.length > 0 && fase !== 'GIRANDO_RULETA' ? 'juego--con-imagen' : ''}`}>
             {error && <p>{error}</p>}
             <div className="juego__columna-izq">
                 {/* Marcadores de jugadores */}
@@ -296,13 +296,15 @@ export default function JuegoEnCurso({ lobby }) {
                 )}
             </div>
             {/* Centro: imagen */}
-            <div className="juego__columna-centro">
-                {imagenActual && fase !== 'GIRANDO_RULETA' && (
+            {imagenesActuales.length > 0 && fase !== 'GIRANDO_RULETA' && (
+                <div className="juego__columna-centro">
                     <div className="juego__imagen">
-                        <img src={`${baseUrl}/${imagenActual}`} alt="Imagen de la pregunta" />
+                        {imagenesActuales.map((url, i) => (
+                            <img key={i} src={`${baseUrl}/${url}`} alt={`Imagen ${i + 1} de la pregunta`} />
+                        ))}
                     </div>
-                )}
-            </div>
+                </div>
+            )}
             {/* Columna derecha: temporizador + pasar + ruleta + girar */}
             <div className="juego__columna-der">
                 <div className="juego__top-der">

@@ -131,8 +131,8 @@ public class LobbyService {
             throw new IllegalStateException("La partida no está en estado de espera");
 
         int numJugadores = jugadorPartidaRepository.countByPartida(partida);
-        if (numJugadores < 2)
-            throw new IllegalStateException("Se necesitan al menos 2 jugadores para iniciar la partida");
+        if (numJugadores < 1)
+            throw new IllegalStateException("Se necesitan al menos 1 jugadores para iniciar la partida");
 
         // Asignar turnos aleatorios
         List<JugadorPartida> jugadores = jugadorPartidaRepository.findByPartida(partida);
@@ -232,6 +232,15 @@ public class LobbyService {
                 partidaRepository.save(partida);
 
                 Long ganadorId = activos.isEmpty() ? null : activos.get(0).getJugador().getIdUsuario();
+
+                messagingTemplate.convertAndSend(
+                        "/topic/juego/" + partida.getId(),
+                        (Object) Map.of(
+                                "evento", "JUGADOR_ABANDONO",
+                                "jugadorId", jugadorPartida.getJugador().getIdUsuario(),
+                                "nick", jugadorPartida.getJugador().getNick(),
+                                "turnoActual", partida.getTurnoActual(),
+                                "eraSuTurno", false));
 
                 messagingTemplate.convertAndSend(
                         "/topic/juego/" + partida.getId(),
