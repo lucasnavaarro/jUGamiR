@@ -25,6 +25,8 @@ public class LobbyService {
     private final JugadorPartidaRepository jugadorPartidaRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final CategoriaRepository categoriaRepository;
+    private final QuesitosGanadosRepository quesitosGanadosRepository;
+    private final ProgresoCategoriaRepository progresoCategoriaRepository;
 
     public Partida crearPartida(Long usuarioId, TipoPartida tipo, Dificultad dificultad, int tiempoRespuesta,
             int maxJugadores, List<Long> categoriaIds, int aciertosParaQuesito) {
@@ -231,7 +233,8 @@ public class LobbyService {
                 partida.setTerminadaEn(OffsetDateTime.now());
                 partidaRepository.save(partida);
 
-                Long ganadorId = activos.isEmpty() ? null : activos.get(0).getJugador().getIdUsuario();
+                JugadorPartida ganadorJp = activos.isEmpty() ? null : activos.get(0);
+                Long ganadorId = ganadorJp != null ? ganadorJp.getJugador().getIdUsuario() : null;
 
                 messagingTemplate.convertAndSend(
                         "/topic/juego/" + partida.getId(),
@@ -242,6 +245,24 @@ public class LobbyService {
                                 "turnoActual", partida.getTurnoActual(),
                                 "eraSuTurno", false));
 
+                List<Map<String, Object>> quesitosGanador = ganadorJp != null
+                        ? quesitosGanadosRepository.findByJugadorPartida(ganadorJp)
+                                .stream()
+                                .map(q -> Map.<String, Object>of(
+                                        "categoriaId", q.getCategoria().getId(),
+                                        "color", q.getCategoria().getColor()))
+                                .toList()
+                        : List.of();
+
+                List<Map<String, Object>> progresoGanador = ganadorJp != null
+                        ? progresoCategoriaRepository.findByJugadorPartida(ganadorJp)
+                                .stream()
+                                .map(pc -> Map.<String, Object>of(
+                                        "categoriaId", pc.getCategoria().getId(),
+                                        "aciertos", pc.getAciertos()))
+                                .toList()
+                        : List.of();
+
                 messagingTemplate.convertAndSend(
                         "/topic/juego/" + partida.getId(),
                         (Object) Map.of(
@@ -250,11 +271,11 @@ public class LobbyService {
                                 "respuestaCorrectaId", -1L,
                                 "respuestaElegidaId", -1L,
                                 "jugadorId", ganadorId != null ? ganadorId : -1L,
-
                                 "turnoActual", partida.getTurnoActual(),
                                 "estado", "TERMINADA", // Para que muestre la pantalla de ganador
                                 "tiempoMs", 0,
-                                "quesitos", java.util.List.of()));
+                                "quesitos", quesitosGanador,
+                                "progreso", progresoGanador));
 
             } else {
                 // Si el turno actual es el jugador que abandona, se pasa al siguiente

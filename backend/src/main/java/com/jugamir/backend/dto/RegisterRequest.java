@@ -17,9 +17,6 @@ public class RegisterRequest {
     private String email;
 
     @NotBlank
-    private String dni;
-
-    @NotBlank
     @Size(min = 8, message = "La contraseña dene tener al menos 8 caractreres")
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$", message = "La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial")
     private String password;

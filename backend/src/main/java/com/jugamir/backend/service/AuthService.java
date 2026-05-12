@@ -162,10 +162,6 @@ public class AuthService {
     private void validarUsuario(RegisterRequest request) {
         if (usuarioRepository.existsByEmail(request.getEmail()))
             throw new RuntimeException("Ya existe un usuario con ese email");
-
-        if (usuarioRepository.existsByDni(request.getDni()))
-            throw new RuntimeException("Ya existe un usaurio con ese DNI");
-
     }
 
     private Usuario guardarUsuario(RegisterRequest request) {
@@ -173,7 +169,6 @@ public class AuthService {
                 .nombre(request.getNombre())
                 .apellidos(request.getApellidos())
                 .email(request.getEmail())
-                .dni(request.getDni())
                 .contrasenaHash(passwordEncoder.encode(request.getPassword()))
                 .esActivo(true)
                 .creadoEn(LocalDateTime.now())

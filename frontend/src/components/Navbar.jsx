@@ -6,7 +6,6 @@ import UserMenu from './UserMenu';
 export default function Navbar() {
 
     const { pathname } = useLocation();
-    const [searchOpen, setSearchOpen] = useState(false);
     const isAuthPage = pathname === '/login'
         || pathname === '/register'
         || pathname === '/forgot-password'
@@ -42,32 +41,6 @@ export default function Navbar() {
                     <>
                         {isLoggedIn ? (
                             <>
-                                <div className={`navbar__search${searchOpen ? ' navbar__search--open' : ''}`}>
-                                    <span className="navbar__search-icon">🔍</span>
-                                    <input
-                                        type="text"
-                                        placeholder="Buscar amigos..."
-                                        disabled
-                                        className="navbar__search-input"
-                                        autoFocus={searchOpen} /* Cuando se abre el buscador, el input se enfoca automáticamente */
-                                    />
-                                    {/* Botón × solo visible cuando está expandido en móvil */}
-                                    <button
-                                        className="navbar__search-close"
-                                        onClick={() => setSearchOpen(false)}
-                                        aria-label="Cerrar búsqueda"
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-                                {/* Botón lupa — solo visible en móvil (oculto en desktop por CSS) */}
-                                <button
-                                    className="navbar__search-trigger"
-                                    onClick={() => setSearchOpen(true)}
-                                    aria-label="Abrir búsqueda"
-                                >
-                                    🔍
-                                </button>
                                 <UserMenu />
                             </>
                         ) : (

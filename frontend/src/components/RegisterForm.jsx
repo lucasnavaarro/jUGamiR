@@ -8,7 +8,6 @@ export default function RegisterForm() {
     const [nombre, setNombre] = useState('');
     const [apellidos, setApellidos] = useState('');
     const [email, setEmail] = useState('');
-    const [dni, setDni] = useState('');
     const [password, setPassword] = useState('');
     const [confirmar, setConfirmar] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -42,16 +41,6 @@ export default function RegisterForm() {
             return;
         }
 
-        if (!dni) {
-            setError('El campo DNI es obligatorio');
-            return;
-        }
-
-        if (!/^\d{8}[A-Za-z]$/.test(dni)) {
-            setError('El DNI no es válido');
-            return;
-        }
-
         if (!password) {
             setError('El campo contraseña es obligatorio');
             return;
@@ -78,7 +67,7 @@ export default function RegisterForm() {
         }
 
         const endpoint = tipo === 'jugador' ? '/api/auth/register/jugador' : '/api/auth/register/profesor';
-        const body = tipo === 'jugador' ? { nombre, apellidos, email, dni, password, nick } : { nombre, apellidos, email, dni, password, departamento };
+        const body = tipo === 'jugador' ? { nombre, apellidos, email, password, nick } : { nombre, apellidos, email, password, departamento };
 
         setIsLoading(true);
         const res = await fetch(endpoint, {
@@ -143,16 +132,6 @@ export default function RegisterForm() {
                         placeholder="Introduce tu email"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
-                    />
-                </div>
-                <div className="auth-form__group">
-                    <label htmlFor="dni">DNI</label>
-                    <input
-                        id="dni"
-                        type="text"
-                        placeholder="Introduce tu DNI"
-                        value={dni}
-                        onChange={e => setDni(e.target.value)}
                     />
                 </div>
                 <div className="auth-form__group">

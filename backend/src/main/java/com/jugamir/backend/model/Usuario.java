@@ -25,9 +25,6 @@ public class Usuario {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, unique = true)
-    private String dni;
-
     @Column(name = "contraseña_hash", nullable = false)
     private String contrasenaHash;
 

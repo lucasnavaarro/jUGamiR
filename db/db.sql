@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS usuarios (
   nombre          VARCHAR(120) NOT NULL,
   apellidos       VARCHAR(120) NOT NULL,
   email           VARCHAR(255) NOT NULL UNIQUE,
-  dni             VARCHAR(20)  NOT NULL UNIQUE,
   contraseña_hash TEXT NOT NULL,
   es_activo       BOOLEAN NOT NULL DEFAULT TRUE,
   creado_en       TIMESTAMPTZ NOT NULL DEFAULT NOW(),

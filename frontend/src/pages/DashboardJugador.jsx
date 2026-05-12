@@ -26,13 +26,13 @@ export default function DashboardJugador() {
             onClick: () => navigate('/crear/partida'),
         },
         {
-            id: 'clasificacion',
-            icon: '🏆',
-            titulo: 'Ver clasificación',
-            descripcion: 'Consulta el ranking global y compara tus resultados con el resto de jugadores.',
-            boton: 'Ver ranking',
+            id: 'estadisticas',
+            icon: '📊',
+            titulo: 'Ver estadísticas',
+            descripcion: 'Consulta tus estadísticas y progreso.',
+            boton: 'Ver estadísticas',
             color: 'var(--color-accent)',
-            onClick: () => navigate('/clasificacion'),
+            onClick: () => navigate('/stats'),
         },
     ];
 

@@ -229,6 +229,7 @@ export default function JuegoEnCurso({ lobby }) {
                             key={j.idJugador}
                             nick={j.nick}
                             quesitos={j.quesitos}
+                            progreso={j.progreso ?? []}
                             categorias={estadoJuego.categorias}
                             esTurno={false}
                             abandonado={j.abandonado ?? false}
