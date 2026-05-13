@@ -35,12 +35,5 @@ CSS3 Moderno: Uso de Variables CSS, Grid Layout, Flexbox y técnicas de truncami
 
 Fetch API: Comunicación asíncrona con el backend de Spring Boot.
 
-##📊 Estructura del Proyecto
-/backend: Código fuente de Spring Boot (clases @RestController, @Service, etc.).
-
-/frontend: Componentes de React, Hooks personalizados y hojas de estilo.
-
-/resources: Configuración de base de datos y assets del juego.
-
 
 Autor: Lucas Navarro Moreno
