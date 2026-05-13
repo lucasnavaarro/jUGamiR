@@ -11,7 +11,7 @@ export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
     const [form, setForm] = useState({
         tipo: 'PUBLICA',
         maxJugadores: 4,
-        dificultad: 'MEDIO',
+        dificultades: ['MEDIO'],
         categoriaIds: [],
         tiempoRespuesta: 30,
         aciertosParaQuesito: 5,
@@ -51,8 +51,8 @@ export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
             setLocalError('Tipo de partida inválido');
             return;
         }
-        if (!['FACIL', 'MEDIO', 'DIFICIL'].includes(form.dificultad)) {
-            setLocalError('Dificultad inválida');
+        if (form.dificultades.length === 0) {
+            setLocalError('Debes seleccionar al menos una dificultad');
             return;
         }
         if (form.maxJugadores < 1 || form.maxJugadores > 6) {
@@ -141,8 +141,18 @@ export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
                             )
                         },
                     ].map(({ val, text, icon }) => (
-                        <label key={val} className={`crear-partida__option ${form.dificultad === val ? 'crear-partida__option--active' : ''}`}>
-                            <input type="radio" name="dificultad" value={val} checked={form.dificultad === val} onChange={() => setForm(prev => ({ ...prev, dificultad: val }))} />
+                        <label key={val} className={`crear-partida__option ${form.dificultades.includes(val) ? 'crear-partida__option--active' : ''}`}>
+                            <input
+                                type="checkbox"
+                                value={val}
+                                checked={form.dificultades.includes(val)}
+                                onChange={() => setForm(prev => {
+                                    const difs = prev.dificultades.includes(val)
+                                        ? prev.dificultades.filter(d => d !== val)
+                                        : [...prev.dificultades, val];
+                                    return { ...prev, dificultades: difs };
+                                })}
+                            />
                             {icon}
                             {text}
                         </label>

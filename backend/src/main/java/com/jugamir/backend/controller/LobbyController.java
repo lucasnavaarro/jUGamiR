@@ -27,7 +27,7 @@ public class LobbyController {
         Partida partida = lobbyService.crearPartida(
                 usuario.getIdUsuario(),
                 request.tipo(),
-                request.dificultad(),
+                request.dificultades(),
                 request.tiempoRespuesta(),
                 request.maxJugadores(),
                 request.categoriaIds(),

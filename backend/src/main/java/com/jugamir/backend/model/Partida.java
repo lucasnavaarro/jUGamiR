@@ -35,10 +35,12 @@ public class Partida {
     @Column(nullable = false)
     private TipoPartida tipo; // PUBLICA | PRIVADA
 
+    @Builder.Default
+    @ElementCollection
+    @CollectionTable(name = "partida_dificultades", joinColumns = @JoinColumn(name = "partida_id"))
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(nullable = false)
-    private Dificultad dificultad; // FÁCIL | MEDIO | DIFÍCIL
+    @Column(name = "dificultad", nullable = false)
+    private List<Dificultad> dificultades = new ArrayList<>();
 
     @Column(name = "tiempo_respuesta", nullable = false)
     private int tiempoRespuesta;

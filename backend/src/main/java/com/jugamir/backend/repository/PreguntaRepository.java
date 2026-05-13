@@ -53,4 +53,19 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Long> {
         @Query("SELECT p FROM Pregunta p WHERE p.imagenUrl IS NOT NULL AND p.imagenUrl != '' AND p.estado = 'PUBLICADA' AND p.anulada = false ORDER BY FUNCTION('RANDOM') LIMIT :limite")
         List<Pregunta> findAleatoriasConImagen(@Param("limite") int limite);
 
+        @Query("SELECT p FROM Pregunta p " +
+                        "WHERE p.asignatura.categoria.id = :categoriaId " +
+                        "AND p.estado = :estado " +
+                        "AND p.dificultad IN :dificultades " +
+                        "AND p.anulada = false " +
+                        "AND p.id NOT IN :usadas " +
+                        "ORDER BY FUNCTION('RANDOM') " +
+                        "LIMIT :limite")
+        List<Pregunta> findAleatoriasByCategoriaYDificultades(
+                        @Param("categoriaId") Long categoriaId,
+                        @Param("estado") EstadoPregunta estado,
+                        @Param("dificultades") List<Dificultad> dificultades,
+                        @Param("usadas") List<Long> usadas,
+                        @Param("limite") int limite);
+
 }

@@ -28,7 +28,7 @@ public class LobbyService {
     private final QuesitosGanadosRepository quesitosGanadosRepository;
     private final ProgresoCategoriaRepository progresoCategoriaRepository;
 
-    public Partida crearPartida(Long usuarioId, TipoPartida tipo, Dificultad dificultad, int tiempoRespuesta,
+    public Partida crearPartida(Long usuarioId, TipoPartida tipo, List<Dificultad> dificultades, int tiempoRespuesta,
             int maxJugadores, List<Long> categoriaIds, int aciertosParaQuesito) {
 
         Jugador jugador = jugadorRepository.findById(usuarioId)
@@ -44,7 +44,7 @@ public class LobbyService {
         Partida partida = Partida.builder()
                 .codigoUnion(codigoUnion)
                 .tipo(tipo)
-                .dificultad(dificultad)
+                .dificultades(dificultades)
                 .tiempoRespuesta(tiempoRespuesta)
                 .maxJugadores(maxJugadores)
                 .estado(EstadoPartida.ESPERANDO)
@@ -117,7 +117,9 @@ public class LobbyService {
                         partida.getCreadaPor() != null ? partida.getCreadaPor().getEmail() : "",
                         jugadorPartidaRepository.countByPartidaAndResultado(partida, ResultadoJugador.PENDIENTE.name()),
                         partida.getMaxJugadores(),
-                        partida.getDificultad().toString()))
+                        partida.getDificultades().stream()
+                                .map(Dificultad::name)
+                                .toList()))
                 .toList();
 
     }

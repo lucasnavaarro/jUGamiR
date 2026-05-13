@@ -59,10 +59,10 @@ public class JuegoService {
                 // throw new IllegalStateException("No hay preguntas con imagen disponibles");
                 // Pregunta pregunta = preguntasConImagen.get(0);
 
-                List<Pregunta> preguntas = preguntaRepository.findAleatoriasByCategoriaYDificultad(
+                List<Pregunta> preguntas = preguntaRepository.findAleatoriasByCategoriaYDificultades(
                                 categoria.getId(),
                                 EstadoPregunta.PUBLICADA,
-                                partida.getDificultad(),
+                                partida.getDificultades(),
                                 filtro_usadas, 1);
                 if (preguntas.isEmpty())
                         throw new IllegalStateException("No hay preguntas disponibles para esta categoría");
