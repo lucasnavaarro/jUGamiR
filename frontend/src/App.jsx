@@ -20,6 +20,7 @@ import PartidasPublicas from './pages/PartidasPublicas';
 import PublicRoute from './components/PublicRoute';
 import SessionExpiredModal from './components/SessionExpiredModal';
 import CrearPartida from './pages/CrearPartida';
+import EstadisticasJugador from './pages/EstadisticasJugador';
 
 export default function App() {
 
@@ -86,6 +87,9 @@ export default function App() {
           } />
           <Route path="/crear/partida" element={
             <ProtectedRoute rolRequerido="JUGADOR"><CrearPartida /></ProtectedRoute>
+          } />
+          <Route path="/jugador/estadisticas" element={
+            <ProtectedRoute rolRequerido="JUGADOR"><EstadisticasJugador /></ProtectedRoute>
           } />
         </Route>
         <Route path="/partida/:idPartida" element={

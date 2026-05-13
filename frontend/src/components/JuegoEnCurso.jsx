@@ -104,11 +104,11 @@ export default function JuegoEnCurso({ lobby }) {
                         ? `¡Acabas de conseguir el quesito de ${data.nuevoQuesito.nombre}!`
                         : `${data.nuevoQuesito.nick} acaba de ganar el quesito de ${data.nuevoQuesito.nombre}`;
                     setNotificacion(msg);
-                    setTimeout(() => setNotificacion(null), 5000);
+                    setTimeout(() => setNotificacion(null), 3500);
                 }
                 if (data.estado === 'TERMINADA') {
                     setGanadorId(data.jugadorId);
-                    setTimeout(() => setFase('PARTIDA_TERMINADA'), 3000);
+                    setTimeout(() => setFase('PARTIDA_TERMINADA'), 3500);
                 } else {
                     setTimeout(() => {
                         setFase('ESPERANDO_TIRADA');
@@ -116,7 +116,7 @@ export default function JuegoEnCurso({ lobby }) {
                         setRespuestas([]);
                         setResultado(null);
                         setImagenesActuales([]);
-                    }, 3000);
+                    }, 3500);
                 }
 
                 break;

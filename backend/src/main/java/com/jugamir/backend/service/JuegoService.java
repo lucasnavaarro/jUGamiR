@@ -303,26 +303,32 @@ public class JuegoService {
 
                 if (progreso.getAciertos() >= partida.getAciertosParaQuesito()) {
 
-                        // Jugador gana quesito de esa categoria
-                        QuesitosGanados quesito = QuesitosGanados.builder()
-                                        .jugadorPartida(jugador)
-                                        .categoria(categoria)
-                                        .ganadoEl(OffsetDateTime.now())
-                                        .build();
+                        boolean yaTieneQuesito = quesitosGanadosRepository
+                                        .existsByJugadorPartidaAndCategoria(jugador, categoria);
 
-                        quesitosGanadosRepository.save(quesito);
+                        if (!yaTieneQuesito) {
+                                // Jugador gana quesito de esa categoria
+                                QuesitosGanados quesito = QuesitosGanados.builder()
+                                                .jugadorPartida(jugador)
+                                                .categoria(categoria)
+                                                .ganadoEl(OffsetDateTime.now())
+                                                .build();
 
-                        progreso.setAciertos(0);
-                        progresoCategoriaRepository.save(progreso);
+                                quesitosGanadosRepository.save(quesito);
 
-                        int quesitosJugador = quesitosGanadosRepository.countByJugadorPartida(jugador);
-                        long totalCategoriasPartida = partida.getCategorias().size();
+                                progreso.setAciertos(0);
+                                progresoCategoriaRepository.save(progreso);
 
-                        if (quesitosJugador >= totalCategoriasPartida) {
-                                terminarPartida(partida, jugador);
+                                int quesitosJugador = quesitosGanadosRepository.countByJugadorPartida(jugador);
+                                long totalCategoriasPartida = partida.getCategorias().size();
+
+                                if (quesitosJugador >= totalCategoriasPartida) {
+                                        terminarPartida(partida, jugador);
+                                }
+
+                                return categoria; // si gana quesito se devuelve la categoria
+
                         }
-
-                        return categoria; // si gana quesito se devuelve la categoria
                 }
 
                 progresoCategoriaRepository.save(progreso);

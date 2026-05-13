@@ -31,8 +31,8 @@ export default function DashboardJugador() {
             titulo: 'Ver estadísticas',
             descripcion: 'Consulta tus estadísticas y progreso.',
             boton: 'Ver estadísticas',
-            color: 'var(--color-accent)',
-            onClick: () => navigate('/stats'),
+            color: 'var(--color-success)',
+            onClick: () => navigate('/jugador/estadisticas'),
         },
     ];
 

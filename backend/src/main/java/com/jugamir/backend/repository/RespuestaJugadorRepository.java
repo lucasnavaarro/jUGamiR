@@ -9,4 +9,6 @@ public interface RespuestaJugadorRepository extends JpaRepository<RespuestaJugad
 
     // Obtiene las respuestas de un jugador en una partida
     List<RespuestaJugador> findByJugadorPartida(JugadorPartida jugadorPartida);
+
+    List<RespuestaJugador> findByJugadorPartida_Jugador_Usuario_IdUsuario(Long usuarioId);
 }

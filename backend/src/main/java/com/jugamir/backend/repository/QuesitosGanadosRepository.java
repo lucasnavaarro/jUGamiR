@@ -3,6 +3,7 @@ package com.jugamir.backend.repository;
 import com.jugamir.backend.model.QuesitosGanados;
 import com.jugamir.backend.model.QuesitosGanadosId;
 import com.jugamir.backend.model.JugadorPartida;
+import com.jugamir.backend.model.Categoria;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
@@ -13,4 +14,6 @@ public interface QuesitosGanadosRepository extends JpaRepository<QuesitosGanados
 
     // Cuenta los quesitos que tiene un jugador
     int countByJugadorPartida(JugadorPartida jugadorPartida);
+
+    boolean existsByJugadorPartidaAndCategoria(JugadorPartida jugadorPartida, Categoria categoria);
 }
