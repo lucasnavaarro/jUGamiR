@@ -2318,13 +2318,13 @@ main {
   margin: 0 0 var(--space-sm) 0;
 }
 
-.entrenamiento__categgorias {
+.entrenamiento__categorias {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.entrenamiento__cat {
+/* .entrenamiento__cat {
   display: grid;
   grid-template-columns: auto auto 1fr auto;
   align-items: center;
@@ -2334,10 +2334,90 @@ main {
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
+} */
+
+.entrenamiento__cat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  animation: cat-entrada 0.3s ease both;
+}
+
+@keyframes cat-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.entrenamiento__cat-top {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.entrenamiento__cat-barra {
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.entrenamiento__cat-barra-fill {
+  height: 100%;
+  border-radius: 999px;
+  width: var(--barra-width, 0%);
+  animation: barra-entrada 0.6s ease both;
+}
+
+@keyframes barra-entrada {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: var(--barra-width, 0%);
+  }
 }
 
 .entrenamiento__cat input[type="checkbox"] {
   display: none;
+}
+
+.entrenamiento__cat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xs);
+}
+
+.entrenamiento__cat-brain {
+  font-size: clamp(1rem, 3vw, 1.6rem);
+  filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.7));
+  animation: brain-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes brain-pulse {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(0, 200, 255, 0.5));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 12px rgba(0, 200, 255, 0.95));
+  }
 }
 
 .entrenamiento__cat--activa {

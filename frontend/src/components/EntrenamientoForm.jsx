@@ -4,12 +4,17 @@ import Deslizante from "./Deslizante";
 
 export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) {
     const [todasCategorias, setTodasCategorias] = useState([]);
+    //Lista de categorias ordenadas por rendimiento del jugador
     const [categoriasStats, setCategoriasStats] = useState([]);
     const [localError, setLocalError] = useState('');
     const [tiempoText, setTiempoText] = useState('30');
     const [aciertosText, setAciertosText] = useState('3');
     const [criterio, setCriterio] = useState('TIEMPO');
     const [direccion, setDireccion] = useState('MEJORAR');
+    //Para que la animacion de las categorias no salte dos veces en general
+    const [animKey, setAnimKey] = useState(0);
+    //Para que la animacion de las categorias no salte dos veces cuando cambias entre tiempo y aciertos
+    const [criterioActivo, setCriterioActivo] = useState('TIEMPO');
     const [form, setForm] = useState({
         dificultades: ['MEDIO'],
         categoriaIds: [],
@@ -18,6 +23,7 @@ export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) 
     });
 
 
+    //Carga todas las categorias existentes y las selecciona por defecto
     useEffect(() => {
         apiFetch('/api/categorias')
             .then(res => res.json())
@@ -25,14 +31,24 @@ export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) 
                 setTodasCategorias(data);
                 setForm(prev => ({ ...prev, categoriaIds: data.map(c => c.id) }));
             })
-            .catch(() => setLocalError('Error al carggar las categorías'));
+            .catch(() => setLocalError('Error al cargar las categorías'));
     }, []);
 
+    //Se ejecuta cada vez que el usuario cambia el criterio o la dirección. 
+    //Recarga las categorías ordenadas según las nuevas preferencias.
     useEffect(() => {
         apiFetch(`/api/stats/jugador/categorias-entrenamiento?criterio=${criterio}&direccion=${direccion}`)
             .then(res => res.json())
-            .then(data => setCategoriasStats(Array.isArray(data) ? data : []))
-            .catch(() => setCategoriasStats([]));
+            .then(data => {
+                setCategoriasStats(Array.isArray(data) ? data : []);
+                setCriterioActivo(criterio);
+                setAnimKey(prev => prev + 1);
+            })
+            .catch(() => {
+                setCategoriasStats([]);
+                setCriterioActivo(criterio);
+                setAnimKey(prev => prev + 1);
+            });
     }, [criterio, direccion]);
 
     function toggleCategoria(id) {
@@ -74,16 +90,22 @@ export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) 
             return;
         }
 
-        const statsIds = new Set(categoriasStats.map(c => c.categoriaId));
+        //De las categorías ordenadas por stats, filtra solo las que el usuario ha seleccionado. 
         const selectedConStats = categoriasStats.filter(c => form.categoriaIds.includes(c.categoriaId));
+        //Obtiene las categorías seleccionadas que NO tienen estadísticas
         const selectedSinStats = todasCategorias.filter(c => form.categoriaIds.includes(c.id) && !statsIds.has(c.id));
+        //suma el numero total de categorias seleccionadas
         const n = selectedConStats.length + selectedSinStats.length;
 
         const categoriaPesos = {};
+        //Asigna pesos a las categorías con stats. La primera de la lista
+        //(la más importante) recibe peso n, la segunda n-1,
         selectedConStats.forEach((cat, index) => {
             categoriaPesos[cat.categoriaId] = n - index;
         });
 
+        //Las categorías sin estadísticas reciben peso 1 (el mínimo) 
+        //porque no sabemos cómo le va al jugador en ellas.
         selectedSinStats.forEach(cat => {
             categoriaPesos[cat.id] = 1;
         });
@@ -100,9 +122,12 @@ export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) 
         });
     }
 
+    //Crea un conjunto con los IDs de las categorías que tienen estadísticas
     const statsIds = new Set(categoriasStats.map(c => c.categoriaId));
     const categoriasSinStats = todasCategorias.filter(c => !statsIds.has(c.id));
     const displayError = localError || serverError;
+    const maxTiempo = Math.max(...categoriasStats.map(c => c.tiempoMedioMs), 1);
+    const minTiempo = Math.min(...categoriasStats.map(c => c.tiempoMedioMs));
 
     const hintTexto = {
         'TIEMPO-MEJORAR': 'De mayor a menor tiempo · las más lentas primero',
@@ -143,30 +168,51 @@ export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) 
 
             {/* Categorias */}
             <div className="crear-partida__group">
-                <label className="crear-partida__group-title">Categorías de las preguntas</label>
+                <div className="entrenamiento__cat-header">
+                    <label className="crear-partida__group-title">Categorías de las preguntas</label>
+                    <span className="entrenamiento__cat-brain">🧠</span>
+                </div>
                 {hintTexto && <p className="entrenamiento__hint">{hintTexto}</p>}
                 <div className="entrenamiento__categorias">
                     {categoriasStats.map((cat, i) => (
-                        <label key={cat.categoriaId}
-                            className={`entrenamiento__cat ${form.categoriaIds.includes(cat.categoriaId) ? 'entrenamiento__cat--activa' : ''}`}>
+                        <label key={`${animKey}-${cat.categoriaId}`}
+                            className={`entrenamiento__cat ${form.categoriaIds.includes(cat.categoriaId) ? 'entrenamiento__cat--activa' : ''}`}
+                            style={{ animationDelay: `${i * 60}ms` }}>
                             <input
                                 type="checkbox"
                                 checked={form.categoriaIds.includes(cat.categoriaId)}
                                 onChange={() => toggleCategoria(cat.categoriaId)}
                             />
-                            <span className="entrenamiento__cat-rank">#{i + 1}</span>
-                            <span className="entrenamiento__cat-dot" style={{ background: cat.color }} />
-                            <span className="entrenamiento__cat-nombre">{cat.nombre}</span>
-                            <span className="entrenamiento__cat-stat">
-                                {criterio === 'TIEMPO'
-                                    ? `${(cat.tiempoMedioMs / 1000).toFixed(1)}s`
-                                    : `${cat.porcentajeAcierto.toFixed(1)}%`}
-                            </span>
+                            <div className="entrenamiento__cat-top">
+                                <span className="entrenamiento__cat-rank">#{i + 1}</span>
+                                <span className="entrenamiento__cat-dot" style={{ background: cat.color }} />
+                                <span className="entrenamiento__cat-nombre">{cat.nombre}</span>
+                                <span className="entrenamiento__cat-stat">
+                                    {criterio === 'TIEMPO'
+                                        ? `${(cat.tiempoMedioMs / 1000).toFixed(1)}s`
+                                        : `${cat.porcentajeAcierto.toFixed(1)}%`}
+                                </span>
+                            </div>
+                            <div className="entrenamiento__cat-barra">
+                                <div
+                                    className="entrenamiento__cat-barra-fill"
+                                    style={{
+                                        '--barra-width': criterioActivo === 'TIEMPO'
+                                            //El tiempo se representa de forma inversa: cuanto menor sea el tiempo medio, mayor será el porcentaje de la barra.
+                                            //El mínimo es 8% para que la barra no sea inapreciable.
+                                            ? `${Math.max(8, ((maxTiempo - cat.tiempoMedioMs) / (maxTiempo - minTiempo || 1)) * 100)}%`
+                                            : `${cat.porcentajeAcierto}%`,
+                                        background: cat.color
+                                    }}
+                                />
+                            </div>
                         </label>
                     ))}
 
                     {categoriasSinStats.map(cat => (
-                        <label key={cat.id} className={`entrenamiento__cat ${form.categoriaIds.includes(cat.id) ? 'entrenamiento__cat--activa' : ''}`}>
+                        <label key={`${animKey}-${cat.id}`}
+                            className={`entrenamiento__cat ${form.categoriaIds.includes(cat.id) ? 'entrenamiento__cat--activa' : ''}`}
+                            style={{ animationDelay: `${(categoriasStats.length) * 60}ms` }}>
                             <input type="checkbox"
                                 checked={form.categoriaIds.includes(cat.id)}
                                 onChange={() => toggleCategoria(cat.id)}
