@@ -249,6 +249,7 @@ CREATE TABLE IF NOT EXISTS partidas (
   aciertos_para_quesito INTEGER NOT NULL DEFAULT 5,
   estado             estado_partida NOT NULL DEFAULT 'ESPERANDO',
   duracion           INT CHECK (duracion IS NULL OR duracion > 0),
+  modo_entrenamiento BOOLEAN NOT NULL DEFAULT false;
   empezada_en        TIMESTAMPTZ,
   terminada_en       TIMESTAMPTZ,
   turno_actual       INT NOT NULL DEFAULT 1,
@@ -266,6 +267,14 @@ CREATE TABLE IF NOT EXISTS partidas_categorias (
   categoria_id BIGINT NOT NULL REFERENCES categorias(id) ON DELETE RESTRICT,
   PRIMARY KEY (partida_id, categoria_id)
 );
+
+CREATE TABLE partida_categoria_pesos (
+    id BIGSERIAL PRIMARY KEY,
+    partida_id BIGINT NOT NULL REFERENCES partidas(id) ON DELETE CASCADE,
+    categoria_id BIGINT NOT NULL REFERENCES categorias(id),
+    peso INT NOT NULL
+);
+
 
 CREATE TABLE IF NOT EXISTS jugadores_partida (
   id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

@@ -21,6 +21,7 @@ import PublicRoute from './components/PublicRoute';
 import SessionExpiredModal from './components/SessionExpiredModal';
 import CrearPartida from './pages/CrearPartida';
 import EstadisticasJugador from './pages/EstadisticasJugador';
+import Entrenamiento from './pages/Entrenamiento';
 
 export default function App() {
 
@@ -90,6 +91,9 @@ export default function App() {
           } />
           <Route path="/jugador/estadisticas" element={
             <ProtectedRoute rolRequerido="JUGADOR"><EstadisticasJugador /></ProtectedRoute>
+          } />
+          <Route path="/jugador/entrenamiento" element={
+            <ProtectedRoute rolRequerido="JUGADOR"><Entrenamiento /></ProtectedRoute>
           } />
         </Route>
         <Route path="/partida/:idPartida" element={

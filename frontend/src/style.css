@@ -1780,7 +1780,26 @@ main {
   position: relative;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid rgba(255, 255, 255, 0.15);
+  border: 0px solid rgba(255, 255, 255, 0.15);
+  /* lo defino con 0px por si luego le quiero poner borde */
+}
+
+.ruleta--iluminada {
+  animation: ruleta-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes ruleta-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 6px var(--cat-color),
+      0 0 20px 6px color-mix(in srgb, var(--cat-color) 50%, transparent);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px var(--cat-color),
+      0 0 40px 24px color-mix(in srgb, var(--cat-color) 80%, transparent);
+  }
 }
 
 .ruleta-contenedor {
@@ -2291,6 +2310,82 @@ main {
   color: var(--text-muted);
   white-space: nowrap;
 }
+
+/* ── Entrenamiento ───────── */
+.entrenamiento__hint {
+  font-size: clamp(0.82rem, 2vw, 1.1rem);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.entrenamiento__categgorias {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.entrenamiento__cat {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.entrenamiento__cat input[type="checkbox"] {
+  display: none;
+}
+
+.entrenamiento__cat--activa {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--bg-card));
+}
+
+.entrenamiento__cat-rank {
+  font-size: clamp(0.75rem, 2vw, 1.1rem);
+  color: var(--text-muted);
+  min-width: 24px;
+  text-align: center;
+}
+
+.entrenamiento__cat-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  /* Evita que el círculo se encoja */
+}
+
+.entrenamiento__cat-nombre {
+  font-size: clamp(0.75rem, 2vw, 1.1rem);
+  font-weight: 500;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entrenamiento__cat-stat {
+  font-size: clamp(0.72rem, 2vw, 1.1rem);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: right;
+  white-space: nowrap;
+  /* Obliga al texto a mantenerse en una sola línea (no hace saltos de linea) */
+  flex-shrink: 0;
+}
+
+.entrenamiento__cat-stat--vacio {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+
 
 /* ── Solo en dispositivos con ratón real (no táctil) ───────── */
 @media (hover: hover) and (pointer: fine) {

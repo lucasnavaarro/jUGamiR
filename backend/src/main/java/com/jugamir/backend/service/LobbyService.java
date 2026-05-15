@@ -27,9 +27,11 @@ public class LobbyService {
     private final CategoriaRepository categoriaRepository;
     private final QuesitosGanadosRepository quesitosGanadosRepository;
     private final ProgresoCategoriaRepository progresoCategoriaRepository;
+    private final PartidaCategoriaWeightRepository partidaCategoriaWeightRepository;
 
     public Partida crearPartida(Long usuarioId, TipoPartida tipo, List<Dificultad> dificultades, int tiempoRespuesta,
-            int maxJugadores, List<Long> categoriaIds, int aciertosParaQuesito) {
+            int maxJugadores, List<Long> categoriaIds, int aciertosParaQuesito, boolean modoEntrenamiento,
+            Map<Long, Integer> categoriaPesos) {
 
         Jugador jugador = jugadorRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalStateException("El usuario no es un jugador"));
@@ -45,6 +47,7 @@ public class LobbyService {
                 .codigoUnion(codigoUnion)
                 .tipo(tipo)
                 .dificultades(dificultades)
+                .modoEntrenamiento(modoEntrenamiento)
                 .tiempoRespuesta(tiempoRespuesta)
                 .maxJugadores(maxJugadores)
                 .estado(EstadoPartida.ESPERANDO)
@@ -75,6 +78,18 @@ public class LobbyService {
                 .build();
 
         jugadorPartidaRepository.save(jugadorPartida);
+
+        if (modoEntrenamiento && categoriaPesos != null) {
+            for (Map.Entry<Long, Integer> entry : categoriaPesos.entrySet()) {
+                Categoria cat = categoriaRepository.findById(entry.getKey())
+                        .orElseThrow(() -> new IllegalArgumentException("Categoria no encontrada"));
+                partidaCategoriaWeightRepository.save(PartidaCategoriaWeight.builder()
+                        .partida(partida)
+                        .categoria(cat)
+                        .peso(entry.getValue())
+                        .build());
+            }
+        }
 
         return partida;
     }
@@ -423,7 +438,8 @@ public class LobbyService {
                 "idAnfitrion", partida.getCreadaPor().getIdUsuario(),
                 "jugadores", jugadores,
                 "maxJugadores", partida.getMaxJugadores(),
-                "estado", partida.getEstado().name());
+                "estado", partida.getEstado().name(),
+                "modoEntrenamiento", partida.isModoEntrenamiento());
 
     }
 

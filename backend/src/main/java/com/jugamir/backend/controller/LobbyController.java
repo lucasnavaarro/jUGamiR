@@ -31,7 +31,9 @@ public class LobbyController {
                 request.tiempoRespuesta(),
                 request.maxJugadores(),
                 request.categoriaIds(),
-                request.aciertosParaQuesito());
+                request.aciertosParaQuesito(),
+                request.modoEntrenamiento(),
+                request.categoriaPesos());
 
         return ResponseEntity.ok(new CrearPartidaResponse(partida.getId(), partida.getCodigoUnion()));
 

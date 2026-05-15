@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../services/api';
+import GraficoLineal from '../components/GraficoLineal';
 
 export default function EstadisticasJugador() {
     const navigate = useNavigate();
@@ -11,18 +12,23 @@ export default function EstadisticasJugador() {
     const [asignaturas, setAsignaturas] = useState(null);
     const [cargandoAsig, setCargandoAsig] = useState(false);
     const [ordenCat, setOrdenCat] = useState('acierto');
+    const [progreso, setProgreso] = useState(null);
+    const [progresoCategoria, setProgresoCategoria] = useState(null);
 
     useEffect(() => {
-        apiFetch('/api/stats/jugador')
-            .then(res => res.json())
-            .then(data => {
-                setStats(data);
+        Promise.all([
+            apiFetch('/api/stats/jugador').then(r => r.json()),
+            apiFetch('/api/stats/jugador/progreso').then(r => r.json()),
+        ])
+            .then(([statsData, progresoData]) => {
+                setStats(statsData);
+                setProgreso(progresoData);
                 setIsLoading(false);
             })
             .catch(() => {
                 setError("Error al cargar las estadísticas");
                 setIsLoading(false);
-            })
+            });
     }, []);
 
     async function seleccionarCategoria(cat) {
@@ -30,14 +36,19 @@ export default function EstadisticasJugador() {
         if (categoriaSeleccionada?.categoriaId === cat.categoriaId) {
             setCategoriaSeleccionada(null);
             setAsignaturas(null);
+            setProgresoCategoria(null);
             return;
         }
         setCategoriaSeleccionada(cat);
         setAsignaturas(null);
+        setProgresoCategoria(null);
         setCargandoAsig(true);
-        const res = await apiFetch(`/api/stats/jugador/categoria/${cat.categoriaId}`)
-        const data = await res.json();
-        setAsignaturas(data);
+        const [asigData, progCatData] = await Promise.all([
+            apiFetch(`/api/stats/jugador/categoria/${cat.categoriaId}`).then(r => r.json()),
+            apiFetch(`/api/stats/jugador/progreso/categoria/${cat.categoriaId}`).then(r => r.json()),
+        ]);
+        setAsignaturas(asigData);
+        setProgresoCategoria(progCatData);
         setCargandoAsig(false);
     }
 
@@ -47,6 +58,25 @@ export default function EstadisticasJugador() {
     const categoriasOrdenadas = ordenCat == 'acierto'
         ? [...stats.categorias].sort((a, b) => b.porcentajeAcierto - a.porcentajeAcierto) //Ordena de mayor a menor porcentaje de acierto
         : [...stats.categorias].sort((a, b) => a.tiempoMedioMs - b.tiempoMedioMs); //Ordena de menor a mayor tiempo medio
+
+    const datosVictorias = progreso?.map(p => ({ fecha: p.fecha, pctVictorias: p.pctVictorias })) ?? [];
+    const datosAcierto = progreso?.map(p => ({ fecha: p.fecha, pctAcierto: p.pctAcierto })) ?? [];
+    const datosTiempo = progreso?.map(p => ({ fecha: p.fecha, tiempoMedioMs: p.tiempoMedioMs })) ?? [];
+
+    function getLabelPeriodo(datos) {
+        if (!datos || datos.length === 0) return 'periodo';
+        const fecha = datos[0].fecha;
+        //YYYY-MM tiene 7 caracteres
+        if (fecha.length === 7) return 'mes';
+        const d = new Date(fecha);
+        //Cuando el backend agrupa por semana, la fecha que elige para representar
+        //cada grupo es siempre el lunes de esa semana
+        if (d.getDay() === 1) return 'semana'; // 1 = lunes
+        return 'día';
+    }
+
+    const labelPeriodo = getLabelPeriodo(progreso);
+    const labelPeriodoCat = getLabelPeriodo(progresoCategoria);
 
     return (
         <main className="stats">
@@ -73,6 +103,14 @@ export default function EstadisticasJugador() {
                         <span className="stats__card-label">% Victorias</span>
                     </div>
                 </div>
+                <GraficoLineal
+                    datos={datosVictorias}
+                    dataKey="pctVictorias"
+                    color="var(--color-primary)"
+                    titulo={`% de victorias por ${labelPeriodo}`}
+                    formatter={v => v.toFixed(1) + '%'}
+                    mensaje="Juega en más de un periodo para ver tu progreso de victorias."
+                />
             </section>
 
             <section className="stats__seccion">
@@ -99,6 +137,14 @@ export default function EstadisticasJugador() {
                         <span className="stats__card-label">No Respondidas</span>
                     </div>
                 </div>
+                <GraficoLineal
+                    datos={datosAcierto}
+                    dataKey="pctAcierto"
+                    color="var(--color-success)"
+                    titulo={`% de aciertos por ${labelPeriodo}`}
+                    formatter={v => v.toFixed(1) + '%'}
+                    mensaje="Juega en más de un periodo para ver tu progreso de aciertos."
+                />
             </section>
 
             <section className="stats__seccion">
@@ -109,6 +155,14 @@ export default function EstadisticasJugador() {
                         <div className="stats__card-label">por pregunta (global)</div>
                     </div>
                 </div>
+                <GraficoLineal
+                    datos={datosTiempo}
+                    dataKey="tiempoMedioMs"
+                    color="var(--color-accent)"
+                    titulo={`Tiempo medio de respuesta por ${labelPeriodo}`}
+                    formatter={v => (v / 1000).toFixed(2) + 's'}
+                    mensaje="Juega en más de un periodo para ver tu progreso de tiempo de respuesta."
+                />
             </section>
 
             {stats.categorias.length === 0 ? (
@@ -171,27 +225,37 @@ export default function EstadisticasJugador() {
                     </div>
 
                     {categoriaSeleccionada && (
-                        <div className="stats__asignaturas">
-                            <h3 className="stats__subtitulo--sm">Asignaturas — {categoriaSeleccionada.nombre}</h3>
-                            {cargandoAsig ? <p>Cargando...</p> : (
-                                <div className="stats__asig-lista">
-                                    {asignaturas?.map(a => (
-                                        <div key={a.asignaturaId} className="stats__asig-fila">
-                                            <span className="stats__asig-nombre">{a.nombre}</span>
-                                            <div className="stats__asig-nums">
-                                                <span className="stats__cat-acierto">{a.aciertos} ✓</span>
-                                                <span className="stats__cat-fallo">{a.fallos} ✗</span>
+                        <>
+                            <div className="stats__asignaturas">
+                                <h3 className="stats__subtitulo--sm">Asignaturas — {categoriaSeleccionada.nombre}</h3>
+                                {cargandoAsig ? <p>Cargando...</p> : (
+                                    <div className="stats__asig-lista">
+                                        {asignaturas?.map(a => (
+                                            <div key={a.asignaturaId} className="stats__asig-fila">
+                                                <span className="stats__asig-nombre">{a.nombre}</span>
+                                                <div className="stats__asig-nums">
+                                                    <span className="stats__cat-acierto">{a.aciertos} ✓</span>
+                                                    <span className="stats__cat-fallo">{a.fallos} ✗</span>
+                                                </div>
+                                                <div className="stats__cat-barra stats__cat-barra--sm">
+                                                    <div className="stats__cat-barra-fill" style={{ width: `${a.porcentajeAcierto}%`, '--cat-color': categoriaSeleccionada.color }} />
+                                                </div>
+                                                <span className="stats__asig-pct">{a.porcentajeAcierto.toFixed(1)}%</span>
+                                                <span className="stats__asig-tiempo">{(a.tiempoMedioMs / 1000).toFixed(1)}s media</span>
                                             </div>
-                                            <div className="stats__cat-barra stats__cat-barra--sm">
-                                                <div className="stats__cat-barra-fill" style={{ width: `${a.porcentajeAcierto}%`, '--cat-color': categoriaSeleccionada.color }} />
-                                            </div>
-                                            <span className="stats__asig-pct">{a.porcentajeAcierto.toFixed(1)}%</span>
-                                            <span className="stats__asig-tiempo">{(a.tiempoMedioMs / 1000).toFixed(1)}s media</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            <GraficoLineal
+                                datos={progresoCategoria ?? []}
+                                dataKey="pctAcierto"
+                                color={categoriaSeleccionada.color}
+                                titulo={`Progreso en ${categoriaSeleccionada.nombre} por ${labelPeriodoCat}`}
+                                formatter={v => v.toFixed(1) + '%'}
+                                mensaje={`Juega en más de un periodo en ${categoriaSeleccionada.nombre} para ver tu progreso.`}
+                            />
+                        </>
                     )}
                 </section>
             )}

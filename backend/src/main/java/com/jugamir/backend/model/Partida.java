@@ -56,6 +56,10 @@ public class Partida {
     private Integer duracion; // nullable
 
     @Builder.Default
+    @Column(name = "modo_entrenamiento", nullable = false)
+    private boolean modoEntrenamiento = false;
+
+    @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "partidas_categorias", joinColumns = @JoinColumn(name = "partida_id"), inverseJoinColumns = @JoinColumn(name = "categoria_id"))
     private List<Categoria> categorias = new ArrayList<>();

@@ -34,6 +34,15 @@ export default function DashboardJugador() {
             color: 'var(--color-success)',
             onClick: () => navigate('/jugador/estadisticas'),
         },
+        {
+            id: 'entrenamiento',
+            icon: '🏋️',
+            titulo: 'Entrenar',
+            descripcion: 'Entrena tus conocimientos en diferentes categorías.',
+            boton: 'Entrenar',
+            color: 'var(--color-accent)',
+            onClick: () => navigate('/jugador/entrenamiento'),
+        },
     ];
 
     return (

@@ -28,6 +28,7 @@ public class JuegoService {
         private final RespuestaJugadorRepository respuestaJugadorRepository;
         private final ProgresoCategoriaRepository progresoCategoriaRepository;
         private final QuesitosGanadosRepository quesitosGanadosRepository;
+        private final PartidaCategoriaWeightRepository partidaCategoriaWeightRepository;
         private final SimpMessagingTemplate messagingTemplate;
 
         public GirarRuletaResponse girarRuleta(Long partidaId, Long usuarioId) {
@@ -37,10 +38,43 @@ public class JuegoService {
 
                 List<Categoria> categorias = partida.getCategorias();
                 if (categorias.isEmpty())
-                        throw new IllegalStateException("No hay categorías disponibles");
+                        throw new IllegalStateException("No hay categorías di   sponibles");
 
-                Categoria categoria = categorias.get(new Random().nextInt(categorias.size()));
+                // Categoria categoria = categorias.get(new
+                // Random().nextInt(categorias.size()));
 
+                Categoria categoria;
+                if (partida.isModoEntrenamiento()) {
+                        // 1. Obtenemos los pesos de las categorías guardados en BD para esta partida
+                        // Ej: [(Cat1, peso=3), (Cat2, peso=2), (Cat3, peso=1)]
+                        List<PartidaCategoriaWeight> pesos = partidaCategoriaWeightRepository.findByPartida(partida);
+                        if (!pesos.isEmpty()) {
+                                // 2. Sumamos todos los pesos → 3+2+1 = 6
+                                int totalPeso = pesos.stream().mapToInt(PartidaCategoriaWeight::getPeso).sum();
+                                // 3. Generamos un número aleatorio entre 0 y 5 (el 6 no se incluye)
+                                // Ej: aleatorio = 4
+                                int aleatorio = new Random().nextInt(totalPeso);
+                                int acumulado = 0;
+                                // 4. Valor por defecto (nunca debería llegar aquí)
+                                categoria = pesos.get(0).getCategoria();
+                                // 5. Recorremos cada categoría sumando su peso al acumulador
+                                for (PartidaCategoriaWeight pw : pesos) {
+
+                                        // Vuelta 1: acumulado = 0+3 = 3 → comprueba si aleatorio está en [0, 3)
+                                        // Vuelta 2: acumulado = 3+2 = 5 → comprueba si aleatorio está en [3, 5)
+                                        // Vuelta 3: acumulado = 5+1 = 6 → comprueba si aleatorio está en [5, 6)
+                                        acumulado += pw.getPeso();
+                                        if (aleatorio < acumulado) {
+                                                categoria = pw.getCategoria();
+                                                break;
+                                        }
+                                }
+                        } else {
+                                categoria = categorias.get(new Random().nextInt(categorias.size()));
+                        }
+                } else {
+                        categoria = categorias.get(new Random().nextInt(categorias.size()));
+                }
                 // Obtener los Ids de las preguntas que ya han salido para no repetir
                 List<Long> idsUsadas = preguntaPartidaRepository
                                 .findByPartidaOrderByOrdenPregunta(partida)
