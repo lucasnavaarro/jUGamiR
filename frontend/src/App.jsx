@@ -22,6 +22,9 @@ import SessionExpiredModal from './components/SessionExpiredModal';
 import CrearPartida from './pages/CrearPartida';
 import EstadisticasJugador from './pages/EstadisticasJugador';
 import Entrenamiento from './pages/Entrenamiento';
+import GestionAsignaturas from './pages/GestionAsignaturas';
+import ImportarPreguntas from './pages/ImportarPreguntas';
+import EditarPreguntas from './pages/EditarPreguntas';
 
 export default function App() {
 
@@ -94,6 +97,15 @@ export default function App() {
           } />
           <Route path="/jugador/entrenamiento" element={
             <ProtectedRoute rolRequerido="JUGADOR"><Entrenamiento /></ProtectedRoute>
+          } />
+          <Route path="/profesor/asignaturas" element={
+            <ProtectedRoute rolRequerido="PROFESOR"><GestionAsignaturas /></ProtectedRoute>
+          } />
+          <Route path="/profesor/preguntas/importar" element={
+            <ProtectedRoute rolRequerido="PROFESOR"><ImportarPreguntas /></ProtectedRoute>
+          } />
+          <Route path="/profesor/preguntas/editar" element={
+            <ProtectedRoute rolRequerido="PROFESOR"><EditarPreguntas /></ProtectedRoute>
           } />
         </Route>
         <Route path="/partida/:idPartida" element={

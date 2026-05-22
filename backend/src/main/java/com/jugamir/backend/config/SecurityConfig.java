@@ -29,13 +29,17 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/auth/me").authenticated()
-                        .requestMatchers("/api/auth/**", "/actuator/**", "/error", "/imagenes/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/actuator/**", "/error", "/imagenes/**", "/api/categorias/**")
+                        .permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Para que el token se
-                                                                                             // verifique antes de que
-                                                                                             // Spring Security intente
-                                                                                             // autenticar
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class) // Para que el token se
+                                                                                            // verifique antes de que
+                                                                                            // Spring Security intente
+                                                                                            // autenticar
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((req, res, ex) -> res
+                                .sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED)));
 
         return http.build();
     }

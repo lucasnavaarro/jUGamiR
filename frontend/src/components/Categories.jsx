@@ -1,13 +1,25 @@
-const categorias = [
-    { icon: '🧠', name: 'Sentidos y Metabolismo', info: 'Digestivo · Cirugía Endocrina · ORL · Oftalmología' },
-    { icon: '❤️', name: 'Cardio, Sangre y Piel', info: 'Cardiología · Dermatología · Hematología · Inmunología · Cirugía Vascular' },
-    { icon: '🦴', name: 'Riñón, Infección y Autoinmunidad', info: 'Nefrología · Enfermedades Infecciosas · Urología · Reumatología Y Enfermedades Sistémicas' },
-    { icon: '👶', name: 'Pediatría, Primaria y Reproducción', info: 'Obstetricia · Ginecología · Pediatría I · Pediatría II · Atención Primaria' },
-    { icon: '🫁', name: 'Cuerpo y Mente', info: 'Respiratorio · Psiquiatría · Traumatología · Neurología Y Neurocirugía' },
-    { icon: '🧬', name: 'Ciencias Básicas', info: 'Anatomía · Bioquímica Y Bioquímica Médica · Fisiología · Farmacología · Biología Molecular' },
-];
+import { useState, useEffect } from 'react';
+import { apiFetch } from '../services/api';
+
+const iconMap = {
+    'Sentidos y Metabolismo': '🧠',
+    'Cardio, Sangre y Piel': '❤️',
+    'Riñón, Infección y Autoinmunidad': '🦴',
+    'Pediatría, Primaria y Reproducción': '👶',
+    'Cuerpo y Mente': '🫁',
+    'Ciencias Básicas': '🧬',
+};
 
 export default function Categories() {
+
+    const [categorias, setCategorias] = useState([]);
+
+    useEffect(() => {
+        apiFetch('/api/categorias/con-asignaturas')
+            .then(res => res.json())
+            .then(setCategorias)
+            .catch(() => { });
+    }, []);
     return (
         <section className="categories" id="categories" aria-label="Categorías del juego">
             <div className="container">
@@ -18,10 +30,21 @@ export default function Categories() {
 
                 <div className="categories__grid">
                     {categorias.map((cat) => (
-                        <article className="cat-card" tabIndex={0} aria-label={`Categoría ${cat.name}`} key={cat.name}>
-                            <div className="cat-card__icon">{cat.icon}</div>
-                            <h3 className="cat-card__name">{cat.name}</h3>
-                            <p className="cat-card__info">{cat.info}</p>
+                        <article className="cat-card" tabIndex={0} aria-label={`Categoría ${cat.nombre}`} key={cat.id}>
+                            <div className="cat-card__icon">{iconMap[cat.nombre] || '📚'}</div>
+                            <h3 className="cat-card__name">{cat.nombre}</h3>
+                            <p className="cat-card__info">
+                                {cat.asignaturas
+                                    .map(a => a.toLowerCase()
+                                        .split(' ')
+                                        .map(word => word.split('-').map((part, i) => {
+                                            if (/^[ivxlcdm]+$/.test(part)) return part.toUpperCase();
+                                            return part.charAt(0).toUpperCase() + part.slice(1);
+                                        }).join('-'))
+                                        .join(' ')
+                                    )
+                                    .join(' · ')}
+                            </p>
                             <div className="cat-card__bar"></div>
                         </article>
                     ))}

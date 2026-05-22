@@ -33,6 +33,14 @@ spring:
           auth: true
           starttls:
             enable: true
+  
+  web:
+    resources:
+      static-locations: classpath:/static/, file:${IMAGENES_PATH:/home/lucas/Escritorio/TFG/jUGamiR/backend/src/main/resources/static}/
+      #En produccion:
+      # static-locations: classpath:/static/, file:/app/imagenes/
+
+
 
 server:
   port: ${SERVER_PORT:8081}
@@ -49,3 +57,33 @@ management:
 jwt:
   secret: ${JWT_SECRET}
   expiration: 900000 #15 minutos
+
+imagenes:
+  path: ${IMAGENES_PATH:/home/lucas/Escritorio/TFG/jUGamiR/backend/src/main/resources/static}
+  #En produccion
+  #path: /app/imagenes
+
+scripts:
+  path: ${SCRIPTS_PATH:/home/lucas/Escritorio/TFG/jUGamiR/db}
+  #En produccion
+  #path: /app/db
+
+
+# Depende de dónde despliegues. Si usas Docker (que es lo más probable para un TFG), la ruta sería la del contenedor, por ejemplo /app/static.
+# Pero hay un problema mayor: src/main/resources/static solo existe en desarrollo. En producción el proyecto se empaqueta en un JAR y esa carpeta desaparece — las imágenes quedarían dentro del JAR y no se podrían escribir.
+# La solución correcta para producción es guardar las imágenes fuera del JAR, en una carpeta del sistema de archivos del servidor, y decirle a Spring Boot que sirva esa carpeta como recurso estático.
+# En application.yaml:
+
+# imagenes:
+#   path: /app/imagenes
+
+# spring:
+#   web:
+#     resources:
+#       static-locations: classpath:/static/, file:/app/imagenes/
+# Así en producción las imágenes se guardan en /app/imagenes/ (fuera del JAR), Spring Boot las sirve desde ahí, y si usas Docker montas esa carpeta como volumen para que persistan entre reinicios.
+
+# Para desarrollo puedes dejarlo como:
+
+# imagenes:
+#   path: src/main/resources/static

@@ -55,8 +55,7 @@ export async function apiFetch(url, options = {}) {
 
         } else {
             // Si el refresh falla, cerramos sesión
-            localStorage.removeItem("jwt");
-            localStorage.removeItem("rol");
+            localStorage.clear();
             window.dispatchEvent(new CustomEvent('session-expired'));
         }
 

@@ -301,7 +301,7 @@ export default function JuegoEnCurso({ lobby }) {
                 <div className="juego__columna-centro">
                     <div className="juego__imagen">
                         {imagenesActuales.map((url, i) => (
-                            <img key={i} src={`${baseUrl}/${url}`} alt={`Imagen ${i + 1} de la pregunta`} />
+                            <img key={i} src={`${baseUrl}/${url.replace(/^\//, '')}`} alt={`Imagen ${i + 1} de la pregunta`} />
                         ))}
                     </div>
                 </div>

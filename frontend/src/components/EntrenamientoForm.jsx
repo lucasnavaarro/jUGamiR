@@ -13,7 +13,8 @@ export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) 
     const [direccion, setDireccion] = useState('MEJORAR');
     //Para que la animacion de las categorias no salte dos veces en general
     const [animKey, setAnimKey] = useState(0);
-    //Para que la animacion de las categorias no salte dos veces cuando cambias entre tiempo y aciertos
+    //Para que la animacion de las categorias no salte dos veces cuando cambias entre tiempo y aciertos. 
+    //Y las barras cambiaría de fórmula (tiempo→aciertos) antes de que los datos llegaran
     const [criterioActivo, setCriterioActivo] = useState('TIEMPO');
     const [form, setForm] = useState({
         dificultades: ['MEDIO'],
@@ -209,18 +210,24 @@ export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) 
                         </label>
                     ))}
 
-                    {categoriasSinStats.map(cat => (
+                    {categoriasSinStats.map((cat, i) => (
                         <label key={`${animKey}-${cat.id}`}
                             className={`entrenamiento__cat ${form.categoriaIds.includes(cat.id) ? 'entrenamiento__cat--activa' : ''}`}
-                            style={{ animationDelay: `${(categoriasStats.length) * 60}ms` }}>
+                            style={{ animationDelay: `${(categoriasStats.length + i) * 60}ms` }}>
                             <input type="checkbox"
                                 checked={form.categoriaIds.includes(cat.id)}
                                 onChange={() => toggleCategoria(cat.id)}
                             />
-                            <span className="entrenamiento__cat-rank">—</span>
-                            <span className="entrenamiento__cat-dot" style={{ background: cat.color }} />
-                            <span className="entrenamiento__cat-nombre">{cat.nombre}</span>
-                            <span className="entrenamiento__cat-stat entrenamiento__cat-stat--vacio">Sin datos</span>
+                            <div className="entrenamiento__cat-top">
+                                <span className="entrenamiento__cat-rank">—</span>
+                                <span className="entrenamiento__cat-dot" style={{ background: cat.color }} />
+                                <span className="entrenamiento__cat-nombre">{cat.nombre}</span>
+                                <span className="entrenamiento__cat-stat entrenamiento__cat-stat--vacio">Sin datos</span>
+                            </div>
+                            <div className="entrenamiento__cat-barra">
+                                <div className="entrenamiento__cat-barra-fill"
+                                    style={{ '--barra-width': '0%', background: cat.color }} />
+                            </div>
                         </label>
                     ))}
                 </div>

@@ -28,10 +28,12 @@ services:
     
     backend:
         build:
-            context: ./backend
-            dockerfile: Dockerfile
+            context: .
+            dockerfile: backend/Dockerfile
         container_name: jugamir_backend
         restart: unless-stopped
+        volumes:
+            - ./backend/src/main/resources/static:/app/static
         environment:
             DB_HOST: db
             DB_PORT: 5432
@@ -43,6 +45,9 @@ services:
             MAIL_USERNAME: ${MAIL_USERNAME}
             MAIL_PASSWORD: ${MAIL_PASSWORD}
             JWT_SECRET: ${JWT_SECRET}
+            SCRIPTS_PATH: /app/db
+            IMAGENES_PATH: /app/static
+            
         ports:
             - "8080:8080"
         depends_on:

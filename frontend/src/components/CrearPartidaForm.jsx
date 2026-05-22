@@ -15,6 +15,8 @@ export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
         categoriaIds: [],
         tiempoRespuesta: 30,
         aciertosParaQuesito: 5,
+        modoEntrenamiento: false,
+        categoriaPesos: {},
     });
 
     useEffect(() => {

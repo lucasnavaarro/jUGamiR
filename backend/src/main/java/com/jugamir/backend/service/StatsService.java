@@ -110,10 +110,10 @@ public class StatsService {
                                 partidasJugadas,
                                 victorias,
                                 porcentajeVictorias,
+                                totalAciertos + totalFallos,
                                 totalAciertos,
                                 totalFallos,
                                 totalNoRespondidas,
-                                totalPreguntas,
                                 porcentajeAcierto,
                                 tiempoMedioMs,
                                 categorias);

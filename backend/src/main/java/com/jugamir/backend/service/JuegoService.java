@@ -85,6 +85,9 @@ public class JuegoService {
                 // Si todavia no hay preguntas usadas, pasamos -1L para que no filtre nada
                 List<Long> filtro_usadas = idsUsadas.isEmpty() ? List.of(-1L) : idsUsadas;
 
+                /**
+                 * ESTE BLOQUE PARA PROBAR CON IMAGENES
+                 */
                 // TODO: quitar este bloque y descomentar el de abajo cuando no se necesite
                 // probar imágenes
                 // List<Pregunta> preguntasConImagen =
@@ -92,6 +95,13 @@ public class JuegoService {
                 // if (preguntasConImagen.isEmpty())
                 // throw new IllegalStateException("No hay preguntas con imagen disponibles");
                 // Pregunta pregunta = preguntasConImagen.get(0);
+
+                /** */
+
+                /***************************************************************
+                 * ESTE BLOQUE ES EL QUE TIENE QUE ESTAR DESCOMENTADO PARA QUE FUNCIONE EL
+                 * JUEGO. SACA PREGUNTAS DE LA BD SEGÚN LA CATEGORÍA Y DIFICULTADES
+                 */
 
                 List<Pregunta> preguntas = preguntaRepository.findAleatoriasByCategoriaYDificultades(
                                 categoria.getId(),
@@ -101,6 +111,8 @@ public class JuegoService {
                 if (preguntas.isEmpty())
                         throw new IllegalStateException("No hay preguntas disponibles para esta categoría");
                 Pregunta pregunta = preguntas.get(0);
+
+                /**************************************************************** */
 
                 // Registrar en PreguntasPartida
                 PreguntaPartida preguntaPartida = PreguntaPartida.builder()

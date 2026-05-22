@@ -6,6 +6,7 @@ export default function UserMenu() {
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
     const ref = useRef(null);
+    const rol = localStorage.getItem("rol");
 
     useEffect(() => {
         function handleClickOutside(e) {
@@ -23,8 +24,7 @@ export default function UserMenu() {
         await fetch("/api/auth/logout", {
             method: "POST",
         });
-        localStorage.removeItem("jwt");
-        localStorage.removeItem("rol");
+        localStorage.clear();
         navigate("/");
     }
 
@@ -39,8 +39,18 @@ export default function UserMenu() {
             {open && (
                 <div className="user-menu__dropdown">
                     <button onClick={() => { navigate("/perfil"); setOpen(false); }}>👤 Editar perfil</button>
-                    <button onClick={() => { navigate("/crear/partida"); setOpen(false); }}>🎮 Crear partida</button>
-                    <button onClick={() => { navigate("/unirse/partida/privada"); setOpen(false); }}>🏆 Unirse a partida</button>
+                    {rol === 'PROFESOR' ? (
+                        <>
+                            <button onClick={() => { navigate("/profesor/preguntas/importar"); setOpen(false); }}>📥 Importar preguntas</button>
+                            <button onClick={() => { navigate("/profesor/preguntas/editar"); setOpen(false); }}>✏️ Editar preguntas</button>
+                            <button onClick={() => { navigate("/profesor/asignaturas"); setOpen(false); }}>📚 Gestionar asignaturas</button>
+                        </>
+                    ) : (
+                        <>
+                            <button onClick={() => { navigate("/crear/partida"); setOpen(false); }}>🎮 Crear partida</button>
+                            <button onClick={() => { navigate("/unirse/partida/privada"); setOpen(false); }}>🏆 Unirse a partida</button>
+                        </>
+                    )}
                     <hr className="user-menu__divider" />
                     <button className="user-menu__logout" onClick={handleLogout}>🚪 Cerrar sesión</button>
                 </div>

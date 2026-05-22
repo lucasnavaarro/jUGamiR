@@ -8,47 +8,39 @@ export default function DashboardProfesor() {
 
     const acciones = [
         {
-            id: 'unirse',
-            icon: '🎮',
-            titulo: 'Unirse a una partida',
-            descripcion: 'Únete a una partida pública o introduce un código para unirte a una privada.',
-            boton: 'Buscar partida',
-            color: 'var(--color-primary)',
-            onClick: () => navigate('/unirse/partida/privada'),
-        },
-        {
-            id: 'preguntas',
-            icon: '➕',
-            titulo: 'Añadir preguntas',
-            descripcion: 'Contribuye al banco de preguntas del MIR añadiendo nuevas cuestiones para los jugadores.',
-            boton: 'Gestionar preguntas',
+            id: 'importar-preguntas',
+            icon: '📥',
+            titulo: 'Importar preguntas',
+            descripcion: 'Añade nuevas preguntas al banco subiendo un archivo CSV.',
+            boton: 'Importar CSV',
             color: 'var(--cat-5)',
-            onClick: () => navigate('/preguntas'),
+            onClick: () => navigate('/profesor/preguntas/importar'),
         },
         {
-            id: 'crear-partida',
-            icon: '🎮',
-            titulo: 'Crear partida',
-            descripcion: 'Crea una nueva partida pública o privada e invita a tus estudiantes a jugar.',
-            boton: 'Crear partida',
+            id: 'editar-preguntas',
+            icon: '✏️',
+            titulo: 'Editar preguntas',
+            descripcion: 'Busca, edita o elimina preguntas del banco de preguntas.',
+            boton: 'Gestionar',
             color: 'var(--color-primary)',
-            onClick: () => navigate('/crear-partida'),
+            onClick: () => navigate('/profesor/preguntas/editar'),
         },
         {
-            id: 'clasificacion',
-            icon: '🏆',
-            titulo: 'Ver clasificación',
-            descripcion: 'Consulta el ranking global y el rendimiento de tus estudiantes en las partidas.',
-            boton: 'Ver ranking',
+            id: 'asignaturas',
+            icon: '📚',
+            titulo: 'Gestionar asignaturas',
+            descripcion: 'Añade, edita o elimina las asignaturas del banco de preguntas.',
+            boton: 'Gestionar',
             color: 'var(--color-accent)',
-            onClick: () => navigate('/clasificacion'),
+            onClick: () => navigate('/profesor/asignaturas'),
         },
+
     ];
 
     return (
         <DashboardLayout
             nombreUsuario={nombre}
-            subtitulo="Gestiona el contenido y crea partidas para que tus estudiantes practiquen el MIR."
+            subtitulo="Gestiona preguntas y asignaturas para que tus estudiantes practiquen el MIR."
             acciones={acciones}
             gridClass="dashboard__grid--3"
         />

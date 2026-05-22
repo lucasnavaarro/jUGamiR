@@ -9,7 +9,7 @@ export default function DashboardJugador() {
     const acciones = [
         {
             id: 'unirse',
-            icon: '🎮',
+            icon: '🏆',
             titulo: 'Unirse a una partida',
             descripcion: 'Únete a una partida pública o introduce un código para unirte a una privada.',
             boton: 'Buscar partida',

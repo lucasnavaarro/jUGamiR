@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
+import java.util.Optional;
 
 public interface PreguntaRepository extends JpaRepository<Pregunta, Long> {
 
@@ -67,5 +68,17 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Long> {
                         @Param("dificultades") List<Dificultad> dificultades,
                         @Param("usadas") List<Long> usadas,
                         @Param("limite") int limite);
+
+        boolean existsByIdentificador(String identificador);
+
+        Optional<Pregunta> findByIdentificador(String identificador);
+
+        @Query("SELECT p FROM Pregunta p WHERE " +
+                        "LOWER(p.identificador) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
+                        "LOWER(p.enunciado) LIKE LOWER(CONCAT('%', :q, '%')) " +
+                        "ORDER BY p.identificador")
+        List<Pregunta> buscarPorIdentificadorOEnunciado(@Param("q") String q);
+
+        boolean existsByEnunciado(String enunciado);
 
 }

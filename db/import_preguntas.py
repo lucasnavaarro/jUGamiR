@@ -29,7 +29,9 @@ DB_CONFIG = {
     "password": os.getenv("DB_PASSWORD", "jugamir_pw"),
 }
 
-CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "preguntas_mir_final.csv")
+#CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "preguntas_mir_final.csv")
+CSV_PATH = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), "..", "preguntas_mir_final.csv")
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
