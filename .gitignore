@@ -19,4 +19,9 @@ frontend/.vite/
 # Logs
 *.log
 
+#Claude
+.claude/
+
+# Backups de BD (contienen datos sensibles)
+db/backup_*.sql
 

@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/profesor")
@@ -25,13 +26,13 @@ public class ProfesorController {
     }
 
     @PostMapping("/asignaturas")
-    public ResponseEntity<AsignaturaDTO> crearAsignatura(@RequestBody CrearAsignaturaRequest request) {
+    public ResponseEntity<AsignaturaDTO> crearAsignatura(@Valid @RequestBody CrearAsignaturaRequest request) {
         return ResponseEntity.ok(profesorService.crearAsignatura(request));
     }
 
     @PutMapping("/asignaturas/{id}")
     public ResponseEntity<AsignaturaDTO> editarAsignatura(@PathVariable Long id,
-            @RequestBody CrearAsignaturaRequest request) {
+            @Valid @RequestBody CrearAsignaturaRequest request) {
         return ResponseEntity.ok(profesorService.editarAsignatura(id, request));
     }
 
@@ -56,7 +57,7 @@ public class ProfesorController {
     @PutMapping("/preguntas/{id}")
     public ResponseEntity<PreguntaResumenDTO> editarPregunta(
             @PathVariable Long id,
-            @RequestBody EditarPreguntaRequest request) {
+            @Valid @RequestBody EditarPreguntaRequest request) {
         return ResponseEntity.ok(profesorService.editarPregunta(id, request));
     }
 

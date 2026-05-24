@@ -1,8 +1,10 @@
 package com.jugamir.backend.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 public record ResponderPreguntaRequest(
 
-        Long respuestaId,
-        int tiempoMs) {
+                @NotNull Long respuestaId,
+                int tiempoMs) {
 
 }

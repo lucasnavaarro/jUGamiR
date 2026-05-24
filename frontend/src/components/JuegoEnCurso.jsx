@@ -41,7 +41,6 @@ export default function JuegoEnCurso({ lobby }) {
         apiFetch(`/api/juego/${lobby.idPartida}/estado`)
             .then(res => res.json())
             .then(data => setEstadoJuego(data))
-            .catch(err => console.error('Error cargando estado:', err));
 
         /*CONSTRUIR LA URL CON EL PROTOCOLO CORRECTO BASADO EN EL ENTORNO*/
         //Si estamos en desarrollo, usamos localhost

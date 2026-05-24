@@ -65,7 +65,6 @@ export default function GestionAsignaturas() {
     }
 
     async function handleEditar(id) {
-        console.log('handleEditar llamado, loading:', loading);
         setError('');
         setExito('');
         if (!editForm.nombre.trim() || !editForm.categoriaId) {
@@ -111,7 +110,9 @@ export default function GestionAsignaturas() {
     return (
         <main className="gestion">
             <div className="gestion__container">
-                <button className="btn btn--outline" onClick={() => navigate('/profesor')}> Volver</button>
+                <div style={{ textAlign: 'left' }}>
+                    <button className="crear-partida__back" onClick={() => navigate('/profesor')}>Volver</button>
+                </div>
                 <h1 className="gestion__titulo">Gestión de asignaturas</h1>
 
                 {error && <p className="gestion__error">{error}</p>}

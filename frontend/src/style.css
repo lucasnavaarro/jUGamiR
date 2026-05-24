@@ -1462,6 +1462,12 @@ main {
   min-height: 44px;
 }
 
+button.crear-partida__back {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
 .crear-partida__title {
   font-size: clamp(1rem, 4vw, 2.5rem);
   font-weight: 700;
@@ -2598,6 +2604,27 @@ main {
   gap: var(--space-xs);
 }
 
+/* ── Editar perfil ───────── */
+.gestion__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  max-width: 480px;
+  margin-top: var(--space-md);
+}
+
+.gestion__form .btn {
+  margin-top: var(--space-lg);
+}
+
+
+.gestion__label {
+  font-size: clamp(0.85rem, 8vw, 1.1rem);
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+
 /* ── Importar preguntas ───────── */
 .importar__zona {
   border: 2px dashed var(--color-border);
@@ -2819,9 +2846,7 @@ main {
   margin-left: 2px;
 }
 
-
-
-/* ── Solo en dispositivos con ratón real (no táctil) ───────── */
+/* Solo en dispositivos con ratón real (no táctil) ───────── */
 @media (hover: hover) and (pointer: fine) {
 
   /* Botones */

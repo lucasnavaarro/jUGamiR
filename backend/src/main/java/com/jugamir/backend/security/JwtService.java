@@ -1,5 +1,6 @@
 package com.jugamir.backend.security;
 
+import com.jugamir.backend.exception.BusinessException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
@@ -21,10 +22,11 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String generateToken(String email, int tokenVersion) {
+    public String generateToken(String email, int tokenVersion, String rol) {
         return Jwts.builder()
                 .subject(email)
                 .claim("tokenVersion", tokenVersion)
+                .claim("rol", rol)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getKey())
@@ -34,6 +36,10 @@ public class JwtService {
 
     public String getEmailFromToken(String token) {
         return getClaims(token).getSubject();
+    }
+
+    public String getRolFromToken(String token) {
+        return getClaims(token).get("rol", String.class);
     }
 
     // Extraer versión de token sin consultar bd
@@ -54,13 +60,13 @@ public class JwtService {
         try {
             getEmailFromToken(token);
         } catch (ExpiredJwtException e) {
-            throw new RuntimeException("El token ha expirado");
+            throw new BusinessException("El token ha expirado");
         } catch (MalformedJwtException e) {
-            throw new RuntimeException("El token tiene formato incorrecto");
+            throw new BusinessException("El token tiene formato incorrecto");
         } catch (SignatureException e) {
-            throw new RuntimeException("La firma del token no es válida");
+            throw new BusinessException("La firma del token no es válida");
         } catch (JwtException e) {
-            throw new RuntimeException("Token inválido");
+            throw new BusinessException("Token inválido");
         }
     }
 }

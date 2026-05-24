@@ -128,7 +128,9 @@ export default function EditarPreguntas() {
     return (
         <main className="gestion">
             <div className="gestion__container">
-                <button className="btn btn--outline" onClick={() => navigate('/profesor')}>Volver</button>
+                <div style={{ textAlign: 'left' }}>
+                    <button className="crear-partida__back" onClick={() => navigate('/profesor')}>Volver</button>
+                </div>
                 <h1 className="gestion__titulo">Editar / eliminar preguntas</h1>
 
                 {error && <p className="gestion__error">{error}</p>}

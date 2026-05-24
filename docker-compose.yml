@@ -8,9 +8,11 @@ services:
             POSTGRES_PASSWORD: ${DB_PASSWORD}
             POSTGRES_DB: jugamirdb
         ports:
-            - "5432:5432"
+            - "5432:5432" #en produccion se quita
         volumes:
             - postgres_data:/var/lib/postgresql/data
+            - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+            - ./db/data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
     
     pgadmin:
         image: dpage/pgadmin4
@@ -20,7 +22,7 @@ services:
             PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
             PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
         ports:
-            - "5050:80"
+            - "5050:80" #en produccion se quita
         volumes:
             - pgadmin_data:/var/lib/pgadmin
         depends_on:
@@ -33,21 +35,22 @@ services:
         container_name: jugamir_backend
         restart: unless-stopped
         volumes:
-            - ./backend/src/main/resources/static:/app/static
+            - ./backend/src/main/resources/static:/app/static #en produccion se quita
+            #- imagenes_data:/app/static #en produccion se descomenta y se sustituye por lo de arriba
         environment:
             DB_HOST: db
-            DB_PORT: 5432
+            DB_PORT: 5432 #en produccion se quita
             DB_NAME: jugamirdb
             DB_USER: ${DB_USER}
             DB_PASSWORD: ${DB_PASSWORD}
             SERVER_PORT: 8080
-            SHOW_SQL: true
+            SHOW_SQL: false
             MAIL_USERNAME: ${MAIL_USERNAME}
             MAIL_PASSWORD: ${MAIL_PASSWORD}
             JWT_SECRET: ${JWT_SECRET}
             SCRIPTS_PATH: /app/db
             IMAGENES_PATH: /app/static
-            
+            APP_URL: ${APP_URL:-http://localhost:3000}
         ports:
             - "8080:8080"
         depends_on:
@@ -62,6 +65,7 @@ services:
 volumes:
     postgres_data:
     pgadmin_data:
+    #imagenes_data: #en produccion se descomenta
         
 
     

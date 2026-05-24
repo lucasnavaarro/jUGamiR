@@ -78,7 +78,7 @@ public class AuthController {
         // Destruye la cookie en el navegador: maxAge(0) hace que caduque inmediatamente
         ResponseCookie cookieBorrada = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(false) // false en localhost, true en producción
                 .path("/api/auth")
                 .maxAge(0)
                 .sameSite("Strict")
@@ -96,13 +96,13 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authService.contrasenaOlvidada(request);
         return ResponseEntity.accepted().build();
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         authService.resetearContrasena(request);
         return ResponseEntity.ok().build();
     }

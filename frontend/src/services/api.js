@@ -57,6 +57,9 @@ export async function apiFetch(url, options = {}) {
             // Si el refresh falla, cerramos sesión
             localStorage.clear();
             window.dispatchEvent(new CustomEvent('session-expired'));
+            // Devolvemos una promesa que nunca resuelve: el event listener
+            // redirigirá al usuario antes de que el caller intente leer la respuesta
+            return new Promise(() => {});
         }
 
     }

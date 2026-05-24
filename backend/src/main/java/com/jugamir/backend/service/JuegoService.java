@@ -38,7 +38,7 @@ public class JuegoService {
 
                 List<Categoria> categorias = partida.getCategorias();
                 if (categorias.isEmpty())
-                        throw new IllegalStateException("No hay categorías di   sponibles");
+                        throw new IllegalStateException("No hay categorías disponibles");
 
                 // Categoria categoria = categorias.get(new
                 // Random().nextInt(categorias.size()));

@@ -68,6 +68,9 @@ scripts:
   #En produccion
   #path: /app/db
 
+app: 
+  url: ${APP_URL:http://localhost:3000}
+
 
 # Depende de dónde despliegues. Si usas Docker (que es lo más probable para un TFG), la ruta sería la del contenedor, por ejemplo /app/static.
 # Pero hay un problema mayor: src/main/resources/static solo existe en desarrollo. En producción el proyecto se empaqueta en un JAR y esa carpeta desaparece — las imágenes quedarían dentro del JAR y no se podrían escribir.

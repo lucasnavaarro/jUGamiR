@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import StatusBadge from './StatusBadge';
 import { Link, useLocation } from 'react-router-dom';
 import UserMenu from './UserMenu';
 
@@ -45,7 +44,6 @@ export default function Navbar() {
                             </>
                         ) : (
                             <>
-                                <StatusBadge />
                                 <nav className="navbar__actions">
                                     <Link to="/login" className="btn btn--outline" id="btn-login">Iniciar sesión</Link>
                                     <Link to="/register" className="btn btn--primary" id="btn-play">¡Jugar!</Link>

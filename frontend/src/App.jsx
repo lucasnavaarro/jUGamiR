@@ -25,6 +25,7 @@ import Entrenamiento from './pages/Entrenamiento';
 import GestionAsignaturas from './pages/GestionAsignaturas';
 import ImportarPreguntas from './pages/ImportarPreguntas';
 import EditarPreguntas from './pages/EditarPreguntas';
+import EditarPerfil from './pages/EditarPerfil';
 
 export default function App() {
 
@@ -40,7 +41,6 @@ export default function App() {
 
     // Escucha el storage event (otra pestaña del mismo navegador)
     const handleStorage = (event) => {
-      // console.log('storage event recibido:', event.key, event.newValue);
       if (event.key === 'jwt' && event.newValue === null) {
         setSessionExpired(true);
       }
@@ -70,9 +70,9 @@ export default function App() {
         <Route element={<CleanLayout />}>
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-          <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
-          <Route path="/password-changed" element={<PublicRoute><ChangePasswordConfirmation /></PublicRoute>} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/password-changed" element={<ChangePasswordConfirmation />} />
           <Route path="/register-confirmation" element={<PublicRoute><RegisterConfirmation /></PublicRoute>} />
         </Route>
         {/* ── CON Navbar SIN Footer ─────────────────── */}
@@ -106,6 +106,9 @@ export default function App() {
           } />
           <Route path="/profesor/preguntas/editar" element={
             <ProtectedRoute rolRequerido="PROFESOR"><EditarPreguntas /></ProtectedRoute>
+          } />
+          <Route path="/perfil" element={
+            <ProtectedRoute><EditarPerfil /></ProtectedRoute>
           } />
         </Route>
         <Route path="/partida/:idPartida" element={

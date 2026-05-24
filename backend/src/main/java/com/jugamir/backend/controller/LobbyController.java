@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/lobby")
@@ -22,7 +23,8 @@ public class LobbyController {
     private final LobbyService lobbyService;
 
     @PostMapping("/crear")
-    public ResponseEntity<?> crear(@AuthenticationPrincipal Usuario usuario, @RequestBody CrearPartidaRequest request) {
+    public ResponseEntity<?> crear(@AuthenticationPrincipal Usuario usuario,
+            @Valid @RequestBody CrearPartidaRequest request) {
 
         Partida partida = lobbyService.crearPartida(
                 usuario.getIdUsuario(),

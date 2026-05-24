@@ -10,9 +10,5 @@
     },
     "devDependencies": {
         "concurrently": "^9.1.2"
-    },
-    "dependencies": {
-        "@stomp/stompjs": "^7.3.0",
-        "sockjs-client": "^1.6.1"
     }
 }

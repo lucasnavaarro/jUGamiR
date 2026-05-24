@@ -1,6 +1,7 @@
 package com.jugamir.backend.service;
 
 import com.jugamir.backend.dto.*;
+import com.jugamir.backend.exception.BusinessException;
 import com.jugamir.backend.model.*;
 import com.jugamir.backend.repository.*;
 import com.jugamir.backend.security.JwtService;
@@ -9,10 +10,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.util.Random;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Optional;
+import java.security.SecureRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +41,7 @@ public class AuthService {
         validarUsuario(request);
 
         if (jugadorRepository.existsByNick(request.getNick())) {
-            throw new RuntimeException("Ya existe un usuario con ese nick");
+            throw new BusinessException("Ya existe un usuario con ese nick");
         }
 
         // Creamos el Usuario base
@@ -75,10 +76,10 @@ public class AuthService {
     public void login(LoginRequest request) {
 
         Usuario usuario = usuarioRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("Las credenciales no coinciden con nuestros registros"));
+                .orElseThrow(() -> new BusinessException("Las credenciales no coinciden con nuestros registros"));
 
         if (!passwordEncoder.matches(request.password(), usuario.getContrasenaHash()))
-            throw new RuntimeException("Las credenciales no coinciden con nuestros registros");
+            throw new BusinessException("Las credenciales no coinciden con nuestros registros");
 
         generarYEnviarCodigo(usuario);
     }
@@ -87,13 +88,13 @@ public class AuthService {
     public VerifyResult verify(VerifyRequest request) {
 
         Usuario usuario = usuarioRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new BusinessException("Usuario no encontrado"));
 
         Codigo2fa codigo = codigo2faRepository.findByUsuarioAndCodigoAndUsadoFalse(usuario, request.codigo())
-                .orElseThrow(() -> new RuntimeException("Código incorrecto o ya usado"));
+                .orElseThrow(() -> new BusinessException("Código incorrecto o ya usado"));
 
         if (codigo.getExpiraEn().isBefore(LocalDateTime.now()))
-            throw new RuntimeException("El código ya ha expirado");
+            throw new BusinessException("El código ya ha expirado");
 
         codigo.setUsado(true);
         codigo2faRepository.save(codigo);
@@ -110,7 +111,7 @@ public class AuthService {
         // El JWT incluye la versión actual. Si el usuario hace logout, la versión
         // sube y este JWT queda inválido en la siguiente petición de cualquier
         // dispositivo.
-        String jwt = jwtService.generateToken(usuario.getEmail(), usuario.getTokenVersion());
+        String jwt = jwtService.generateToken(usuario.getEmail(), usuario.getTokenVersion(), rol);
 
         // Si el usuario tiene sesion iniciada en otro dispositivo, se le asigna ese
         // token
@@ -133,13 +134,14 @@ public class AuthService {
     public Map<String, String> renovarToken(String refreshToken) {
 
         RefreshToken rt = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Token no encontrado"));
+                .orElseThrow(() -> new BusinessException("Token no encontrado"));
 
         if (rt.getExpiraEn().isBefore(LocalDateTime.now()))
-            throw new RuntimeException("El token ha expirado");
+            throw new BusinessException("El token ha expirado");
 
         Usuario usuario = rt.getUsuario();
-        String nuevoJwt = jwtService.generateToken(usuario.getEmail(), usuario.getTokenVersion());
+        String rol = jugadorRepository.existsByUsuario(usuario) ? "JUGADOR" : "PROFESOR";
+        String nuevoJwt = jwtService.generateToken(usuario.getEmail(), usuario.getTokenVersion(), rol);
 
         return Map.of("token", nuevoJwt);
     }
@@ -148,7 +150,7 @@ public class AuthService {
     public void logout(String refreshToken) {
 
         RefreshToken rt = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Token no encontrado"));
+                .orElseThrow(() -> new BusinessException("Token no encontrado"));
 
         Usuario usuario = rt.getUsuario();
         // Al subir la versión, todos los JWT con versión anterior son rechazados
@@ -161,7 +163,7 @@ public class AuthService {
 
     private void validarUsuario(RegisterRequest request) {
         if (usuarioRepository.existsByEmail(request.getEmail()))
-            throw new RuntimeException("Ya existe un usuario con ese email");
+            throw new BusinessException("Ya existe un usuario con ese email");
     }
 
     private Usuario guardarUsuario(RegisterRequest request) {
@@ -179,7 +181,7 @@ public class AuthService {
 
         codigo2faRepository.deleteByUsuario(usuario);
 
-        String codigo = String.format("%06d", new Random().nextInt(1000000));
+        String codigo = String.format("%06d", new SecureRandom().nextInt(1000000));
 
         codigo2faRepository.save(Codigo2fa.builder()
                 .usuario(usuario)
@@ -194,7 +196,7 @@ public class AuthService {
     @Transactional
     public void reenviarCodigo(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("No existe ninguna cuenta asociada a ese email"));
+                .orElseThrow(() -> new BusinessException("No existe ninguna cuenta asociada a ese email"));
         generarYEnviarCodigo(usuario);
     }
 
@@ -202,7 +204,7 @@ public class AuthService {
     public void contrasenaOlvidada(ForgotPasswordRequest request) {
 
         Usuario usuario = usuarioRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("No existe ninguna cuenta asociada a ese email"));
+                .orElseThrow(() -> new BusinessException("No existe ninguna cuenta asociada a ese email"));
 
         passwordResetTokenRepository.deleteByUsuario(usuario);
 
@@ -222,10 +224,10 @@ public class AuthService {
     public void resetearContrasena(ResetPasswordRequest request) {
 
         PasswordResetToken resetToken = passwordResetTokenRepository.findByTokenAndUsadoFalse(request.token())
-                .orElseThrow(() -> new RuntimeException("Token inválido o ya usado"));
+                .orElseThrow(() -> new BusinessException("Token inválido o ya usado"));
 
         if (resetToken.getExpiraEn().isBefore(LocalDateTime.now()))
-            throw new RuntimeException("El enlace ha expirado");
+            throw new BusinessException("El enlace ha expirado");
 
         Usuario usuario = resetToken.getUsuario();
         usuario.setContrasenaHash(passwordEncoder.encode(request.nuevaPassword()));

@@ -29,9 +29,12 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/auth/me").authenticated()
-                        .requestMatchers("/api/auth/**", "/actuator/**", "/error", "/imagenes/**", "/api/categorias/**")
+                        .requestMatchers("/api/auth/**", "/actuator/health", "/error", "/imagenes/**",
+                                "/api/categorias/**")
                         .permitAll()
                         .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/api/profesor/**").hasRole("PROFESOR")
+                        .requestMatchers("/api/juego/**", "/api/stats/**").hasRole("JUGADOR")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class) // Para que el token se
                                                                                             // verifique antes de que

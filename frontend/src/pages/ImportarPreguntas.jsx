@@ -64,7 +64,9 @@ export default function ImportarPreguntas() {
     return (
         <main className="gestion">
             <div className="gestion__container">
-                <button className="btn btn--outline" onClick={() => navigate('/profesor')}>Volver</button>
+                <div style={{ textAlign: 'left' }}>
+                    <button className="crear-partida__back" onClick={() => navigate('/profesor')}>Volver</button>
+                </div>
                 <h1 className="gestion__titulo">Importar preguntas</h1>
                 <p style={{ color: 'var(--text-muted)' }}>
                     El archivo CSV debe tener el mismo formato que <code>preguntas_mir_final.csv</code>

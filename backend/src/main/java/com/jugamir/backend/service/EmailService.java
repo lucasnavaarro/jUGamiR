@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 @RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender mailSender;
+    @Value("${app.url}")
+    private String appUrl;
 
     public void enviarCodigo(String email, String codigo) {
 
@@ -31,7 +34,7 @@ public class EmailService {
                 "¿Mala memoria? \n\n " +
                         "Has solicitado un cambio de contraseña. Para reestablecerla, haz clic en el siguiente enlace: \n\n"
                         +
-                        "http://localhost:3000/reset-password?token=" + token + "\n\n" +
+                        appUrl + "/reset-password?token=" + token + "\n\n" +
                         "Si no lo has solicitado, ignora este correo."
 
         );
