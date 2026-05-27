@@ -183,7 +183,7 @@ export default function EstadisticasJugador() {
                                 className={`btn btn--sm ${ordenCat === 'tiempo' ? 'btn--primary' : 'btn--outline'}`}
                                 onClick={() => setOrdenCat('tiempo')}
                             >
-                                Tiempo
+                                ⏳ Tiempo
                             </button>
                         </div>
                     </div>

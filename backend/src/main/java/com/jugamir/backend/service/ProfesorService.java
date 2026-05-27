@@ -6,13 +6,21 @@ import com.jugamir.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -148,24 +156,14 @@ public class ProfesorService {
     }
 
     @Transactional(readOnly = true)
-    public List<PreguntaResumenDTO> buscarPreguntas(String q) {
-        return preguntaRepository.buscarPorIdentificadorOEnunciado(q)
-                .stream()
-                .map(p -> {
-                    List<RespuestaDTO> respuestas = respuestaRepository.findByPregunta(p)
-                            .stream()
-                            .sorted((a, b) -> Integer.compare(a.getOrden(), b.getOrden()))
-                            .map(r -> new RespuestaDTO(r.getId(), r.getTextoRespuesta(),
-                                    r.getEsCorrecta(), r.getOrden()))
-                            .toList();
-
-                    return new PreguntaResumenDTO(p.getId(), p.getIdentificador(), p.getTituloIndice(),
-                            p.getEnunciado(), p.getImagenUrl(), p.getAnio(),
-                            p.getComentario(), p.isAnulada(), p.getDificultad(),
-                            p.getEstado(), p.getAsignatura().getId(),
-                            p.getAsignatura().getNombre(), respuestas);
-                })
+    public Map<String, Object> buscarPreguntas(String q, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Pregunta> resultado = preguntaRepository.buscarPorIdentificadorOEnunciado(q, pageable);
+        List<PreguntaResumenDTO> dtos = resultado.getContent().stream()
+                .map(this::mapToDTO)
                 .toList();
+        return Map.of("preguntas", dtos, "totalPaginas", resultado.getTotalPages(), "totalElementos",
+                resultado.getTotalElements());
     }
 
     public PreguntaResumenDTO editarPregunta(Long id, EditarPreguntaRequest request) {
@@ -222,12 +220,20 @@ public class ProfesorService {
                 }
             }
         }
+        return mapToDTO(p);
+    }
 
-        // Como hay que devolver un preguntaResumenDTO, en vez de construirlo aquí
-        // llamo a este método que ya lo hace. Como solo hay una pregunta con ese
-        // identificador
-        // cojo el primero y único de la lista, por eso hago el .get(0)
-        return buscarPreguntas(p.getIdentificador()).get(0);
+    private PreguntaResumenDTO mapToDTO(Pregunta p) {
+        List<RespuestaDTO> respuestas = respuestaRepository.findByPregunta(p)
+                .stream()
+                .sorted((a, b) -> Integer.compare(a.getOrden(), b.getOrden()))
+                .map(r -> new RespuestaDTO(r.getId(), r.getTextoRespuesta(), r.getEsCorrecta(), r.getOrden()))
+                .toList();
+        return new PreguntaResumenDTO(p.getId(), p.getIdentificador(), p.getTituloIndice(),
+                p.getEnunciado(), p.getImagenUrl(), p.getAnio(),
+                p.getComentario(), p.isAnulada(), p.getDificultad(),
+                p.getEstado(), p.getAsignatura().getId(),
+                p.getAsignatura().getNombre(), respuestas);
     }
 
     public void eliminarPregunta(Long id) throws Exception {
@@ -309,6 +315,20 @@ public class ProfesorService {
                 // Copia el archivo del ZIP a la ruta destino, sobreescribiendo si ya existe
                 Files.copy(zis, destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                 zis.closeEntry();
+            }
+        }
+    }
+
+    public void eliminarImagen(String url) throws Exception {
+        String rutaRelativa = url.startsWith("/") ? url.substring(1) : url;
+        Path imagen = Path.of(imagenesPath, rutaRelativa).toAbsolutePath();
+        Files.deleteIfExists(imagen);
+        Path carpeta = imagen.getParent();
+        if (carpeta != null && Files.isDirectory(carpeta)) {
+            try (var contenido = Files.list(carpeta)) {
+                if (contenido.findAny().isEmpty()) {
+                    Files.deleteIfExists(carpeta);
+                }
             }
         }
     }

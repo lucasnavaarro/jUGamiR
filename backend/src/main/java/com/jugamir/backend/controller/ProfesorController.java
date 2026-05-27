@@ -50,8 +50,9 @@ public class ProfesorController {
     }
 
     @GetMapping("/preguntas/buscar")
-    public ResponseEntity<List<PreguntaResumenDTO>> buscarPreguntas(@RequestParam String q) {
-        return ResponseEntity.ok(profesorService.buscarPreguntas(q));
+    public ResponseEntity<Map<String, Object>> buscarPreguntas(@RequestParam String q,
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "35") int size) {
+        return ResponseEntity.ok(profesorService.buscarPreguntas(q, page, size));
     }
 
     @PutMapping("/preguntas/{id}")
@@ -80,6 +81,12 @@ public class ProfesorController {
             @RequestParam("file") MultipartFile file) throws Exception {
         profesorService.descomprimirImagenes(file);
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/imagenes")
+    public ResponseEntity<Void> eliminarImagen(@RequestParam String url) throws Exception {
+        profesorService.eliminarImagen(url);
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -3,6 +3,8 @@ package com.jugamir.backend.repository;
 import com.jugamir.backend.model.Pregunta;
 import com.jugamir.backend.model.enums.Dificultad;
 import com.jugamir.backend.model.enums.EstadoPregunta;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -77,7 +79,7 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Long> {
                         "LOWER(p.identificador) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
                         "LOWER(p.enunciado) LIKE LOWER(CONCAT('%', :q, '%')) " +
                         "ORDER BY p.identificador")
-        List<Pregunta> buscarPorIdentificadorOEnunciado(@Param("q") String q);
+        Page<Pregunta> buscarPorIdentificadorOEnunciado(@Param("q") String q, Pageable pageable);
 
         boolean existsByEnunciado(String enunciado);
 

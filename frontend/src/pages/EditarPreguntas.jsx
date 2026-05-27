@@ -12,6 +12,8 @@ export default function EditarPreguntas() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [exito, setExito] = useState('');
+    const [paginaActual, setPaginaActual] = useState(0);
+    const [totalPaginas, setTotalPaginas] = useState(0);
     const [sinResultados, setSinResultados] = useState(false);
     const inputImagenRef = useRef(null);
 
@@ -34,16 +36,18 @@ export default function EditarPreguntas() {
             .catch(() => { });
     }, []);
 
-    async function handleBuscar(e) {
-        e.preventDefault();
+    async function handleBuscar(e, pagina = 0) {
+        if (e) e.preventDefault();
         setLoading(true);
         setError('');
         setEditandoId(null);
         try {
-            const res = await apiFetch(`/api/profesor/preguntas/buscar?q=${encodeURIComponent(query)}`);
+            const res = await apiFetch(`/api/profesor/preguntas/buscar?q=${encodeURIComponent(query)}&page=${pagina}&size=35`);
             const data = await res.json();
-            setResultados(data);
-            setSinResultados(data.length === 0);
+            setResultados(data.preguntas);
+            setTotalPaginas(data.totalPaginas);
+            setPaginaActual(pagina);
+            setSinResultados(data.preguntas.length === 0);
             setTimeout(() => setSinResultados(false), 5000);
         } catch {
             setError('Error al buscar preguntas');
@@ -77,10 +81,6 @@ export default function EditarPreguntas() {
         if (editForm.respuestas.some(r => !r.texto.trim())) { setError('Todas las respuestas deben tener texto'); return; }
         if (!editForm.respuestas.some(r => r.esCorrecta)) { setError('Debe haber una respuesta correcta'); return; }
 
-        if (editForm.imagenUrl && !editForm.imagenUrl.startsWith('imagenes/')) {
-            setError('La URL de imagen debe empezar por imagenes/');
-            return;
-        }
         setLoading(true);
         setError('');
         try {
@@ -217,7 +217,7 @@ export default function EditarPreguntas() {
                                                                         </select>
                                                                     </div>
                                                                     <div className="editar__campo editar__campo--full">
-                                                                        <label>URL imagen</label>
+                                                                        <label>Imagen</label>
                                                                         {editForm.imagenUrl && (
                                                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
                                                                                 {editForm.imagenUrl.split(' | ').map((url, i) => (
@@ -226,8 +226,9 @@ export default function EditarPreguntas() {
                                                                                         <button
                                                                                             type="button"
                                                                                             style={{ background: 'none', border: 'none', color: 'var(--color-danger)', cursor: 'pointer', fontSize: '0.9rem', padding: 0 }}
-                                                                                            onClick={() => {
+                                                                                            onClick={async () => {
                                                                                                 const urls = editForm.imagenUrl.split(' | ').filter((_, j) => j !== i);
+                                                                                                await apiFetch(`/api/profesor/imagenes?url=${encodeURIComponent(url)}`, { method: 'DELETE' });
                                                                                                 setEditForm(p => ({ ...p, imagenUrl: urls.join(' | ') }));
                                                                                             }}
                                                                                         >✕</button>
@@ -237,23 +238,15 @@ export default function EditarPreguntas() {
                                                                         )}
 
                                                                         <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-xs)' }}>
-                                                                            <input
-                                                                                className="gestion__input"
-                                                                                placeholder="imagenes/ruta/archivo.png"
-                                                                                value={editForm._rutaNuevaImagen || ''}
-                                                                                onChange={e => setEditForm(p => ({ ...p, _rutaNuevaImagen: e.target.value }))}
-                                                                            />
-                                                                            <label className="btn btn--outline btn--sm" style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                                                                            <label className="btn btn--outline btn--sm" style={{ cursor: 'pointer', whiteSpace: 'nowrap', borderColor: 'rgba(255,255,255,0.45)' }}>
                                                                                 Subir imagen
                                                                                 <input ref={inputImagenRef} type="file" accept="image/*" style={{ display: 'none' }}
                                                                                     onChange={async e => {
                                                                                         const file = e.target.files[0];
                                                                                         if (!file) return;
-                                                                                        const ruta = editForm._rutaNuevaImagen?.trim();
-                                                                                        if (!ruta?.startsWith('imagenes/')) {
-                                                                                            setError('La ruta debe empezar por imagenes/');
-                                                                                            return;
-                                                                                        }
+                                                                                        const asignatura = asignaturas.find(a => a.id === Number(editForm.asignaturaId));
+                                                                                        const nombreCarpeta = asignatura?.nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_');
+                                                                                        const ruta = `imagenes/${nombreCarpeta}/${file.name}`;
                                                                                         const urlsExistentes = editForm.imagenUrl ? editForm.imagenUrl.split(' | ') : [];
                                                                                         if (urlsExistentes.includes(ruta)) {
                                                                                             setError('Esa imagen ya está añadida');
@@ -267,8 +260,7 @@ export default function EditarPreguntas() {
                                                                                             const data = await res.json();
                                                                                             setEditForm(p => ({
                                                                                                 ...p,
-                                                                                                imagenUrl: p.imagenUrl ? p.imagenUrl + ' | ' + data.url : data.url,
-                                                                                                _rutaNuevaImagen: ''
+                                                                                                imagenUrl: p.imagenUrl ? p.imagenUrl + ' | ' + data.url : data.url
                                                                                             }));
                                                                                             setExito('Imagen subida correctamente');
                                                                                             if (inputImagenRef.current) {
@@ -332,6 +324,13 @@ export default function EditarPreguntas() {
                             </table>
                         </div>
                     </section>
+                )}
+                {totalPaginas > 1 && (
+                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1rem', alignItems: 'center' }}>
+                        <button className="btn btn--outline btn--sm" disabled={paginaActual === 0} onClick={() => handleBuscar(null, paginaActual - 1)}>Anterior</button>
+                        <span>{paginaActual + 1} / {totalPaginas}</span>
+                        <button className="btn btn--outline btn--sm" disabled={paginaActual >= totalPaginas - 1} onClick={() => handleBuscar(null, paginaActual + 1)}>Siguiente</button>
+                    </div>
                 )}
                 {sinResultados && (
                     <p className="gestion__error">No se han encontrado preguntas que coincidan con tu búsqueda.</p>

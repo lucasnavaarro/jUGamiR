@@ -1817,7 +1817,7 @@ button.crear-partida__back {
 }
 
 .ruleta__flecha {
-  font-size: clamp(0.75rem, 2.5vw, 2rem);
+  font-size: clamp(1.7rem, 2.5vw, 2rem);
   line-height: 1;
   color: white;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
@@ -1929,12 +1929,12 @@ button.crear-partida__back {
 }
 
 .respuesta-card--correcta {
-  background: rgba(34, 197, 94, 0.2);
+  background: rgba(7, 226, 88, 0.573);
   border-color: #22C55E;
 }
 
 .respuesta-card--incorrecta {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(226, 9, 9, 0.325);
   border-color: #EF4444;
 }
 
