@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "../services/api";
 import Deslizante from "./Deslizante";
+import { formatTiempo } from "../services/formatTiempo";
 
 export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) {
     const [todasCategorias, setTodasCategorias] = useState([]);
@@ -190,7 +191,7 @@ export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) 
                                 <span className="entrenamiento__cat-nombre">{cat.nombre}</span>
                                 <span className="entrenamiento__cat-stat">
                                     {criterio === 'TIEMPO'
-                                        ? `${(cat.tiempoMedioMs / 1000).toFixed(1)}s`
+                                        ? formatTiempo(cat.tiempoMedioMs)
                                         : `${cat.porcentajeAcierto.toFixed(1)}%`}
                                 </span>
                             </div>

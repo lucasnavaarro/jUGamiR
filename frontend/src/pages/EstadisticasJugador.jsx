@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../services/api';
 import GraficoLineal from '../components/GraficoLineal';
+import { formatTiempo } from '../services/formatTiempo';
+
 
 export default function EstadisticasJugador() {
     const navigate = useNavigate();
@@ -151,7 +153,7 @@ export default function EstadisticasJugador() {
                 <h2 className="stats__subtitulo">Tiempo medio de respuesta</h2>
                 <div className="stats__cards">
                     <div className="stats__card stats__card--lg">
-                        <div className="stats__card-valor">{(stats.tiempoMedioMs / 1000).toFixed(2)}s</div>
+                        <div className="stats__card-valor">{formatTiempo(stats.tiempoMedioMs, 2)}</div>
                         <div className="stats__card-label">por pregunta (global)</div>
                     </div>
                 </div>
@@ -160,7 +162,7 @@ export default function EstadisticasJugador() {
                     dataKey="tiempoMedioMs"
                     color="var(--color-accent)"
                     titulo={`Tiempo medio de respuesta por ${labelPeriodo}`}
-                    formatter={v => (v / 1000).toFixed(2) + 's'}
+                    formatter={v => formatTiempo(v, 2)}
                     mensaje="Juega en más de un periodo para ver tu progreso de tiempo de respuesta."
                 />
             </section>
@@ -218,7 +220,7 @@ export default function EstadisticasJugador() {
                                 </div>
                                 <div className="stats__cat-footer">
                                     <span>{cat.porcentajeAcierto.toFixed(1)}%</span>
-                                    <span>{(cat.tiempoMedioMs / 1000).toFixed(1)}s media</span>
+                                    <span>{formatTiempo(cat.tiempoMedioMs)} media</span>
                                 </div>
                             </div>
                         ))}
@@ -241,7 +243,7 @@ export default function EstadisticasJugador() {
                                                     <div className="stats__cat-barra-fill" style={{ width: `${a.porcentajeAcierto}%`, '--cat-color': categoriaSeleccionada.color }} />
                                                 </div>
                                                 <span className="stats__asig-pct">{a.porcentajeAcierto.toFixed(1)}%</span>
-                                                <span className="stats__asig-tiempo">{(a.tiempoMedioMs / 1000).toFixed(1)}s media</span>
+                                                <span className="stats__asig-tiempo">{formatTiempo(a.tiempoMedioMs)} media</span>
                                             </div>
                                         ))}
                                     </div>

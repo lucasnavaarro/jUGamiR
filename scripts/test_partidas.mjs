@@ -12,7 +12,7 @@ const BASE = 'http://localhost:8080';
 const NUM_PARTIDAS = 20;
 
 // ── Credenciales ────────────────────────────────────────────────────────────
-const USER1 = { email: 'pruebaslucas3@gmail.com', password: 'Hola@123456' };
+const USER1 = { email: 'lucas@gmail.com', password: 'Hola@123456' };
 const USER2 = { email: 'pruebaslucas4@gmail.com', password: 'Hola@123456' };
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
