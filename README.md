@@ -36,4 +36,36 @@ CSS3 Moderno: Uso de Variables CSS, Grid Layout, Flexbox y técnicas de truncami
 Fetch API: Comunicación asíncrona con el backend de Spring Boot.
 
 
+## 🚀 Instalación y Puesta en Marcha
+
+### Requisitos Previos
+Docker: Para ejecutar el backend y la base de datos en contenedores.
+
+Node.js 18+: Para lanzar el frontend y el script orquestador.
+
+### ⚡ Lanzar el Proyecto
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/lucasnavaarro/jUGamiR.git
+cd jUGamiR
+
+# 2. Instalar dependencias del orquestador
+npm install
+
+# 3. Lanzar todo con un solo comando
+npm run dev
+```
+
+Esto levanta en paralelo la base de datos PostgreSQL, el backend Spring Boot y el frontend React. La primera vez tarda ~2-3 minutos mientras Maven descarga dependencias y compila el JAR.
+
+### 🌐 Puertos y Acceso
+
+Frontend (React): http://localhost:5173
+
+Backend (API REST): http://localhost:8080
+
+pgAdmin (gestión BD): http://localhost:5050
+
+
 Autor: Lucas Navarro Moreno
