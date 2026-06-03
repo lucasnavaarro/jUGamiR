@@ -102,7 +102,7 @@ export default function JuegoEnCurso({ lobby }) {
                     const msg = data.jugadorId === miIdUsuario
                         ? `¡Acabas de conseguir el quesito de ${data.nuevoQuesito.nombre}!`
                         : `${data.nuevoQuesito.nick} acaba de ganar el quesito de ${data.nuevoQuesito.nombre}`;
-                    setNotificacion(msg);
+                    setNotificacion({ msg, color: data.nuevoQuesito.color });
                     setTimeout(() => setNotificacion(null), 3500);
                 }
                 if (data.estado === 'TERMINADA') {
@@ -322,11 +322,12 @@ export default function JuegoEnCurso({ lobby }) {
                     )}
                 </div>
                 {/* Ruleta */}
-                <Ruleta
-                    categorias={estadoJuego.categorias}
-                    categoriaSeleccionada={categoriaActual}
-
-                />
+                <div className={fase === 'MOSTRANDO_PREGUNTA' ? 'juego__ruleta-wrapper juego__ruleta-wrapper--oculta-movil' : 'juego__ruleta-wrapper'}>
+                    <Ruleta
+                        categorias={estadoJuego.categorias}
+                        categoriaSeleccionada={categoriaActual}
+                    />
+                </div>
 
                 {/* Botón Girar */}
                 {fase === 'ESPERANDO_TIRADA' && esMiTurno && (
@@ -348,8 +349,8 @@ export default function JuegoEnCurso({ lobby }) {
 
             {notificacion && (
                 <div className="notificacion-quesito">
-                    <div className="notificacion-quesito__card">
-                        🧀 {notificacion} 🧀
+                    <div className="notificacion-quesito__card" style={{ borderColor: notificacion.color, boxShadow: `0 0 40px ${notificacion.color}66` }}>
+                        🧀 {notificacion.msg} 🧀
                     </div>
                 </div>
             )}

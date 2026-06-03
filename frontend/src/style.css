@@ -1722,6 +1722,10 @@ button.crear-partida__back {
   padding-right: var(--space-md);
 }
 
+.juego__ruleta-wrapper {
+  display: contents;
+}
+
 
 .juego__imagen {
   display: flex;
@@ -3178,13 +3182,16 @@ button.crear-partida__back {
     grid-template-columns: repeat(2, 1fr);
   }
 
-
   /* Reduce el espaciado grande en móvil */
   :root {
     --space-xl: 1.5rem;
     /* 2.5rem → 1.5rem */
     --space-2xl: 2rem;
     /* 4rem   → 2rem   */
+  }
+
+  .juego__ruleta-wrapper--oculta-movil {
+    display: none;
   }
 }
 

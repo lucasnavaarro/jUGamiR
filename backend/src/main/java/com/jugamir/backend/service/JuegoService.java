@@ -255,7 +255,8 @@ public class JuegoService {
                 if (categoriaObtenida != null) {
                         evento.put("nuevoQuesito", Map.of(
                                         "nombre", categoriaObtenida.getNombre(),
-                                        "nick", jugador.getJugador().getNick()));
+                                        "nick", jugador.getJugador().getNick(),
+                                        "color", categoriaObtenida.getColor()));
                 }
 
                 messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) evento);
