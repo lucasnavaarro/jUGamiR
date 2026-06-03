@@ -1,47 +1,47 @@
 # jUGamiR 🩺🎮
 
-
 jUGamiR es una plataforma web de alto rendimiento diseñada para la preparación del examen MIR (Médico Interno Residente). El proyecto combina una interfaz de usuario dinámica y gamificada con una arquitectura de backend robusta basada en estándares industriales.
 
 ## ✨ Características Principales
-Ruleta de Especialidades: Sistema de selección aleatoria de preguntas por categorías médicas con animaciones fluidas.
 
-Banco de Preguntas MIR: Gestión de un dataset extenso de preguntas reales, opciones y respuestas correctas.
-
-Dashboard de Estadísticas Avanzado:
-
-Métricas de rendimiento por categoría y tiempo de respuesta.
-
-Visualización de datos mediante componentes dinámicos y barras de progreso.
-
-Diseño 100% Responsive: Optimización total para cualquier dispositivo (Mobile First) utilizando CSS moderno y layouts adaptables.
+- **Ruleta de Especialidades**: Sistema de selección aleatoria de preguntas por categorías médicas con animaciones fluidas.
+- **Banco de Preguntas MIR**: Gestión de un dataset extenso de preguntas reales, opciones y respuestas correctas.
+- **Partidas multijugador**: Competición en tiempo real entre jugadores mediante WebSockets.
+- **Dashboard de Estadísticas**: Métricas de rendimiento por categoría y tiempo de respuesta con visualización de datos dinámica.
+- **Diseño 100% Responsive**: Optimización total para cualquier dispositivo (Mobile First) utilizando CSS moderno y layouts adaptables.
 
 ## 🛠️ Stack Tecnológico
-### Backend (Arquitectura Empresarial)
-Java 17+: Lenguaje principal para una lógica de negocio sólida.
 
-Spring Boot: Framework core para la creación de la API REST.
+### Backend
+- **Java 17** — Lenguaje principal.
+- **Spring Boot 4.0.2** — Framework core para la API REST.
+- **Spring Security + JWT (JJWT 0.12.6)** — Autenticación y autorización.
+- **Spring Data JPA** — Persistencia y gestión de la base de datos.
+- **Spring WebSocket + STOMP** — Comunicación en tiempo real para partidas multijugador.
+- **Spring Mail** — Envío de correos electrónicos.
+- **Flyway** — Migraciones de base de datos.
+- **Lombok** — Reducción de boilerplate.
+- **Maven 3.9.9** — Gestión de dependencias y build.
 
-Spring Data JPA: Para la persistencia y gestión eficiente de la base de datos.
+### Frontend
+- **React 19.2** — Biblioteca principal para la SPA.
+- **React Router DOM 7.13** — Enrutado del lado del cliente.
+- **Recharts 3.8** — Visualización de datos y gráficas.
+- **@stomp/stompjs 7.3** — Cliente WebSocket para partidas en tiempo real.
+- **Vite 7.3** — Bundler y herramienta de build.
+- **Nginx** — Servidor estático en producción con proxy inverso al backend.
 
-Maven: Gestión de dependencias y ciclo de vida del proyecto.
+### Base de datos
+- **PostgreSQL 16** — Base de datos principal.
+- **pgAdmin 4** — Interfaz de administración de la base de datos.
 
-Arquitectura Limpia: Separación clara entre Controladores, Servicios y Repositorios.
-
-### Frontend (Interfaz de Usuario)
-React.js: Biblioteca principal para la construcción de la SPA (Single Page Application).
-
-CSS3 Moderno: Uso de Variables CSS, Grid Layout, Flexbox y técnicas de truncamiento inteligente.
-
-Fetch API: Comunicación asíncrona con el backend de Spring Boot.
-
+### Infraestructura
+- **Docker + Docker Compose** — Contenerización y orquestación de todos los servicios.
 
 ## 🚀 Instalación y Puesta en Marcha
 
 ### Requisitos Previos
-Docker: Para ejecutar el backend y la base de datos en contenedores.
-
-Node.js 18+: Para lanzar el frontend y el script orquestador.
+- **Docker** y **Docker Compose**
 
 ### ⚡ Lanzar el Proyecto
 
@@ -50,22 +50,24 @@ Node.js 18+: Para lanzar el frontend y el script orquestador.
 git clone https://github.com/lucasnavaarro/jUGamiR.git
 cd jUGamiR
 
-# 2. Instalar dependencias del orquestador
-npm install
+# 2. Crear el fichero de variables de entorno
+cp .env.example .env
+# Editar .env con los valores correspondientes
 
-# 3. Lanzar todo con un solo comando
-npm run dev
+# 3. Levantar todos los servicios
+docker compose up --build
 ```
 
-Esto levanta en paralelo la base de datos PostgreSQL, el backend Spring Boot y el frontend React. La primera vez tarda ~2-3 minutos mientras Maven descarga dependencias y compila el JAR.
+La primera vez tarda ~2-3 minutos mientras Maven descarga dependencias y compila el JAR.
 
 ### 🌐 Puertos y Acceso
 
-Frontend (React): http://localhost:5173
+| Servicio | URL |
+|---|---|
+| Frontend (React) | http://localhost:3000 |
+| Backend (API REST) | http://localhost:8080 |
+| pgAdmin (gestión BD) | http://localhost:5050 |
 
-Backend (API REST): http://localhost:8080
-
-pgAdmin (gestión BD): http://localhost:5050
-
+---
 
 Autor: Lucas Navarro Moreno

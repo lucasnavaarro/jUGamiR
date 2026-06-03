@@ -32,4 +32,10 @@ public class PerfilController {
         }
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/perfil")
+    public ResponseEntity<Void> eliminarCuenta(@AuthenticationPrincipal Usuario usuario) {
+        perfilService.eliminarCuenta(usuario);
+        return ResponseEntity.noContent().build();
+    }
 }

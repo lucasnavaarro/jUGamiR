@@ -7,6 +7,7 @@ import com.jugamir.backend.model.Jugador;
 import com.jugamir.backend.model.Profesor;
 import com.jugamir.backend.model.Usuario;
 import com.jugamir.backend.repository.JugadorRepository;
+import com.jugamir.backend.repository.PreguntaRepository;
 import com.jugamir.backend.repository.ProfesorRepository;
 import com.jugamir.backend.repository.UsuarioRepository;
 import com.jugamir.backend.security.JwtService;
@@ -22,6 +23,7 @@ public class PerfilService {
     private final UsuarioRepository usuarioRepository;
     private final JugadorRepository jugadorRepository;
     private final ProfesorRepository profesorRepository;
+    private final PreguntaRepository preguntaRepository;
     private final JwtService jwtService;
 
     public PerfilResponseDTO obtenerPerfil(Usuario usuario) {
@@ -77,5 +79,14 @@ public class PerfilService {
             return jwtService.generateToken(req.email(), usuario.getTokenVersion(), rol);
         }
         return null;
+    }
+
+    @Transactional
+    public void eliminarCuenta(Usuario usuario) {
+        boolean esProfesor = profesorRepository.existsById(usuario.getIdUsuario());
+        if (esProfesor && preguntaRepository.existsByCreadaPor(usuario)) {
+            throw new BusinessException("No puedes eliminar tu cuenta mientras tengas preguntas creadas. Elimínalas primero desde el panel de gestión.");
+        }
+        usuarioRepository.delete(usuario);
     }
 }

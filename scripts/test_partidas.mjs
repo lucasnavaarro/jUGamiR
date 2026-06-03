@@ -6,7 +6,7 @@
  */
 
 import readline from 'readline';
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 
 const BASE = 'http://localhost:8080';
 const NUM_PARTIDAS = 20;
@@ -213,6 +213,18 @@ async function pasarTurno(user, idPartida, partidaNum) {
   return true;
 }
 
+// ── Tiempos de respuesta por categoría (en ms) ────────────────────────────────
+// Cada categoría tiene un rango propio para simular distinta dificultad percibida
+// y que los gráficos de estadísticas muestren variación real entre categorías.
+const TIEMPOS_POR_CATEGORIA = {
+  'Cardio, Sangre y Piel':               { min: 150_000, max: 240_000 }, // ~3-4 min (la más difícil)
+  'Riñón, Infección y Autoinmunidad':    { min: 100_000, max: 180_000 }, // ~1:40-3 min
+  'Ciencias Básicas':                    { min:  70_000, max: 130_000 }, // ~1:10-2:10 min
+  'Cuerpo y Mente':                      { min:  40_000, max:  90_000 }, // ~40s-1:30 min
+  'Pediatría, Primaria y Reproducción':  { min:  20_000, max:  55_000 }, // ~20-55s
+  'Sentidos y Metabolismo':              { min:   8_000, max:  25_000 }, // ~8-25s (la más rápida)
+};
+
 // ── Jugar una partida completa ────────────────────────────────────────────────
 async function jugarPartida(u1, u2, idPartida, partidaNum, tiempoRespuesta = 30) {
   const usuarios = { [u1.idUsuario]: u1, [u2.idUsuario]: u2 };
@@ -317,7 +329,10 @@ async function jugarPartida(u1, u2, idPartida, partidaNum, tiempoRespuesta = 30)
       continue;
     }
 
-    const tiempoMs = Math.floor(Math.random() * (tiempoRespuesta * 1000 - 15000)) + 15000;
+    // Tiempo de respuesta basado en la categoría → medias distintas por categoría en estadísticas
+    const catNombre = giro.categoria?.nombre;
+    const rango = TIEMPOS_POR_CATEGORIA[catNombre] ?? { min: 15_000, max: tiempoRespuesta * 1000 };
+    const tiempoMs = Math.floor(Math.random() * (rango.max - rango.min)) + rango.min;
     const ok = await responder(userActual, idPartida, respuestaId, tiempoMs, partidaNum);
     const esCorrecto = primeraRespuesta.correcta === true;
     console.log(`categoría "${giro.categoria && giro.categoria.nombre}" → respuesta ${ok ? (esCorrecto ? '✅ correcta' : '❌ incorrecta') : '⚠️ error'}`);
@@ -543,9 +558,14 @@ async function main() {
         DELETE FROM partidas             WHERE estado = 'EN_CURSO';
       END $$;
     `;
-    const result = execSync(
-      `docker exec jugamir_db psql -U jugamir -d jugamirdb -c "${sql.replace(/\n/g, ' ').replace(/"/g, '\\"')}"`
-    ).toString();
+    // Usamos spawnSync (sin shell) para que el $$ del bloque PL/pgSQL
+    // no sea interpretado por bash como el PID del proceso
+    const result = spawnSync(
+      'docker',
+      ['exec', 'jugamir_db', 'psql', '-U', 'jugamir', '-d', 'jugamirdb', '-c', sql],
+      { encoding: 'utf8' }
+    );
+    if (result.status !== 0) throw new Error(result.stderr || result.error?.message);
     console.log('  ✅ BD limpia — partidas EN_CURSO eliminadas');
   } catch (e) {
     console.error('  ⚠️  Error en la limpieza SQL:', e.message && e.message.split('\n')[0]);

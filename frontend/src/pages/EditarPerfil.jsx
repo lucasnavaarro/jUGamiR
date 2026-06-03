@@ -31,6 +31,8 @@ export default function EditarPerfil() {
     const [exito, setExito] = useState('');
     const [loading, setLoading] = useState(false);
     const [emailContrasena, setEmailContrasena] = useState('');
+    const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+    const [eliminando, setEliminando] = useState(false);
 
     useEffect(() => {
         async function cargarPerfil() {
@@ -93,7 +95,7 @@ export default function EditarPerfil() {
         }
     }
 
-    async function handleCambiarContrasena(e) {
+    async function handleCambiarContrasena() {
         try {
             await apiFetch('/api/auth/forgot-password', {
                 method: 'POST',
@@ -103,6 +105,25 @@ export default function EditarPerfil() {
             setExito('Revisa tu correo para cambiar la contraseña');
         } catch {
             setError('Error al enviar el correo');
+        }
+    }
+
+    async function handleEliminarCuenta() {
+        setEliminando(true);
+        setError('');
+        try {
+            const res = await apiFetch('/api/usuario/perfil', { method: 'DELETE' });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.message || 'Error al eliminar la cuenta');
+            }
+            localStorage.clear();
+            navigate('/');
+        } catch (err) {
+            setError(err.message || 'Error al eliminar la cuenta');
+            setConfirmarEliminar(false);
+        } finally {
+            setEliminando(false);
         }
     }
 
@@ -140,7 +161,36 @@ export default function EditarPerfil() {
                 <button className="btn btn--outline" onClick={handleCambiarContrasena}>
                     Cambiar contraseña
                 </button>
+
+                <hr style={{ margin: 'var(--space-lg) 0', borderColor: 'var(--border)' }} />
+
+                <h2 className="gestion__titulo">Eliminar cuenta</h2>
+                <p className="gestion__label">
+                    Esta acción es irreversible. Se eliminarán todos tus datos permanentemente.
+                </p>
+                <button className="btn btn--danger-outline" onClick={() => setConfirmarEliminar(true)}>
+                    Eliminar cuenta
+                </button>
             </div>
+
+            {confirmarEliminar && (
+                <div className="modal-overlay" onClick={() => setConfirmarEliminar(false)}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <h2 className="modal__titulo">¿Eliminar tu cuenta?</h2>
+                        <p className="modal__texto">
+                            Esta acción es permanente e irreversible. Se borrarán todos tus datos.
+                        </p>
+                        <div className="modal__acciones">
+                            <button className="btn btn--outline" onClick={() => setConfirmarEliminar(false)}>
+                                Cancelar
+                            </button>
+                            <button className="btn btn--danger" onClick={handleEliminarCuenta} disabled={eliminando}>
+                                {eliminando ? 'Eliminando...' : 'Sí, eliminar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

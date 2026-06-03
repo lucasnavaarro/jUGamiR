@@ -314,8 +314,15 @@ p {
 
 .btn--danger {
   background: #ef4444;
-  /* Color rojo */
   color: white;
+}
+
+.btn--danger-outline {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 2px solid #ef4444;
+  border-radius: var(--radius-md);
+  justify-content: center;
 }
 
 /* ── HERO ─────────────────────────────────────────────────── */
@@ -1433,6 +1440,49 @@ main {
 .session-modal__text {
   font-size: clamp(0.95rem, 2.5vw, 1.1rem);
   color: var(--text-secondary);
+}
+
+/* ── Modal genérico ─────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+}
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  max-width: 420px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  animation: modalSlideIn 0.2s ease;
+}
+
+.modal__titulo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.modal__texto {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.modal__acciones {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  margin-top: var(--space-sm);
 }
 
 /* ── Crear partida ─────────────────── */

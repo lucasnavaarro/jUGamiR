@@ -83,4 +83,6 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Long> {
 
         boolean existsByEnunciado(String enunciado);
 
+        boolean existsByCreadaPor(com.jugamir.backend.model.Usuario usuario);
+
 }
