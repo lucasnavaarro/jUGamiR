@@ -217,7 +217,7 @@ async function pasarTurno(user, idPartida, partidaNum) {
 // Cada categoría tiene un rango propio para simular distinta dificultad percibida
 // y que los gráficos de estadísticas muestren variación real entre categorías.
 const TIEMPOS_POR_CATEGORIA = {
-  'Cardio, Sangre y Piel':               { min: 150_000, max: 240_000 }, // ~3-4 min (la más difícil)
+  'Cardio, Sangre y Piel':               { min:  90_000, max: 120_000 }, // ~1:30-2 min
   'Riñón, Infección y Autoinmunidad':    { min: 100_000, max: 180_000 }, // ~1:40-3 min
   'Ciencias Básicas':                    { min:  70_000, max: 130_000 }, // ~1:10-2:10 min
   'Cuerpo y Mente':                      { min:  40_000, max:  90_000 }, // ~40s-1:30 min

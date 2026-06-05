@@ -375,6 +375,9 @@ public class JuegoService {
 
                                 return categoria; // si gana quesito se devuelve la categoria
 
+                        } else {
+                                // Resetear aunque ya tenga el quesito para no superar el CHECK constraint de la BD
+                                progreso.setAciertos(0);
                         }
                 }
 
