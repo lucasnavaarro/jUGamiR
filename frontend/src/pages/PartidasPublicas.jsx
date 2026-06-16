@@ -100,7 +100,7 @@ export default function PartidasPublicas() {
                                     <span className="partidas-publicas__email partidas-publicas__cell">{p.emailCreador}</span>
                                     <span className="partidas-publicas__count partidas-publicas__cell">{p.jugadoresActuales}/{p.maxJugadores}</span>
                                     <button
-                                        className="btn btn--primary partidas-publicas__cell"
+                                        className={`btn partidas-publicas__cell ${p.jugadoresActuales >= p.maxJugadores ? 'btn--llena' : 'btn--primary'}`}
                                         onClick={() => entrar(p.id)}
                                         disabled={p.jugadoresActuales >= p.maxJugadores}
                                     >

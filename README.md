@@ -51,8 +51,7 @@ git clone https://github.com/lucasnavaarro/jUGamiR.git
 cd jUGamiR
 
 # 2. Crear el fichero de variables de entorno
-cp .env.example .env
-# Editar .env con los valores correspondientes
+# Crear un fichero .env en la raíz del proyecto con las variables necesitadas.
 
 # 3. Levantar todos los servicios
 docker compose up --build

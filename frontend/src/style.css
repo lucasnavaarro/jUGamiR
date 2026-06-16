@@ -283,6 +283,13 @@ p {
   color: #fff;
 }
 
+.btn--primary:disabled,
+.btn--llena {
+  background: #4a4a4a;
+  color: #888;
+  cursor: not-allowed;
+}
+
 .btn--secondary {
   background: var(--color-primary);
   color: #fff;

@@ -59,10 +59,6 @@ public class LobbyService {
                 .build();
 
         partida = partidaRepository.save(partida);
-        if (tipo == TipoPartida.PUBLICA) {
-            List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
-            messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
-        }
 
         JugadorPartida jugadorPartida = JugadorPartida.builder()
                 .jugador(jugador)
@@ -78,6 +74,11 @@ public class LobbyService {
                 .build();
 
         jugadorPartidaRepository.save(jugadorPartida);
+
+        if (tipo == TipoPartida.PUBLICA) {
+            List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
+            messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
+        }
 
         if (modoEntrenamiento && categoriaPesos != null) {
             for (Map.Entry<Long, Integer> entry : categoriaPesos.entrySet()) {

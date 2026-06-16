@@ -9,11 +9,16 @@ import readline from 'readline';
 import { spawnSync } from 'child_process';
 
 const BASE = 'http://localhost:8080';
-const NUM_PARTIDAS = 20;
+const NUM_PARTIDAS = 5;
 
 // ── Credenciales ────────────────────────────────────────────────────────────
 const USER1 = { email: 'lucas@gmail.com', password: 'Hola@123456' };
 const USER2 = { email: 'pruebaslucas4@gmail.com', password: 'Hola@123456' };
+const USER3 = { email: 'pruebaslucas3@gmail.com', password: 'Hola@123456' };
+const USER4 = { email: 'pruebaslucas2@gmail.com', password: 'Hola@123456' };
+const USER5 = { email: 'pruebaslucas10@gmail.com', password: 'Hola@123456' };
+const USER6 = { email: 'pruebaslucas11@gmail.com', password: 'Hola@123456' };
+const USERS = [USER1, USER2, USER3, USER4, USER5, USER6];
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -130,7 +135,7 @@ async function crearPartida(u1, categoriaIds, tiempoRespuesta) {
     tipo: 'PUBLICA',
     dificultades: ['FACIL', 'MEDIO', 'DIFICIL'],
     tiempoRespuesta,
-    maxJugadores: 2,
+    maxJugadores: 6,
     categoriaIds,
     aciertosParaQuesito: 3,   // 3 aciertos por categoría para ganar el quesito
     modoEntrenamiento: false,
@@ -217,17 +222,19 @@ async function pasarTurno(user, idPartida, partidaNum) {
 // Cada categoría tiene un rango propio para simular distinta dificultad percibida
 // y que los gráficos de estadísticas muestren variación real entre categorías.
 const TIEMPOS_POR_CATEGORIA = {
-  'Cardio, Sangre y Piel':               { min:  90_000, max: 120_000 }, // ~1:30-2 min
-  'Riñón, Infección y Autoinmunidad':    { min: 100_000, max: 180_000 }, // ~1:40-3 min
-  'Ciencias Básicas':                    { min:  70_000, max: 130_000 }, // ~1:10-2:10 min
-  'Cuerpo y Mente':                      { min:  40_000, max:  90_000 }, // ~40s-1:30 min
-  'Pediatría, Primaria y Reproducción':  { min:  20_000, max:  55_000 }, // ~20-55s
-  'Sentidos y Metabolismo':              { min:   8_000, max:  25_000 }, // ~8-25s (la más rápida)
+  'Cardio, Sangre y Piel': { min: 90_000, max: 120_000 }, // ~1:30-2 min
+  'Riñón, Infección y Autoinmunidad': { min: 100_000, max: 180_000 }, // ~1:40-3 min
+  'Ciencias Básicas': { min: 70_000, max: 130_000 }, // ~1:10-2:10 min
+  'Cuerpo y Mente': { min: 40_000, max: 90_000 }, // ~40s-1:30 min
+  'Pediatría, Primaria y Reproducción': { min: 20_000, max: 55_000 }, // ~20-55s
+  'Sentidos y Metabolismo': { min: 8_000, max: 25_000 }, // ~8-25s (la más rápida)
 };
 
 // ── Jugar una partida completa ────────────────────────────────────────────────
-async function jugarPartida(u1, u2, idPartida, partidaNum, tiempoRespuesta = 30) {
-  const usuarios = { [u1.idUsuario]: u1, [u2.idUsuario]: u2 };
+async function jugarPartida(jugadores, idPartida, partidaNum, tiempoRespuesta = 30, habilidad = 0.5, velocidad = 1.0) {
+  // jugadores: array de objetos autenticados { token, idUsuario, nick, cookieJar }
+  const usuarios = Object.fromEntries(jugadores.map(u => [u.idUsuario, u]));
+  const u1 = jugadores[0]; // anfitrión (para getEstado, etc.)
   let turnosJugados = 0;
   const MAX_TURNOS = 500; // máximo de turnos por partida para evitar loops infinitos
   let ultimoEstadoValido = null; // guardamos el último estado antes del 409
@@ -319,11 +326,13 @@ async function jugarPartida(u1, u2, idPartida, partidaNum, tiempoRespuesta = 30)
         `preguntaId=${giro.pregunta.id}`);
     }
 
-    // Responder con la primera opción siempre
-    const primeraRespuesta = giro.respuestas[0];
-    const respuestaId = primeraRespuesta.id;
+    const correcta = giro.respuestas.find(r => r.correcta);
+    const incorrectas = giro.respuestas.filter(r => !r.correcta);
+    const elige = (Math.random() < habilidad && correcta) ? correcta
+      : incorrectas[Math.floor(Math.random() * incorrectas.length)] ?? giro.respuestas[0];
+    const respuestaId = elige.id;
     if (!respuestaId) {
-      logBug(partidaNum, 'CRÍTICO', 'Respuesta sin ID', JSON.stringify(primeraRespuesta));
+      logBug(partidaNum, 'CRÍTICO', 'Respuesta sin ID', JSON.stringify(elige));
       await pasarTurno(userActual, idPartida, partidaNum);
       turnosJugados++;
       continue;
@@ -332,9 +341,9 @@ async function jugarPartida(u1, u2, idPartida, partidaNum, tiempoRespuesta = 30)
     // Tiempo de respuesta basado en la categoría → medias distintas por categoría en estadísticas
     const catNombre = giro.categoria?.nombre;
     const rango = TIEMPOS_POR_CATEGORIA[catNombre] ?? { min: 15_000, max: tiempoRespuesta * 1000 };
-    const tiempoMs = Math.floor(Math.random() * (rango.max - rango.min)) + rango.min;
+    const tiempoMs = Math.floor((Math.floor(Math.random() * (rango.max - rango.min)) + rango.min) * velocidad);
     const ok = await responder(userActual, idPartida, respuestaId, tiempoMs, partidaNum);
-    const esCorrecto = primeraRespuesta.correcta === true;
+    const esCorrecto = elige.correcta === true;
     console.log(`categoría "${giro.categoria && giro.categoria.nombre}" → respuesta ${ok ? (esCorrecto ? '✅ correcta' : '❌ incorrecta') : '⚠️ error'}`);
 
     // Esperar a que el backend procese la respuesta y actualice el turno
@@ -344,8 +353,9 @@ async function jugarPartida(u1, u2, idPartida, partidaNum, tiempoRespuesta = 30)
 
   // Si llegamos aquí, la partida superó el máximo de turnos → abandonar para limpiar
   console.log(`   ⏱️  Límite de ${MAX_TURNOS} turnos alcanzado — abandonando partida...`);
-  await apiCall('DELETE', `/api/lobby/abandonar/${idPartida}`, null, u1.token).catch(() => {});
-  await apiCall('DELETE', `/api/lobby/abandonar/${idPartida}`, null, u2.token).catch(() => {});
+  for (const u of jugadores) {
+    await apiCall('DELETE', `/api/lobby/abandonar/${idPartida}`, null, u.token).catch(() => { });
+  }
   return { resultado: 'TIMEOUT', ganador: null };
 }
 
@@ -355,29 +365,29 @@ async function main() {
   console.log(' 🧪 jUGamiR — Test automatizado de partidas');
   console.log('═'.repeat(60));
   console.log(`  Partidas a jugar: ${NUM_PARTIDAS}`);
+  console.log(`  Jugadores por partida: ${USERS.length}`);
   console.log(`  aciertosParaQuesito: 3`);
   console.log(`  Categorías usadas: todas (6)`);
   console.log('═'.repeat(60));
 
-  // ── Login de ambos usuarios ──────────────────────────────────────────────
-  let u1, u2;
-  try {
-    u1 = await login(USER1);
-  } catch (e) {
-    console.error(`\n❌ LOGIN USUARIO 1 FALLÓ: ${e.message}`);
-    rl.close();
-    process.exit(1);
+  // ── Login de todos los usuarios ──────────────────────────────────────────
+  const jugadoresAuth = [];
+  for (let idx = 0; idx < USERS.length; idx++) {
+    const userCreds = USERS[idx];
+    try {
+      const auth = await login(userCreds);
+      jugadoresAuth.push(auth);
+    } catch (e) {
+      console.error(`\n❌ LOGIN USUARIO ${idx + 1} (${userCreds.email}) FALLÓ: ${e.message}`);
+      rl.close();
+      process.exit(1);
+    }
   }
 
-  try {
-    u2 = await login(USER2);
-  } catch (e) {
-    console.error(`\n❌ LOGIN USUARIO 2 FALLÓ: ${e.message}`);
-    rl.close();
-    process.exit(1);
-  }
+  console.log(`\n✅ Los ${USERS.length} usuarios han iniciado sesión correctamente\n`);
 
-  console.log('\n✅ Ambos usuarios logueados correctamente\n');
+  // Referencia al anfitrión (primer usuario)
+  const u1 = jugadoresAuth[0];
 
   // ── Obtener categorías ───────────────────────────────────────────────────
   let categoriaIds;
@@ -401,7 +411,7 @@ async function main() {
     let notas = [];
 
     try {
-      // 1. Crear partida
+      // 1. Crear partida (u1 es el anfitrión)
       const tiempoRespuesta = Math.floor(Math.random() * 271) + 30; // 30s – 300s
       let partida;
       try {
@@ -413,24 +423,29 @@ async function main() {
         continue;
       }
 
-      // 2. Usuario 2 se une
-      try {
-        await unirsePartida(u2, partida.idPartida);
-        console.log(`   ✅ Usuario 2 unido`);
-      } catch (e) {
-        logBug(i, 'CRÍTICO', 'Error al unirse a la partida', e.message);
-        partidas.push({ num: i, resultado: 'ERROR_UNIRSE', ganador: null, duracionSeg: 0, notas: [e.message] });
-        continue;
+      // 2. Usuarios 2-6 se unen
+      let errorUnirse = false;
+      for (let j = 1; j < jugadoresAuth.length; j++) {
+        try {
+          await unirsePartida(jugadoresAuth[j], partida.idPartida);
+          console.log(`   ✅ Usuario ${j + 1} (${USERS[j].email}) unido`);
+        } catch (e) {
+          logBug(i, 'CRÍTICO', `Error al unirse: usuario ${j + 1}`, e.message);
+          partidas.push({ num: i, resultado: 'ERROR_UNIRSE', ganador: null, duracionSeg: 0, notas: [e.message] });
+          errorUnirse = true;
+          break;
+        }
       }
+      if (errorUnirse) continue;
 
-      // 3. Verificar lobby: comprobar que hay 2 jugadores
+      // 3. Verificar lobby: comprobar que hay 6 jugadores
       await sleep(200);
       const estadoLobby = await apiCall('GET', `/api/lobby/${partida.idPartida}`, null, u1.token);
       if (estadoLobby.ok) {
         const lobbyData = await estadoLobby.json();
         const numJugadores = lobbyData.jugadores && lobbyData.jugadores.length;
-        if (numJugadores !== 2) {
-          logBug(i, 'MODERADO', `Lobby muestra ${numJugadores} jugador(es) antes de iniciar (esperado: 2)`);
+        if (numJugadores !== USERS.length) {
+          logBug(i, 'MODERADO', `Lobby muestra ${numJugadores} jugador(es) antes de iniciar (esperado: ${USERS.length})`);
           notas.push(`Lobby con ${numJugadores} jugadores`);
         }
         // Comprobar que el anfitrión está bien asignado
@@ -473,8 +488,11 @@ async function main() {
         notas.push(e.message);
       }
 
-      // 6. Jugar la partida
-      const res = await jugarPartida(u1, u2, partida.idPartida, i, tiempoRespuesta);
+      // 6. Jugar la partida con los 6 jugadores
+      const habilidad = 0.1 + Math.random() * 0.8; // 10%–90% por partida
+      const velocidad = 0.2 + Math.random() * 2.8; // 0.2x–3x velocidad de respuesta
+      console.log(`   🎯 Habilidad: ${Math.round(habilidad * 100)}% | Velocidad: ${velocidad.toFixed(2)}x`);
+      const res = await jugarPartida(jugadoresAuth, partida.idPartida, i, tiempoRespuesta, habilidad, velocidad);
       resultado = res.resultado;
       ganador = res.ganador;
 
@@ -497,8 +515,9 @@ async function main() {
 
   // Login
   console.log('\n🔑 LOGIN:');
-  console.log(`  Usuario 1 (${USER1.email}): ✅ OK`);
-  console.log(`  Usuario 2 (${USER2.email}): ✅ OK`);
+  for (let idx = 0; idx < USERS.length; idx++) {
+    console.log(`  Usuario ${idx + 1} (${USERS[idx].email}): ✅ OK`);
+  }
 
   // Resumen de partidas
   const completadas = partidas.filter(p => p.resultado === 'COMPLETADA').length;

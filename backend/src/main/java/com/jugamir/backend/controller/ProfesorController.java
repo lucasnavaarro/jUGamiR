@@ -46,6 +46,10 @@ public class ProfesorController {
     public ResponseEntity<ImportarResultadoDTO> importarPreguntas(
             @AuthenticationPrincipal Usuario usuario,
             @RequestParam("file") MultipartFile file) throws Exception {
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".csv")) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(profesorService.importarPreguntas(file, usuario.getIdUsuario()));
     }
 
@@ -79,6 +83,10 @@ public class ProfesorController {
     @PostMapping("/imagenes/zip")
     public ResponseEntity<Void> subirImagenesZip(
             @RequestParam("file") MultipartFile file) throws Exception {
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".zip")) {
+            return ResponseEntity.badRequest().build();
+        }
         profesorService.descomprimirImagenes(file);
         return ResponseEntity.ok().build();
     }
