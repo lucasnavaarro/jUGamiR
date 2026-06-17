@@ -9,7 +9,7 @@ import readline from 'readline';
 import { spawnSync } from 'child_process';
 
 const BASE = 'http://localhost:8080';
-const NUM_PARTIDAS = 5;
+const NUM_PARTIDAS = 15;
 
 // ── Credenciales ────────────────────────────────────────────────────────────
 const USER1 = { email: 'lucas@gmail.com', password: 'Hola@123456' };

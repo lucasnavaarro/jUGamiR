@@ -81,7 +81,11 @@ export default function EditarPerfil() {
                 throw new Error(data.message || 'Error al guardar');
             }
 
-            //Si email cambia, el backend devuelve unu nuevo JWT
+            localStorage.setItem('email', form.email);
+            localStorage.setItem('nombre', form.nombre);
+            if (form.nick) localStorage.setItem('nick', form.nick);
+
+            //Si email cambia, el backend devuelve un nuevo JWT
             const contentType = res.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 const data = await res.json();

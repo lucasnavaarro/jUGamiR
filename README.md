@@ -38,6 +38,72 @@ jUGamiR es una plataforma web de alto rendimiento diseñada para la preparación
 ### Infraestructura
 - **Docker + Docker Compose** — Contenerización y orquestación de todos los servicios.
 
+## 📁 Estructura del Proyecto
+
+```
+.
+├── backend
+│   ├── src
+│   │   ├── main
+│   │   │   ├── java
+│   │   │   │   └── com
+│   │   │   │       └── jugamir
+│   │   │   │           └── backend
+│   │   │   │               ├── config
+│   │   │   │               ├── controller
+│   │   │   │               ├── dto
+│   │   │   │               ├── exception
+│   │   │   │               ├── model
+│   │   │   │               │   └── enums
+│   │   │   │               ├── repository
+│   │   │   │               ├── security
+│   │   │   │               └── service
+│   │   │   └── resources
+│   │   │       ├── static
+│   │   │       └── templates
+│   │   └── test
+│   ├── Dockerfile
+│   ├── mvnw
+│   ├── mvnw.cmd
+│   └── pom.xml
+├── db
+│   ├── backup_completo.sql
+│   ├── data.sql
+│   ├── import_preguntas.py
+│   ├── import_respuestas.py
+│   └── schema.sql
+├── frontend
+│   ├── node_modules
+│   ├── public
+│   │   └── favicon.png
+│   ├── src
+│   │   ├── components
+│   │   ├── layouts
+│   │   ├── pages
+│   │   ├── services
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── style.css
+│   ├── Dockerfile
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── nginx.conf
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── README.md
+│   └── vite.config.js
+├── node_modules
+├── scripts
+│   ├── fix_preguntas2.py
+│   ├── fix_preguntas.py
+│   ├── fix_preguntas_vascular.py
+│   └── test_partidas.mjs
+├── docker-compose.yml
+├── package.json
+├── package-lock.json
+└── README.md
+```
+
 ## 🚀 Instalación y Puesta en Marcha
 
 ### Requisitos Previos
@@ -51,8 +117,29 @@ git clone https://github.com/lucasnavaarro/jUGamiR.git
 cd jUGamiR
 
 # 2. Crear el fichero de variables de entorno
-# Crear un fichero .env en la raíz del proyecto con las variables necesitadas.
+Crear un fichero .env en la raíz del proyecto con las variables necesitadas.
+```
 
+El fichero `.env` debe contener las siguientes variables:
+
+```dotenv
+# Base de datos
+DB_USER=jugamir
+DB_PASSWORD=jugamir_pw
+
+# JWT (clave generada con: openssl rand -base64 64)
+JWT_SECRET=
+
+# Gmail (desde donde se envían los correos)
+MAIL_USERNAME=
+MAIL_PASSWORD=
+
+# pgAdmin
+PGADMIN_EMAIL=admin@jugamir.com
+PGADMIN_PASSWORD=admin
+```
+
+```bash
 # 3. Levantar todos los servicios
 docker compose up --build
 ```
