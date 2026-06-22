@@ -139,12 +139,12 @@ PGADMIN_EMAIL=admin@jugamir.com
 PGADMIN_PASSWORD=admin
 ```
 
-Para que el envío de correos funcione, la cuenta de Gmail usada en `MAIL_USERNAME` debe tener activada la [verificación en dos pasos](https://myaccount.google.com/security). Una vez activada, hay que generar una [contraseña de aplicación](https://myaccount.google.com/apppasswords), que es el valor que debe ir en el campo `MAIL_PASSWORD` (no la contraseña habitual de la cuenta).
-
 ```bash
 # 3. Levantar todos los servicios
 docker compose up --build
 ```
+
+Para que el envío de correos funcione, la cuenta de Gmail usada en `MAIL_USERNAME` debe tener activada la [verificación en dos pasos](https://myaccount.google.com/security). Una vez activada, hay que generar una [contraseña de aplicación](https://myaccount.google.com/apppasswords), que es el valor que debe ir en el campo `MAIL_PASSWORD` (no la contraseña habitual de la cuenta).
 
 ### 🌐 Puertos y Acceso
 
