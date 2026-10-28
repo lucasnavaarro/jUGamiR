@@ -25,3 +25,6 @@ frontend/.vite/
 # Backups de BD (contienen datos sensibles)
 db/backup_*.sql
 
+# Informes locales de seguridad
+SECURITY-AUDIT-*.md
+

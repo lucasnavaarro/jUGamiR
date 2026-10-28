@@ -41,8 +41,7 @@ services:
         container_name: jugamir_backend
         restart: unless-stopped
         volumes:
-            - ./backend/src/main/resources/static:/app/static #en produccion se quita
-            #- imagenes_data:/app/static #en produccion se descomenta y se sustituye por lo de arriba
+            - imagenes_data:/app/static
         environment:
             DB_HOST: db
             DB_PORT: 5432 #en produccion se quita
@@ -83,7 +82,7 @@ services:
 volumes:
     postgres_data:
     pgadmin_data:
-    #imagenes_data: #en produccion se descomenta
-        
+    imagenes_data:
 
-    
+
+
