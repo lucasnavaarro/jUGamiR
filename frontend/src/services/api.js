@@ -35,15 +35,8 @@ export async function apiFetch(url, options = {}) {
 
     if (res.status === 401) {
 
-        const refreshRes = await fetch(API_BASE + "/auth/refresh", {
-            method: "POST",
-            //credentials: "include" en producción con HTTPS 
-        });
-
-        if (refreshRes.ok) {
-            const { token } = await refreshRes.json();
-            localStorage.setItem("jwt", token);
-
+        const token = await refreshAccessToken();
+        if (token) {
             // Reintentamos la petición original con el nuevo token
             return fetch(url, {
                 ...options,
@@ -67,4 +60,15 @@ export async function apiFetch(url, options = {}) {
     return res;
 
 
+}
+let pendingRefresh;
+export function refreshAccessToken() {
+    if (!pendingRefresh) pendingRefresh = fetch(API_BASE + '/auth/refresh', { method: 'POST' })
+        .then(async response => {
+            if (!response.ok) return null;
+            const { token } = await response.json();
+            localStorage.setItem('jwt', token);
+            return token;
+        }).finally(() => { pendingRefresh = null; });
+    return pendingRefresh;
 }

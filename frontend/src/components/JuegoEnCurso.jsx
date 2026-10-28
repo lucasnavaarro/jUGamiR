@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Client } from '@stomp/stompjs';
+import { authenticatedClient } from '../services/socket';
 import { apiFetch } from '../services/api';
 import ScoreboardJugador from './ScoreboardJugador';
 import Ruleta from './Ruleta';
@@ -42,18 +42,9 @@ export default function JuegoEnCurso({ lobby }) {
             .then(res => res.json())
             .then(data => setEstadoJuego(data))
 
-        /*CONSTRUIR LA URL CON EL PROTOCOLO CORRECTO BASADO EN EL ENTORNO*/
-        //Si estamos en desarrollo, usamos localhost
-        //Si estamos en producción, usamos el protocolo correcto (https o wss)
-        const wsUrl = import.meta.env.DEV
-            ? 'ws://localhost:8080/ws'
-            : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`;
-        /******************************************************************/
-        const client = new Client({
-            webSocketFactory: () => new WebSocket(wsUrl),
-            connectHeaders: {
-                Authorization: `Bearer ${jwt}`
-            },
+        const client = authenticatedClient({
+            accessUrl: `/api/juego/${lobby.idPartida}/estado`,
+            onAccessLost: () => navigate('/jugador'),
             onConnect: () => {
                 client.subscribe(`/topic/juego/${lobby.idPartida}`, (message) => {
                     const data = JSON.parse(message.body);
@@ -63,7 +54,7 @@ export default function JuegoEnCurso({ lobby }) {
         });
 
         client.activate();
-        return () => client.deactivate();
+        return () => client.stop();
 
     }, [lobby.idPartida]);
 
