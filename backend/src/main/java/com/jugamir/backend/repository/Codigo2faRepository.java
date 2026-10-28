@@ -11,10 +11,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface Codigo2faRepository extends JpaRepository<Codigo2fa, Long> {
 
-    Optional<Codigo2fa> findByUsuarioAndCodigoAndUsadoFalse(Usuario usuario, String codigo);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select c from Codigo2fa c where c.challengeId = :challenge")
+    Optional<Codigo2fa> findLockedByChallengeId(@Param("challenge") String challenge);
 
     @Transactional
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("DELETE FROM Codigo2fa c WHERE c.usuario = :usuario")
     void deleteByUsuario(@Param("usuario") Usuario usuario);
 }

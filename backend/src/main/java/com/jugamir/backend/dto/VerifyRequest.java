@@ -1,9 +1,4 @@
 package com.jugamir.backend.dto;
-
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-
-public record VerifyRequest(
-        @NotBlank @Email String email,
-        @NotBlank String codigo
-) {}
+import jakarta.validation.constraints.*;
+public record VerifyRequest(@NotBlank @Size(max = 36) String challengeId,
+                            @NotBlank @Pattern(regexp = "[0-9]{6}") String codigo) {}

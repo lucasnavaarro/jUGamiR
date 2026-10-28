@@ -32,10 +32,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest request) {
 
-        authService.login(request);
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.accepted().body(Map.of("challengeId", authService.login(request)));
     }
 
     @PostMapping("/verify")
@@ -90,8 +89,8 @@ public class AuthController {
     }
 
     @PostMapping("/reenviar-codigo")
-    public ResponseEntity<Void> reenviarCodigo(@RequestBody Map<String, String> body) {
-        authService.reenviarCodigo(body.get("email"));
+    public ResponseEntity<Void> reenviarCodigo(@Valid @RequestBody ResendCodeRequest body) {
+        authService.reenviarCodigo(body.challengeId());
         return ResponseEntity.accepted().build();
     }
 

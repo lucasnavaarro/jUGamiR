@@ -23,6 +23,13 @@ public class Codigo2fa {
     @Column(nullable = false)
     private String codigo;
 
+    @Column(name = "challenge_id", nullable = false, unique = true)
+    private String challengeId;
+    private int attempts;
+    private int resends;
+    @Column(name = "last_sent")
+    private LocalDateTime lastSent;
+
     @Column(name = "expira_en", nullable = false)
     private LocalDateTime expiraEn;
 

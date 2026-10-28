@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function VerifyForm({ email }) {
+export default function VerifyForm({ email, challengeId }) {
     const [codigo, setCodigo] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -13,7 +13,7 @@ export default function VerifyForm({ email }) {
         const res = await fetch('/api/auth/reenviar-codigo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email }),
+            body: JSON.stringify({ challengeId }),
         });
         setReenvCod(res.ok ? 'Correo reenviado correctamente.' : 'No se pudo reenviar el correo.');
     }
@@ -31,7 +31,7 @@ export default function VerifyForm({ email }) {
         const res = await fetch('/api/auth/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, codigo }),
+            body: JSON.stringify({ challengeId, codigo }),
         });
         setIsLoading(false);
 

@@ -20,6 +20,9 @@ import java.security.SecureRandom;
 public class AuthService {
 
     private final JwtService jwtService;
+    private final com.jugamir.backend.security.AccountLock accounts;
+    private final LoginChallengeService challenges;
+    private final com.jugamir.backend.security.AuthRateLimiter limiter;
     private final com.jugamir.backend.security.ProfessorRegistrationPolicy professorRegistrationPolicy;
     private final UsuarioRepository usuarioRepository;
     private final JugadorRepository jugadorRepository;
@@ -53,8 +56,6 @@ public class AuthService {
                 .nick(request.getNick())
                 .build());
 
-        generarYEnviarCodigo(usuario);
-
     }
 
     @Transactional
@@ -70,37 +71,30 @@ public class AuthService {
                 .departamento(request.getDepartamento())
                 .build());
 
-        generarYEnviarCodigo(usuario);
-
     }
 
     @Transactional
-    public void login(LoginRequest request) {
+    public String login(LoginRequest request) {
+        limiter.check("login-account", request.email(), 10);
 
         Usuario usuario = usuarioRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BusinessException("Las credenciales no coinciden con nuestros registros"));
 
+        usuario = accounts.current(usuario.getIdUsuario());
         if (!passwordEncoder.matches(request.password(), usuario.getContrasenaHash()))
             throw new BusinessException("Las credenciales no coinciden con nuestros registros");
 
-        generarYEnviarCodigo(usuario);
+        return challenges.issue(usuario);
     }
 
     @Transactional
     public VerifyResult verify(VerifyRequest request) {
 
-        Usuario usuario = usuarioRepository.findByEmail(request.email())
-                .orElseThrow(() -> new BusinessException("Usuario no encontrado"));
+        var identity = challenges.consume(request.challengeId(), request.codigo());
+        Usuario usuario = accounts.current(identity.userId());
 
-        Codigo2fa codigo = codigo2faRepository.findByUsuarioAndCodigoAndUsadoFalse(usuario, request.codigo())
-                .orElseThrow(() -> new BusinessException("Código incorrecto o ya usado"));
-
-        if (codigo.getExpiraEn().isBefore(LocalDateTime.now()))
-            throw new BusinessException("El código ya ha expirado");
-
-        codigo.setUsado(true);
-        codigo2faRepository.save(codigo);
-
+        if (usuario.getTokenVersion() != identity.tokenVersion())
+            throw new org.springframework.security.authentication.BadCredentialsException("Inicia sesión de nuevo");
         usuario.setEsActivo(true);
         usuarioRepository.save(usuario);
 
@@ -119,6 +113,11 @@ public class AuthService {
         // token
         // Si no, se crea uno nuevo
         Optional<RefreshToken> rtExistente = refreshTokenRepository.findByUsuario(usuario);
+        if (rtExistente.isPresent() && !rtExistente.get().getExpiraEn().isAfter(LocalDateTime.now())) {
+            refreshTokenRepository.delete(rtExistente.get());
+            refreshTokenRepository.flush();
+            rtExistente = Optional.empty();
+        }
         RefreshToken rt = rtExistente.orElseGet(() -> refreshTokenRepository.save(
                 RefreshToken.builder()
                         .token(UUID.randomUUID().toString())
@@ -164,6 +163,7 @@ public class AuthService {
     }
 
     private void validarUsuario(RegisterRequest request) {
+        limiter.check("register-account", request.getEmail(), 3);
         if (usuarioRepository.existsByEmail(request.getEmail()))
             throw new BusinessException("Ya existe un usuario con ese email");
     }
@@ -179,34 +179,17 @@ public class AuthService {
                 .build());
     }
 
-    private void generarYEnviarCodigo(Usuario usuario) {
-
-        codigo2faRepository.deleteByUsuario(usuario);
-
-        String codigo = String.format("%06d", new SecureRandom().nextInt(1000000));
-
-        codigo2faRepository.save(Codigo2fa.builder()
-                .usuario(usuario)
-                .codigo(codigo)
-                .expiraEn(LocalDateTime.now().plusMinutes(10))
-                .usado(false)
-                .build());
-
-        emailService.enviarCodigo(usuario.getEmail(), codigo);
-    }
-
-    @Transactional
-    public void reenviarCodigo(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException("No existe ninguna cuenta asociada a ese email"));
-        generarYEnviarCodigo(usuario);
+    public void reenviarCodigo(String challengeId) {
+        challenges.resend(challengeId);
     }
 
     @Transactional
     public void contrasenaOlvidada(ForgotPasswordRequest request) {
+        limiter.check("reset-account", request.email(), 3);
 
-        Usuario usuario = usuarioRepository.findByEmail(request.email())
-                .orElseThrow(() -> new BusinessException("No existe ninguna cuenta asociada a ese email"));
+        Usuario usuario = usuarioRepository.findByEmail(request.email()).orElse(null);
+        if (usuario == null) return;
+        usuario = accounts.current(usuario.getIdUsuario());
 
         passwordResetTokenRepository.deleteByUsuario(usuario);
 

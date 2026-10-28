@@ -15,6 +15,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(403).body(Map.of("error", "No tienes permiso para esta operación"));
     }
 
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    public ResponseEntity<Map<String, String>> handleAuthentication(Exception ex) {
+        return ResponseEntity.status(401).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<Map<String, String>> handleStatus(org.springframework.web.server.ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(Map.of("error", ex.getReason() == null ? "Operación rechazada" : ex.getReason()));
+    }
+
     // Errores de negocio esperados: email duplicado, código incorrecto...
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Map<String, String>> handleBusiness(BusinessException ex) {
