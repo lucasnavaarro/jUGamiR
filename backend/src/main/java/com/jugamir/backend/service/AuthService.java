@@ -60,7 +60,7 @@ public class AuthService {
 
     @Transactional
     public void registerProfesor(RegisterProfesorRequest request) {
-        professorRegistrationPolicy.requireApproved(request.getEmail());
+        professorRegistrationPolicy.requireInstitutionalEmail(request.getEmail());
 
         validarUsuario(request);
 

@@ -55,6 +55,52 @@ class SecurityIntegrationTest {
         jdbc.update("INSERT INTO password_reset_tokens(token,id_usuario,expira_en) VALUES (?,?,CURRENT_TIMESTAMP + INTERVAL '10 minutes')", token, userId);
         return token;
     }
+    RegisterProfesorRequest professorRequest(String email) {
+        var request = new RegisterProfesorRequest();
+        request.setNombre("Test"); request.setApellidos("Professor"); request.setEmail(email);
+        request.setPassword("Test-password@123"); request.setDepartamento("Medicina");
+        return request;
+    }
+    @Test void institutionalProfessorSignupNeedsNoAllowlistAndLoginStillRequiresEmailCode() {
+        var first = professorRequest("first.professor@ugr.es");
+        var second = professorRequest("SECOND.PROFESSOR@UGR.ES");
+        auth.registerProfesor(first); auth.registerProfesor(second);
+        assertEquals(2, jdbc.queryForObject("select count(*) from profesores", Integer.class));
+        String challenge = auth.login(new LoginRequest(first.getEmail(), first.getPassword()));
+        verify(mail).enviarCodigo(eq(first.getEmail()), anyString());
+        assertEquals(0, jdbc.queryForObject("select count(*) from refresh_tokens", Integer.class));
+        String correct = code(challenge), wrong = correct.equals("000000") ? "111111" : "000000";
+        assertThrows(BadCredentialsException.class, () -> auth.verify(new VerifyRequest(challenge, wrong)));
+        var session = auth.verify(new VerifyRequest(challenge, correct));
+        assertEquals("PROFESOR", session.authResponse().rol());
+        assertEquals("PROFESOR", jwt.getRolFromToken(session.authResponse().token()));
+    }
+    @Test void backendRejectsProfessorSignupOutsideTheExactInstitutionalDomain() {
+        for (String email : new String[]{"teacher@gmail.com", "teacher@mail.ugr.es", "teacher@ugr.es.example.com"}) {
+            assertThrows(com.jugamir.backend.exception.BusinessException.class,
+                    () -> auth.registerProfesor(professorRequest(email)));
+            assertFalse(users.existsByEmail(email));
+        }
+        assertEquals(0, jdbc.queryForObject("select count(*) from profesores", Integer.class));
+    }
+    @Test void professorCanChangeToAnyVerifiedInstitutionalMailboxButNotAnExternalOne() {
+        var request = professorRequest("original.professor@ugr.es");
+        auth.registerProfesor(request);
+        var professor = users.findByEmail(request.getEmail()).orElseThrow();
+        Long id = professor.getIdUsuario();
+        assertThrows(com.jugamir.backend.exception.BusinessException.class,
+                () -> emailChanges.issue(id, "external@gmail.com", request.getPassword()));
+        String newEmail = "new.professor@ugr.es";
+        emailChanges.issue(id, newEmail, request.getPassword());
+        var captor = org.mockito.ArgumentCaptor.forClass(String.class);
+        verify(mail).enviarCodigoCambioEmail(eq(newEmail), captor.capture());
+        assertThrows(com.jugamir.backend.exception.BusinessException.class,
+                () -> profiles.editarPerfil(professor, new EditarPerfilRequest("Test", "Professor", newEmail,
+                        null, "Medicina", request.getPassword(), null)));
+        assertTrue(profiles.editarPerfil(professor, new EditarPerfilRequest("Test", "Professor", newEmail,
+                null, "Medicina", request.getPassword(), captor.getValue())));
+        assertEquals(newEmail, users.findById(id).orElseThrow().getEmail());
+    }
     @Test void passwordRequiredAndWrongOtpAttemptsPersistAcrossRollbacks() {
         assertThrows(RuntimeException.class, () -> auth.login(new LoginRequest(EMAIL, "wrong")));
         assertEquals(0, jdbc.queryForObject("select count(*) from codigos_2fa", Integer.class));
