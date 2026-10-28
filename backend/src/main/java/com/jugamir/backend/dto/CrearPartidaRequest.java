@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 public record CrearPartidaRequest(
         @NotNull TipoPartida tipo,
         @NotNull List<Dificultad> dificultades,
-        int tiempoRespuesta,
+        @jakarta.validation.constraints.Min(5) @jakarta.validation.constraints.Max(600) int tiempoRespuesta,
         int maxJugadores,
         @NotNull List<Long> categoriaIds,
         int aciertosParaQuesito,

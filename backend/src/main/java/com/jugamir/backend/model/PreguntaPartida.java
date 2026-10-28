@@ -23,6 +23,15 @@ public class PreguntaPartida {
     @JoinColumn(name = "pregunta_id", nullable = false)
     private Pregunta pregunta;
 
+    @Column(name = "emitida_en")
+    private java.time.OffsetDateTime emitidaEn;
+    @Column(name = "vence_en")
+    private java.time.OffsetDateTime venceEn;
+    @Column(name = "jugador_turno_id")
+    private Long jugadorTurnoId;
+    @Column(nullable = false)
+    private boolean cerrada;
+
     @Column(name = "orden_pregunta", nullable = false)
     private Integer ordenPregunta;
 }

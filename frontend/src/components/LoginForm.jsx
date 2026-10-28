@@ -38,7 +38,8 @@ export default function LoginForm({ onEmailSent }) {
         setIsLoading(false);
 
         if (res.ok) {
-            onEmailSent(email);
+            const { challengeId } = await res.json();
+            onEmailSent(email, challengeId);
         } else {
             setError('Email o contraseña incorrectos');
         }
@@ -55,7 +56,7 @@ export default function LoginForm({ onEmailSent }) {
 
             <form onSubmit={handleSubmit} className="auth-form" noValidate>
                 <div className="auth-form__group">
-                    <label htmmlFor="email">Email</label>
+                    <label htmlFor="email">Email</label>
                     <input
                         id="email"
                         type="email"

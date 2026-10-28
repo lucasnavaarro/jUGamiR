@@ -25,6 +25,14 @@ public class EmailService {
 
     }
 
+    public void enviarCodigoCambioEmail(String email, String codigo) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Confirma tu nuevo correo - jUGamiR");
+        message.setText("Tu código para confirmar el cambio de correo es: " + codigo + "\nCaduca en diez minutos.");
+        mailSender.send(message);
+    }
+
     public void enviarEnlaceCambioContrasena(String email, String token) {
 
         SimpleMailMessage mensaje = new SimpleMailMessage();

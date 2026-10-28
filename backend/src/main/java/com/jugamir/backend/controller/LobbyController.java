@@ -88,8 +88,8 @@ public class LobbyController {
     }
 
     @GetMapping("/{partidaId}")
-    public ResponseEntity<Map<String, Object>> obtenerEstadoLobby(@PathVariable Long partidaId) {
-        return ResponseEntity.ok(lobbyService.obtenerEstadoLobby(partidaId));
+    public ResponseEntity<Map<String, Object>> obtenerEstadoLobby(@PathVariable Long partidaId, @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(lobbyService.obtenerEstadoLobby(partidaId, usuario.getIdUsuario()));
     }
 
 }

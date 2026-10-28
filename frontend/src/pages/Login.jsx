@@ -5,12 +5,13 @@ import VerifyForm from '../components/VerifyForm';
 export default function Login() {
     const [step, setStep] = useState('login'); // 'login' | 'verify'
     const [email, setEmail] = useState('');
+    const [challengeId, setChallengeId] = useState('');
 
     return (
         <main className="login-page">
             {step === 'login'
-                ? <LoginForm onEmailSent={(e) => { setEmail(e); setStep('verify'); }} />
-                : <VerifyForm email={email} />
+                ? <LoginForm onEmailSent={(e, id) => { setEmail(e); setChallengeId(id); setStep('verify'); }} />
+                : <VerifyForm email={email} challengeId={challengeId} />
             }
         </main>
     );

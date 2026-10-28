@@ -21,6 +21,7 @@ import java.util.Map;
 public class LobbyService {
 
     private final PartidaRepository partidaRepository;
+    private final com.jugamir.backend.security.GameAccess gameAccess;
     private final JugadorRepository jugadorRepository;
     private final JugadorPartidaRepository jugadorPartidaRepository;
     private final SimpMessagingTemplate messagingTemplate;
@@ -96,7 +97,8 @@ public class LobbyService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Object> obtenerEstadoLobby(Long partidaId) {
+    public Map<String, Object> obtenerEstadoLobby(Long partidaId, Long usuarioId) {
+        gameAccess.requireMember(partidaId, usuarioId);
         Partida partida = partidaRepository.findById(partidaId)
                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
         return construirEstadoLobby(partida);
@@ -141,7 +143,7 @@ public class LobbyService {
     }
 
     public void iniciarPartida(Long partidaId, Long usuarioId) {
-        Partida partida = partidaRepository.findById(partidaId)
+        Partida partida = partidaRepository.findLockedById(partidaId)
                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
 
         if (!partida.getCreadaPor().getIdUsuario().equals(usuarioId))
@@ -183,7 +185,7 @@ public class LobbyService {
 
     public void abandonarPartida(Long partidaId, Long usuarioId) {
 
-        Partida partida = partidaRepository.findById(partidaId)
+        Partida partida = partidaRepository.findLockedById(partidaId)
                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
 
         JugadorPartida jugadorPartida = jugadorPartidaRepository
@@ -335,7 +337,7 @@ public class LobbyService {
 
     public void expulsarJugador(Long partidaId, Long anfitrionId, Long expulsadoId) {
 
-        Partida partida = partidaRepository.findById(partidaId)
+        Partida partida = partidaRepository.findLockedById(partidaId)
                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
 
         if (!partida.getCreadaPor().getIdUsuario().equals(anfitrionId))

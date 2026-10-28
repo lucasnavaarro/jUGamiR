@@ -18,7 +18,7 @@ spring:
         format_sql: true
   
   flyway:
-    enabled: false
+    enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
 
@@ -36,7 +36,7 @@ spring:
   
   web:
     resources:
-      static-locations: classpath:/static/, file:${IMAGENES_PATH:/home/lucas/Escritorio/TFG/jUGamiR/backend/src/main/resources/static}/
+      static-locations: file:${IMAGENES_PATH:src/main/resources/static}/, classpath:/static/
       #En produccion:
       # static-locations: classpath:/static/, file:/app/imagenes/
 
@@ -59,12 +59,12 @@ jwt:
   expiration: 900000 #15 minutos
 
 imagenes:
-  path: ${IMAGENES_PATH:/home/lucas/Escritorio/TFG/jUGamiR/backend/src/main/resources/static}
+  path: ${IMAGENES_PATH:src/main/resources/static}
   #En produccion
   #path: /app/imagenes
 
 scripts:
-  path: ${SCRIPTS_PATH:/home/lucas/Escritorio/TFG/jUGamiR/db}
+  path: ${SCRIPTS_PATH:../db}
   #En produccion
   #path: /app/db
 

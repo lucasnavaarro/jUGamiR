@@ -32,12 +32,10 @@ public class ProfesorService {
     private final PreguntaRepository preguntaRepository;
     private final RespuestaRepository respuestaRepository;
     private final jakarta.persistence.EntityManager entityManager;
+    private final ImageStorage imageStorage;
 
     @Value("${scripts.path:db}")
     private String scriptsPath;
-
-    @Value("${imagenes.path:src/main/resources/static}")
-    private String imagenesPath;
 
     @Transactional(readOnly = true)
     public List<AsignaturaDTO> listarAsignaturas() {
@@ -246,18 +244,7 @@ public class ProfesorService {
 
         if (p.getImagenUrl() != null && !p.getImagenUrl().isBlank()) {
             for (String url : p.getImagenUrl().split(" \\| ")) {
-                String rutaRelativa = url.startsWith("/") ? url.substring(1) : url;
-                Path imagen = Path.of(imagenesPath, rutaRelativa).toAbsolutePath();
-                Files.deleteIfExists(imagen);
-                // Eliminar carpeta padre si está vacía
-                Path carpeta = imagen.getParent();
-                if (carpeta != null && Files.isDirectory(carpeta)) {
-                    try (var contenido = Files.list(carpeta)) {
-                        if (contenido.findAny().isEmpty()) {
-                            Files.deleteIfExists(carpeta);
-                        }
-                    }
-                }
+                imageStorage.delete(url);
             }
         }
 
@@ -283,54 +270,14 @@ public class ProfesorService {
     }
 
     public String subirImagen(MultipartFile file, String rutaDestino) throws Exception {
-        String rutaRelativa = rutaDestino.startsWith("/") ? rutaDestino.substring(1) : rutaDestino;
-        Path destino = Path.of(imagenesPath, rutaRelativa).toAbsolutePath();
-        Files.createDirectories(destino.getParent());
-        Files.copy(file.getInputStream(), destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-        return rutaDestino;
+        return imageStorage.upload(file, rutaDestino);
     }
 
     public void descomprimirImagenes(MultipartFile zipFile) throws Exception {
-        try (java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(zipFile.getInputStream())) {
-            java.util.zip.ZipEntry entrada;
-            // Recorre cada entrada del ZIP hasta que no queden más
-            while ((entrada = zis.getNextEntry()) != null) {
-                // Ignoramos las entradas que son carpetas, solo procesamos archivos
-                if (entrada.isDirectory()) {
-                    zis.closeEntry();
-                    continue;
-                }
-                // Ruta relativa del archivo dentro del ZIP (ej:
-                // imagenes/cardiologia/pulmon.png)
-                String nombreEntrada = entrada.getName();
-                // Ruta absoluta donde se guardará el archivo
-                Path destino = Path.of(imagenesPath, nombreEntrada).toAbsolutePath().normalize();
-                // Seguridad anti zip-slip: descartamos rutas que salgan de imagenesPath
-                if (!destino.startsWith(Path.of(imagenesPath).toAbsolutePath())) {
-                    zis.closeEntry();
-                    continue;
-                }
-                // Crea las carpetas intermedias si no existen
-                Files.createDirectories(destino.getParent());
-                // Copia el archivo del ZIP a la ruta destino, sobreescribiendo si ya existe
-                Files.copy(zis, destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                zis.closeEntry();
-            }
-        }
+        imageStorage.uploadZip(zipFile);
     }
 
     public void eliminarImagen(String url) throws Exception {
-        String rutaRelativa = url.startsWith("/") ? url.substring(1) : url;
-        Path imagen = Path.of(imagenesPath, rutaRelativa).toAbsolutePath();
-        Files.deleteIfExists(imagen);
-        Path carpeta = imagen.getParent();
-        if (carpeta != null && Files.isDirectory(carpeta)) {
-            try (var contenido = Files.list(carpeta)) {
-                if (contenido.findAny().isEmpty()) {
-                    Files.deleteIfExists(carpeta);
-                }
-            }
-        }
+        imageStorage.delete(url);
     }
-
 }

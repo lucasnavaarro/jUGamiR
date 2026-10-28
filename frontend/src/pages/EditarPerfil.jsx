@@ -24,6 +24,8 @@ export default function EditarPerfil() {
         email: '',
         nick: '',
         departamento: '',
+        currentPassword: '',
+        emailCode: '',
     });
 
     const [rol, setRol] = useState('');
@@ -45,7 +47,9 @@ export default function EditarPerfil() {
                     apellidos: data.apellidos,
                     email: data.email,
                     nick: data.nick || '',
-                    departamento: data.departamento || ''
+                    departamento: data.departamento || '',
+                    currentPassword: '',
+                    emailCode: ''
                 });
                 setEmailContrasena(data.email);
             } catch (err) {
@@ -78,25 +82,36 @@ export default function EditarPerfil() {
             });
             if (!res.ok) {
                 const data = await res.json().catch(() => ({}));
-                throw new Error(data.message || 'Error al guardar');
+                throw new Error(data.error || 'Error al guardar');
             }
 
+            const result = await res.json();
+            if (result.reauthenticate) {
+                localStorage.clear();
+                navigate('/login');
+                return;
+            }
             localStorage.setItem('email', form.email);
             localStorage.setItem('nombre', form.nombre);
             if (form.nick) localStorage.setItem('nick', form.nick);
 
-            //Si email cambia, el backend devuelve un nuevo JWT
-            const contentType = res.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const data = await res.json();
-                if (data.token) localStorage.setItem('jwt', data.token);
-            }
             setExito('Perfil actualizado correctamente');
         } catch (err) {
             setError(err.message || 'Error al guardar');
         } finally {
             setLoading(false);
         }
+    }
+
+    async function sendEmailCode() {
+        setError('');
+        const response = await apiFetch('/api/usuario/email/codigo', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: form.email, currentPassword: form.currentPassword })
+        });
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) setError(body.error || 'No se pudo enviar el código');
+        else setExito('Código enviado al nuevo correo. Introdúcelo y guarda los cambios.');
     }
 
     async function handleCambiarContrasena() {
@@ -147,6 +162,12 @@ export default function EditarPerfil() {
                     <Campo label="Nombre" name="nombre" form={form} setForm={setForm} />
                     <Campo label="Apellidos" name="apellidos" form={form} setForm={setForm} />
                     <Campo label="Email" name="email" type="email" form={form} setForm={setForm} />
+                    {form.email !== emailContrasena && <>
+                        <Campo label="Contraseña actual" name="currentPassword" type="password" form={form} setForm={setForm} />
+                        <button type="button" className="btn btn--outline" onClick={sendEmailCode}>Verificar nuevo correo</button>
+                        <Campo label="Código recibido en el nuevo correo" name="emailCode" form={form} setForm={setForm} />
+                        <p>Al cambiar el correo tendrás que iniciar sesión de nuevo.</p>
+                    </>}
                     {rol === 'JUGADOR' && <Campo label="Nick" name="nick" form={form} setForm={setForm} />}
                     {rol === 'PROFESOR' && <Campo label="Departamento" name="departamento" form={form} setForm={setForm} />}
 

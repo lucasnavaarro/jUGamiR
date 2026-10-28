@@ -29,18 +29,19 @@ public class JuegoController {
     public ResponseEntity<Void> responderPregunta(@AuthenticationPrincipal Usuario usuario,
             @PathVariable Long partidaId, @Valid @RequestBody ResponderPreguntaRequest request) {
 
-        juegoService.responderPregunta(partidaId, usuario.getIdUsuario(), request.respuestaId(), request.tiempoMs());
+        juegoService.responderPregunta(partidaId, usuario.getIdUsuario(), request.respuestaId(), request.preguntaPartidaId());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{partidaId}/estado")
-    public ResponseEntity<Map<String, Object>> obtenerEstadoJuego(@PathVariable Long partidaId) {
-        return ResponseEntity.ok(juegoService.obtenerEstadoJuego(partidaId));
+    public ResponseEntity<Map<String, Object>> obtenerEstadoJuego(@PathVariable Long partidaId, @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(juegoService.obtenerEstadoJuego(partidaId, usuario.getIdUsuario()));
     }
 
     @PostMapping("/{partidaId}/pasarse")
-    public ResponseEntity<Void> pasarTurno(@AuthenticationPrincipal Usuario usuario, @PathVariable Long partidaId) {
-        juegoService.pasarTurno(partidaId, usuario.getIdUsuario());
+    public ResponseEntity<Void> pasarTurno(@AuthenticationPrincipal Usuario usuario, @PathVariable Long partidaId,
+            @Valid @RequestBody com.jugamir.backend.dto.PasarTurnoRequest request) {
+        juegoService.pasarTurno(partidaId, usuario.getIdUsuario(), request.preguntaPartidaId());
         return ResponseEntity.ok().build();
     }
 }

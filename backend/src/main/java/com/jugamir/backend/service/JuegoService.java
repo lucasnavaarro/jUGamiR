@@ -21,6 +21,7 @@ import java.util.HashMap;
 public class JuegoService {
 
         private final PartidaRepository partidaRepository;
+        private final com.jugamir.backend.security.GameAccess gameAccess;
         private final JugadorPartidaRepository jugadorPartidaRepository;
         private final PreguntaRepository preguntaRepository;
         private final PreguntaPartidaRepository preguntaPartidaRepository;
@@ -35,6 +36,11 @@ public class JuegoService {
 
                 Partida partida = getPartidaEnCurso(partidaId);
                 validarTurno(partida, usuarioId);
+                preguntaPartidaRepository.findFirstByPartidaOrderByOrdenPreguntaDesc(partida).ifPresent(previous -> {
+                        if (!previous.isCerrada() && usuarioId.equals(previous.getJugadorTurnoId()))
+                                throw new IllegalStateException("Ya tienes una pregunta pendiente");
+                        if (!previous.isCerrada()) { previous.setCerrada(true); preguntaPartidaRepository.save(previous); }
+                });
 
                 List<Categoria> categorias = partida.getCategorias();
                 if (categorias.isEmpty())
@@ -115,14 +121,43 @@ public class JuegoService {
                 /**************************************************************** */
 
                 // Registrar en PreguntasPartida
+                OffsetDateTime emittedAt = OffsetDateTime.now().plusNanos(4_200_000_000L);
                 PreguntaPartida preguntaPartida = PreguntaPartida.builder()
                                 .partida(partida)
                                 .pregunta(pregunta)
+                                .emitidaEn(emittedAt)
+                                .venceEn(emittedAt.plusSeconds(partida.getTiempoRespuesta()))
+                                .jugadorTurnoId(usuarioId)
+                                .cerrada(false)
                                 .ordenPregunta(idsUsadas.size() + 1)
                                 .build();
 
                 preguntaPartidaRepository.save(preguntaPartida);
 
+                Map<String, Object> eventoMsg = questionEvent(preguntaPartida, categoria);
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> opciones = (List<Map<String, Object>>) eventoMsg.get("respuestas");
+
+                messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) eventoMsg);
+
+                return new GirarRuletaResponse(categoria,
+                                new PreguntaDTO(
+                                                pregunta.getId(),
+                                                pregunta.getIdentificador(),
+                                                pregunta.getTituloIndice(),
+                                                pregunta.getEnunciado(),
+                                                pregunta.getImagenUrl(),
+                                                pregunta.getAnio(),
+                                                null, // La explicación se reserva para después de responder.
+                                                pregunta.isAnulada(),
+                                                pregunta.getDificultad(),
+                                                pregunta.getEstado(),
+                                                pregunta.getAsignatura().getId()),
+                                opciones);
+        }
+
+        private Map<String, Object> questionEvent(PreguntaPartida preguntaPartida, Categoria categoria) {
+                Pregunta pregunta = preguntaPartida.getPregunta();
                 List<Map<String, Object>> opciones = respuestaRepository.findByPregunta(pregunta)
                                 .stream()
                                 .sorted((a, b) -> Integer.compare(a.getOrden(), b.getOrden()))
@@ -143,41 +178,28 @@ public class JuegoService {
 
                 Map<String, Object> eventoMsg = new HashMap<>();
                 eventoMsg.put("evento", "PREGUNTA");
+                eventoMsg.put("preguntaPartidaId", preguntaPartida.getId());
+                eventoMsg.put("emitidaEn", preguntaPartida.getEmitidaEn().toString());
+                eventoMsg.put("venceEn", preguntaPartida.getVenceEn().toString());
                 eventoMsg.put("categoria", Map.of("id", categoria.getId(), "nombre", categoria.getNombre(), "color",
                                 categoria.getColor()));
                 eventoMsg.put("pregunta", preguntaMsg);
                 eventoMsg.put("respuestas", opciones);
-                eventoMsg.put("turnoActual", partida.getTurnoActual());
+                eventoMsg.put("turnoActual", preguntaPartida.getPartida().getTurnoActual());
 
-                messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) eventoMsg);
-
-                return new GirarRuletaResponse(categoria,
-                                new PreguntaDTO(
-                                                pregunta.getId(),
-                                                pregunta.getIdentificador(),
-                                                pregunta.getTituloIndice(),
-                                                pregunta.getEnunciado(),
-                                                pregunta.getImagenUrl(),
-                                                pregunta.getAnio(),
-                                                pregunta.getComentario(),
-                                                pregunta.isAnulada(),
-                                                pregunta.getDificultad(),
-                                                pregunta.getEstado(),
-                                                pregunta.getAsignatura().getId()),
-                                opciones);
+                return eventoMsg;
         }
 
-        public void responderPregunta(Long partidaId, Long usuarioId, Long respuestaId, int tiempoMs) {
+        public void responderPregunta(Long partidaId, Long usuarioId, Long respuestaId, Long preguntaPartidaId) {
 
                 Partida partida = getPartidaEnCurso(partidaId);
                 JugadorPartida jugador = validarTurno(partida, usuarioId);
 
-                List<PreguntaPartida> lista = preguntaPartidaRepository.findByPartidaOrderByOrdenPregunta(partida);
-
-                if (lista.isEmpty())
-                        throw new IllegalStateException("No hay preguntas en esta partida");
-
-                PreguntaPartida preguntaPartida = lista.get(lista.size() - 1);
+                PreguntaPartida preguntaPartida = pendingQuestion(partida, usuarioId, preguntaPartidaId);
+                OffsetDateTime now = OffsetDateTime.now();
+                if (now.isBefore(preguntaPartida.getEmitidaEn()) || !now.isBefore(preguntaPartida.getVenceEn()))
+                        throw new IllegalStateException("La pregunta no está dentro de su plazo de respuesta");
+                int tiempoMs = Math.toIntExact(java.time.Duration.between(preguntaPartida.getEmitidaEn(), now).toMillis());
 
                 Respuesta respuesta = respuestaRepository.findById(respuestaId)
                                 .orElseThrow(() -> new IllegalArgumentException("Respuesta no encontrada"));
@@ -194,6 +216,8 @@ public class JuegoService {
                                 .respondidaEl(OffsetDateTime.now())
                                 .build();
 
+                preguntaPartida.setCerrada(true);
+                preguntaPartidaRepository.save(preguntaPartida);
                 respuestaJugadorRepository.save(respuestaJugador);
 
                 // Actualizar estadísticas del jugador
@@ -264,9 +288,10 @@ public class JuegoService {
         }
 
         @Transactional(readOnly = true)
-        public Map<String, Object> obtenerEstadoJuego(Long partidaId) {
+        public Map<String, Object> obtenerEstadoJuego(Long partidaId, Long usuarioId) {
+        gameAccess.requireMember(partidaId, usuarioId);
 
-                Partida partida = getPartidaEnCurso(partidaId);
+                Partida partida = partidaRepository.findById(partidaId).orElseThrow();
 
                 List<Map<String, Object>> jugadores = jugadorPartidaRepository.findByPartida(partida)
                                 .stream()
@@ -307,33 +332,64 @@ public class JuegoService {
                                                 "color", c.getColor()))
                                 .toList();
 
-                return Map.of(
+                Map<String, Object> state = new HashMap<>(Map.of(
                                 "idPartida", partida.getId(),
                                 "estado", partida.getEstado().name(),
                                 "turnoActual", partida.getTurnoActual(),
                                 "tiempoRespuesta", partida.getTiempoRespuesta(),
                                 "aciertosParaQuesito", partida.getAciertosParaQuesito(),
                                 "jugadores", jugadores,
-                                "categorias", categorias);
+                                "categorias", categorias));
+                preguntaPartidaRepository.findFirstByPartidaOrderByOrdenPreguntaDesc(partida)
+                        .filter(q -> !q.isCerrada() && q.getVenceEn() != null && q.getVenceEn().isAfter(OffsetDateTime.now()))
+                        .ifPresent(q -> state.put("preguntaActual", questionEvent(q, q.getPregunta().getAsignatura().getCategoria())));
+                return state;
         }
 
-        public void pasarTurno(Long partidaId, Long usuarioId) {
+        public void pasarTurno(Long partidaId, Long usuarioId, Long preguntaPartidaId) {
 
                 Partida partida = getPartidaEnCurso(partidaId);
                 JugadorPartida jugador = validarTurno(partida, usuarioId);
 
-                jugador.setNumNoRespondidas(jugador.getNumNoRespondidas() + 1);
-                jugadorPartidaRepository.save(jugador);
+                PreguntaPartida question = pendingQuestion(partida, usuarioId, preguntaPartidaId);
+                closeUnanswered(partida, jugador, question);
+        }
 
+        public void expirarPregunta(Long partidaId) {
+                Partida partida = partidaRepository.findLockedById(partidaId).orElse(null);
+                if (partida == null) return;
+                var pending = preguntaPartidaRepository.findFirstByPartidaOrderByOrdenPreguntaDesc(partida);
+                if (pending.isEmpty()) return;
+                var question = pending.get();
+                if (question.isCerrada() || question.getVenceEn() == null || question.getVenceEn().isAfter(OffsetDateTime.now())) return;
+                var player = jugadorPartidaRepository.findByPartidaAndJugador_Usuario_IdUsuario(partida, question.getJugadorTurnoId()).orElse(null);
+                if (partida.getEstado() != EstadoPartida.EN_CURSO || player == null ||
+                    player.getResultado() != ResultadoJugador.PENDIENTE || !player.getOrdenTurno().equals(partida.getTurnoActual())) {
+                        question.setCerrada(true);
+                        preguntaPartidaRepository.save(question);
+                        return;
+                }
+                closeUnanswered(partida, player, question);
+        }
+
+        private PreguntaPartida pendingQuestion(Partida partida, Long userId, Long questionId) {
+                PreguntaPartida question = preguntaPartidaRepository.findFirstByPartidaOrderByOrdenPreguntaDesc(partida)
+                        .orElseThrow(() -> new IllegalStateException("No hay una pregunta pendiente"));
+                if (question.isCerrada() || !question.getId().equals(questionId) || !userId.equals(question.getJugadorTurnoId()) ||
+                    question.getEmitidaEn() == null || question.getVenceEn() == null)
+                        throw new IllegalStateException("La pregunta ya no está activa");
+                return question;
+        }
+
+        private void closeUnanswered(Partida partida, JugadorPartida player, PreguntaPartida question) {
+                question.setCerrada(true);
+                preguntaPartidaRepository.save(question);
+                player.setNumNoRespondidas(player.getNumNoRespondidas() + 1);
+                jugadorPartidaRepository.save(player);
                 avanzarTurno(partida);
-
-                messagingTemplate.convertAndSend(
-                                "/topic/juego/" + partidaId,
-                                (Object) Map.of(
-                                                "evento", "TURNO_PASADO",
-                                                "turnoActual", partida.getTurnoActual(),
-                                                "jugadorId", usuarioId));
-
+                messagingTemplate.convertAndSend("/topic/juego/" + partida.getId(), (Object) Map.of(
+                        "evento", "TURNO_PASADO", "turnoActual", partida.getTurnoActual(),
+                        "jugadorId", player.getJugador().getIdUsuario(), "preguntaPartidaId", question.getId()));
         }
 
         private Categoria actualizarProgreso(JugadorPartida jugador, Categoria categoria, Partida partida) {
@@ -425,7 +481,7 @@ public class JuegoService {
         }
 
         private Partida getPartidaEnCurso(Long partidaId) {
-                Partida partida = partidaRepository.findById(partidaId)
+                Partida partida = partidaRepository.findLockedById(partidaId)
                                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
 
                 if (partida.getEstado() != EstadoPartida.EN_CURSO)
@@ -438,7 +494,7 @@ public class JuegoService {
                                 .findByPartidaAndJugador_Usuario_IdUsuario(partida, usuarioId)
                                 .orElseThrow(() -> new IllegalStateException("No estás jugando esta partida"));
 
-                if (!jugador.getOrdenTurno().equals(partida.getTurnoActual()))
+                if (jugador.getResultado() != ResultadoJugador.PENDIENTE || !jugador.getOrdenTurno().equals(partida.getTurnoActual()))
                         throw new IllegalStateException("No es tu turno");
                 return jugador;
         }

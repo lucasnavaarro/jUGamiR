@@ -9,4 +9,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     boolean existsByEmail(String email);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select u from Usuario u where u.idUsuario = :id")
+    Optional<Usuario> findLockedById(@org.springframework.data.repository.query.Param("id") Long id);
+
 }

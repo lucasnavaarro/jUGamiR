@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { Client } from '@stomp/stompjs';
+import { authenticatedClient } from '../services/socket';
 import { apiFetch } from '../services/api';
 
 
@@ -23,17 +23,7 @@ export default function PartidasPublicas() {
 
     //Segundo useEffect para actualizar la lista cuando se cree una partida publica nueva
     useEffect(() => {
-        const jwt = localStorage.getItem('jwt');
-        /*CONSTRUIR LA URL CON EL PROTOCOLO CORRECTO BASADO EN EL ENTORNO*/
-        //Si estamos en desarrollo, usamos localhost
-        //Si estamos en producción, usamos el protocolo correcto (https o wss)
-        const wsUrl = import.meta.env.DEV
-            ? 'ws://localhost:8080/ws'
-            : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`;
-        /******************************************************************/
-        const client = new Client({
-            webSocketFactory: () => new WebSocket(wsUrl),
-            connectHeaders: { Authorization: `Bearer ${jwt}` },
+        const client = authenticatedClient({
             onConnect: () => {
                 client.subscribe('/topic/partidas-publicas', (message) => {
                     const data = JSON.parse(message.body);
@@ -42,7 +32,7 @@ export default function PartidasPublicas() {
             },
         });
         client.activate();
-        return () => client.deactivate();
+        return () => client.stop();
     }, []);
 
     function entrar(idPartida) {

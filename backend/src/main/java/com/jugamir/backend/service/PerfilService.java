@@ -24,7 +24,11 @@ public class PerfilService {
     private final JugadorRepository jugadorRepository;
     private final ProfesorRepository profesorRepository;
     private final PreguntaRepository preguntaRepository;
-    private final JwtService jwtService;
+    private final EmailChangeService emailChangeService;
+    private final com.jugamir.backend.security.AccountLock accounts;
+    private final com.jugamir.backend.repository.PasswordResetTokenRepository resetTokens;
+    private final com.jugamir.backend.repository.RefreshTokenRepository refreshTokens;
+    private final com.jugamir.backend.repository.Codigo2faRepository loginCodes;
 
     public PerfilResponseDTO obtenerPerfil(Usuario usuario) {
 
@@ -42,7 +46,8 @@ public class PerfilService {
     }
 
     @Transactional
-    public String editarPerfil(Usuario usuario, EditarPerfilRequest req) {
+    public boolean editarPerfil(Usuario usuario, EditarPerfilRequest req) {
+        usuario = accounts.current(usuario.getIdUsuario());
 
         // Validamos la unicidad del email
         if (!usuario.getEmail().equals(req.email()) && usuarioRepository.existsByEmail(req.email())) {
@@ -50,6 +55,14 @@ public class PerfilService {
         }
 
         boolean emailCambiado = !usuario.getEmail().equals(req.email());
+
+        if (emailCambiado) {
+            emailChangeService.consume(usuario, req.email(), req.currentPassword(), req.emailCode());
+            usuario.setTokenVersion(usuario.getTokenVersion() + 1);
+            refreshTokens.deleteByUsuario(usuario);
+            loginCodes.deleteByUsuario(usuario);
+            resetTokens.deleteByUsuario(usuario);
+        }
 
         usuario.setNombre(req.nombre());
         usuario.setApellidos(req.apellidos());
@@ -72,13 +85,7 @@ public class PerfilService {
             profesorRepository.save(profesor);
         }
 
-        String rol = jugadorRepository.existsByUsuario(usuario) ? "JUGADOR" : "PROFESOR";
-
-        // Solo generar nuevo JWT si cambió el email
-        if (emailCambiado) {
-            return jwtService.generateToken(req.email(), usuario.getTokenVersion(), rol);
-        }
-        return null;
+        return emailCambiado;
     }
 
     @Transactional

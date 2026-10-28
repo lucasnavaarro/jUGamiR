@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Client } from '@stomp/stompjs';
+import { authenticatedClient } from '../services/socket';
 import { apiFetch } from '../services/api';
 import JuegoEnCurso from '../components/JuegoEnCurso';
 import LobbyEspera from '../components/LobbyEspera';
@@ -30,16 +30,9 @@ export default function Lobby() {
             })
             .then(data => setLobby(data))
             .catch(err => setError(err.message));
-        /*CONSTRUIR LA URL CON EL PROTOCOLO CORRECTO BASADO EN EL ENTORNO*/
-        //Si estamos en desarrollo, usamos localhost
-        //Si estamos en producción, usamos el protocolo correcto (https o wss)
-        const wsUrl = import.meta.env.DEV
-            ? 'ws://localhost:8080/ws'
-            : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`;
-        /******************************************************************/
-        const client = new Client({
-            webSocketFactory: () => new WebSocket(wsUrl), //Crea conexión apuntando a la ruta /ws del backend
-            connectHeaders: { Authorization: `Bearer ${jwt}` }, //Envía el token para autenticarse
+        const client = authenticatedClient({
+            accessUrl: `/api/lobby/${idPartida}`,
+            onAccessLost: () => setExpulsado(true),
             onConnect: () => {
                 //Suscribirse al canal de esta partida
                 client.subscribe(`/topic/lobby/${idPartida}`, //ruta de escucha
@@ -57,7 +50,7 @@ export default function Lobby() {
                         //Si ya no está en el lobby, lo echa
                         if (!abandonandoRef.current && !soyAnfitrion && !estaEnLobby) {
                             setExpulsado(true);
-                            client.deactivate(); //Cierra la conexión al ser expulsado
+                            client.stop(); //Cierra la conexión al ser expulsado
                         }
                     });
             },
@@ -67,7 +60,7 @@ export default function Lobby() {
 
         //Limpiar al salir de la página
         return () => {
-            client.deactivate(); //Cierra la conexión para no dejar procesos abiertos
+            client.stop(); //Cierra la conexión para no dejar procesos abiertos
         }
     }, [idPartida]); //Se ejecuta cada vez que cambia el idPartida
 
