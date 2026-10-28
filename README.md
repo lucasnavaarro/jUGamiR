@@ -195,6 +195,12 @@ Flyway aplica V2–V4 sobre el esquema existente, baselining en V1. Hacer una co
 seguridad antes de actualizar. V2 invalida códigos de login antiguos; V4 cierra
 preguntas anteriores que no tenían un plazo fiable. No es necesario borrar la base.
 En una instalación vacía, el Compose carga primero `db/schema.sql`.
+Después importa `db/data.sql` en una transacción. El banco inicial usa un autor
+interno deshabilitado, sin perfil de profesor/jugador y sin contraseña utilizable;
+las cuentas reales se crean desde el registro. No se incluyen cuentas de acceso
+de demostración. El chequeo de salud de PostgreSQL
+espera al servidor TCP definitivo para no dar por terminada la importación durante
+el servidor temporal de inicialización.
 
 Las nuevas imágenes se guardan en el volumen `imagenes_data`; los originales del
 classpath siguen disponibles. Si hay imágenes antiguas en el bind mount local,
@@ -209,9 +215,9 @@ sh scripts/test-security.sh
 docker build -f frontend/Dockerfile -t jugamir-frontend:check .
 ```
 
-El script crea una base temporal sin puertos públicos, carga solo el esquema, ejecuta
-las pruebas con correo simulado y elimina la base y su red al terminar. No lee `.env`
-ni importa `db/data.sql`. Requiere Docker y las imágenes PostgreSQL 16 y Maven/Java 17.
+El script crea una base temporal sin puertos públicos, comprueba la carga del esquema
+y del banco de preguntas, ejecuta las pruebas con correo simulado y elimina la base
+y su red al terminar. No lee `.env`. Requiere Docker y las imágenes PostgreSQL 16 y Maven/Java 17.
 
 ---
 

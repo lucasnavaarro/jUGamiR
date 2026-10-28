@@ -81,7 +81,7 @@ public class AuthService {
                 .orElseThrow(() -> new BusinessException("Las credenciales no coinciden con nuestros registros"));
 
         usuario = accounts.current(usuario.getIdUsuario());
-        if (!passwordEncoder.matches(request.password(), usuario.getContrasenaHash()))
+        if (!Boolean.TRUE.equals(usuario.getEsActivo()) || !passwordEncoder.matches(request.password(), usuario.getContrasenaHash()))
             throw new BusinessException("Las credenciales no coinciden con nuestros registros");
 
         return challenges.issue(usuario);
@@ -93,10 +93,8 @@ public class AuthService {
         var identity = challenges.consume(request.challengeId(), request.codigo());
         Usuario usuario = accounts.current(identity.userId());
 
-        if (usuario.getTokenVersion() != identity.tokenVersion())
+        if (!Boolean.TRUE.equals(usuario.getEsActivo()) || usuario.getTokenVersion() != identity.tokenVersion())
             throw new org.springframework.security.authentication.BadCredentialsException("Inicia sesión de nuevo");
-        usuario.setEsActivo(true);
-        usuarioRepository.save(usuario);
 
         // Determinar qué tipo de usuario es y obtener su nick si es jugador
         String rol = jugadorRepository.existsByUsuario(usuario) ? "JUGADOR" : "PROFESOR";
