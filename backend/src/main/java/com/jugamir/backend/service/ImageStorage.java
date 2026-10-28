@@ -58,6 +58,7 @@ public class ImageStorage {
         Path stage = Files.createTempFile("jugamir-image-", ".tmp");
         try (InputStream input = file.getInputStream()) {
             Files.copy(input, stage, StandardCopyOption.REPLACE_EXISTING);
+            RasterImages.sanitize(stage, name);
             publish(stage, name);
             return name.startsWith("/") ? name.substring(1) : name;
         } finally { Files.deleteIfExists(stage); }
@@ -72,6 +73,7 @@ public class ImageStorage {
                 Path stage = Files.createTempFile("jugamir-zip-", ".tmp");
                 try {
                     Files.copy(zip, stage, StandardCopyOption.REPLACE_EXISTING);
+                    RasterImages.sanitize(stage, entry.getName());
                     publish(stage, entry.getName());
                 } finally { Files.deleteIfExists(stage); }
             }

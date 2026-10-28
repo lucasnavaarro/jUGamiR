@@ -240,7 +240,7 @@ export default function EditarPreguntas() {
                                                                         <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-xs)' }}>
                                                                             <label className="btn btn--outline btn--sm" style={{ cursor: 'pointer', whiteSpace: 'nowrap', borderColor: 'rgba(255,255,255,0.45)' }}>
                                                                                 Subir imagen
-                                                                                <input ref={inputImagenRef} type="file" accept="image/*" style={{ display: 'none' }}
+                                                                                <input ref={inputImagenRef} type="file" accept="image/png,image/jpeg" style={{ display: 'none' }}
                                                                                     onChange={async e => {
                                                                                         const file = e.target.files[0];
                                                                                         if (!file) return;
