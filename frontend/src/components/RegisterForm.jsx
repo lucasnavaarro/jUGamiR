@@ -31,7 +31,7 @@ export default function RegisterForm() {
             return;
         }
 
-        if (tipo === 'profesor' && !email.endsWith('@ugr.es')) {
+        if (tipo === 'profesor' && !/^[^@\s]+@ugr\.es$/i.test(email)) {
             setError('Debes registrarte con el email de la UGR (@ugr.es)');
             return;
         }
@@ -101,7 +101,7 @@ export default function RegisterForm() {
                 </button>
             </div>
 
-            {tipo === 'profesor' && <p>El registro de profesores requiere un correo @ugr.es autorizado previamente por el administrador.</p>}
+            {tipo === 'profesor' && <p>Para registrarte como profesor, utiliza tu correo @ugr.es.</p>}
             <form onSubmit={handleSubmit} className="auth-form" noValidate>
 
                 {/* Campos comunes */}
@@ -242,4 +242,4 @@ export default function RegisterForm() {
             </form>
         </div>
     )
-}    
+}

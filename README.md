@@ -174,8 +174,11 @@ ni el backend. Si hay otro proxy delante de Nginx, configurar los rangos de prox
 confiables para recuperar la IP real; no aceptar cabeceras de IP arbitrarias.
 La renovación de certificados corresponde al despliegue.
 
-- `PROFESSOR_ALLOWED_EMAILS`: lista de correos `@ugr.es` autorizados por el administrador,
-  separados por comas. Vacía bloquea altas nuevas de profesor; conserva cuentas existentes.
+- El registro de profesores está abierto a cualquier correo cuyo dominio sea exactamente
+  `ugr.es`, sin lista de autorización ni configuración adicional en `.env`. El backend
+  aplica esta regla también al cambiar el correo de una cuenta de profesor.
+  Para acceder se exige el código enviado al buzón institucional; esto acredita acceso
+  al correo y no verifica por separado la condición de profesor.
 - El login devuelve `challengeId` tras comprobar la contraseña. Verificar y reenviar
   requieren ese identificador. Cada desafío caduca en 10 minutos, admite cinco intentos
   y dos reenvíos separados por al menos 60 segundos. Hay límites adicionales por cuenta.

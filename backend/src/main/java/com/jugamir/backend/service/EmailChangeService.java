@@ -37,7 +37,7 @@ public class EmailChangeService {
         reauthenticate(user, password);
         limiter.check("email-send", userId.toString(), 3);
         if (users.existsByEmail(newEmail)) throw new BusinessException("El email ya está registrado");
-        if (professors.existsById(userId)) professorPolicy.requireApproved(newEmail);
+        if (professors.existsById(userId)) professorPolicy.requireInstitutionalEmail(newEmail);
         String code = String.format("%06d", new SecureRandom().nextInt(1_000_000));
         jdbc.update("""
             INSERT INTO email_change_challenges (usuario_id, new_email, code_hash, token_version, expires_at)
