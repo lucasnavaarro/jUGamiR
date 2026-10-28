@@ -160,7 +160,7 @@ public class JuegoService {
                                                 pregunta.getEnunciado(),
                                                 pregunta.getImagenUrl(),
                                                 pregunta.getAnio(),
-                                                pregunta.getComentario(),
+                                                null, // La explicación se reserva para después de responder.
                                                 pregunta.isAnulada(),
                                                 pregunta.getDificultad(),
                                                 pregunta.getEstado(),
