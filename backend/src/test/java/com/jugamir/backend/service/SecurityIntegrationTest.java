@@ -112,6 +112,16 @@ class SecurityIntegrationTest {
         assertThrows(BadCredentialsException.class, () -> auth.verify(new VerifyRequest(challenge,correct)));
         assertEquals(0, jdbc.queryForObject("select count(*) from refresh_tokens", Integer.class));
     }
+    @Test void disabledAccountsCannotLoginOrUseAnAlreadyIssuedChallenge() {
+        String challenge = login(), correct = code(challenge);
+        jdbc.update("update usuarios set es_activo=false where id_usuario=?", userId);
+        reset(mail);
+        assertThrows(RuntimeException.class, () -> auth.login(new LoginRequest(EMAIL, PASSWORD)));
+        assertThrows(BadCredentialsException.class, () -> auth.verify(new VerifyRequest(challenge, correct)));
+        assertFalse(users.findById(userId).orElseThrow().getEsActivo());
+        assertEquals(0, jdbc.queryForObject("select count(*) from refresh_tokens", Integer.class));
+        verifyNoInteractions(mail);
+    }
     @Test void resendDoesNotResetAttemptsOrExpiryAndIsRateLimited() {
         String challenge=login();
         jdbc.update("update codigos_2fa set attempts=3,last_sent=CURRENT_TIMESTAMP - INTERVAL '2 minutes' where challenge_id=?", challenge);

@@ -20,6 +20,14 @@ SET row_security = off;
 -- Data for Name: categorias; Type: TABLE DATA; Schema: public; Owner: -
 --
 
+-- Load the question bank atomically. Imported questions retain author ID 2.
+BEGIN;
+
+-- Internal content owner: no professor/player profile, disabled and no usable password.
+INSERT INTO public.usuarios (id_usuario, nombre, apellidos, email, "contraseña_hash", es_activo, creado_en, token_version)
+OVERRIDING SYSTEM VALUE
+VALUES (2, 'Banco de preguntas', 'jUGamiR', 'contenido@jugamir.invalid', '!disabled-content-owner', false, CURRENT_TIMESTAMP, 1);
+
 INSERT INTO public.categorias OVERRIDING SYSTEM VALUE VALUES (8, 'Sentidos y Metabolismo', '#FFFF00', 'Digestivo · Cirugía Endocrina · ORL · Oftalmología');
 INSERT INTO public.categorias OVERRIDING SYSTEM VALUE VALUES (10, 'Riñón, Infección y Autoinmunidad', '#0000FF', 'Nefrología · Enfermedades Infecciosas · Urología · Reumatología Y Enfermedades Sistemáticas');
 INSERT INTO public.categorias OVERRIDING SYSTEM VALUE VALUES (11, 'Pediatría, Primaria y Reproducción', '#FF8000', 'Obstetricia · Ginecología · Pediatría I · Pediatría II · Atención Primaria');
@@ -58,33 +66,6 @@ INSERT INTO public.asignaturas OVERRIDING SYSTEM VALUE VALUES (50, 'FISIOLOGÍA 
 INSERT INTO public.asignaturas OVERRIDING SYSTEM VALUE VALUES (51, 'FARMACOLOGÍA', 13);
 INSERT INTO public.asignaturas OVERRIDING SYSTEM VALUE VALUES (52, 'BIOLOGÍA MOLECULAR', 13);
 INSERT INTO public.asignaturas OVERRIDING SYSTEM VALUE VALUES (31, 'CARDIOLOGIA', 9);
-
-
---
--- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: -
---
-
-INSERT INTO public.usuarios OVERRIDING SYSTEM VALUE VALUES (8, 'Pruebas', 'Lucas 7', 'pruebaslucas7@ugr.es', '$2a$10$0BuJDK2juPKnMsxlRG8TPuXSTW5X580DqZ2EDehARTCf80cHZu9TS', true, '2026-03-26 17:50:23.980905+00', NULL, 7);
-INSERT INTO public.usuarios OVERRIDING SYSTEM VALUE VALUES (9, 'Pruebas ', 'Lucas 8', 'pruebaslucas8@gmail.com', '$2a$10$5BZ/r8w7BmcyD/7gwyn1F.0U6DmrriF7RgOyoiNaOtTa4Eug.v5nW', true, '2026-04-13 19:38:09.44964+00', NULL, 7);
-INSERT INTO public.usuarios OVERRIDING SYSTEM VALUE VALUES (12, 'Pruebas', 'Lucas 10', 'pruebaslucas10@gmail.com', '$2a$10$ptVoAmLEgn/LIDPmlEG7Q.yQYBIOjLm4s3A61J8num.4K.Ayo.tyK', true, '2026-05-13 16:23:57.00646+00', NULL, 2);
-INSERT INTO public.usuarios OVERRIDING SYSTEM VALUE VALUES (13, 'Pruebas', 'Lucas 11', 'pruebaslucas11@gmail.com', '$2a$10$MG2j.c4eCk2O0/DO6d9Fhepb/d8QBMXzdR6XxYeefU247hvYO3vM.', true, '2026-05-17 16:55:37.465614+00', NULL, 2);
-INSERT INTO public.usuarios OVERRIDING SYSTEM VALUE VALUES (2, 'Pruebas ', 'Lucas 2', 'pruebaslucas2@gmail.com', '$2a$10$gS8HY8qfieGOw8v2LwfSo.kgABa8aiSMOde9nh3f5oeH0M5oabnSy', true, '2026-03-14 11:52:44.78775+00', NULL, 3);
-INSERT INTO public.usuarios OVERRIDING SYSTEM VALUE VALUES (3, 'Pruebas', 'Lucas 3', 'pruebaslucas3@gmail.com', '$2a$10$noBexNzIB20Ufs9QamQzvu5/m7vs9bPVASvUSUey/aZOrY/u0fmAO', true, '2026-03-14 12:01:06.549982+00', NULL, 72);
-INSERT INTO public.usuarios OVERRIDING SYSTEM VALUE VALUES (11, 'Pruebas Lucas', '4', 'pruebaslucas4@gmail.com', '$2a$10$mq2jOFTKPuIQ1bqrMH2k9OfVWJ3xMxa9DuQC3Tw8JnxkliViruMZK', true, '2026-04-28 17:01:55.743725+00', NULL, 18);
-INSERT INTO public.usuarios OVERRIDING SYSTEM VALUE VALUES (10, 'Pruebas', 'Lucas 9', 'pruebaslucas9@ugr.es', '$2a$10$mbHf3q/BMFpQuXTPvI.tquSwmdYXkWkt71WOkvh4UjMXCa/WIesNG', true, '2026-04-14 14:27:21.131094+00', NULL, 11);
-
-
---
--- Data for Name: jugadores; Type: TABLE DATA; Schema: public; Owner: -
---
-
-INSERT INTO public.jugadores VALUES (2, 'pruebaslucas2');
-INSERT INTO public.jugadores VALUES (3, 'pruebaslucas3');
-INSERT INTO public.jugadores VALUES (9, 'pruebaslucas8');
-INSERT INTO public.jugadores VALUES (11, 'pruebaslucas4');
-INSERT INTO public.jugadores VALUES (12, 'pruebaslucas10');
-INSERT INTO public.jugadores VALUES (13, 'pruebaslucas11');
-INSERT INTO public.jugadores VALUES (14, 'pruebaslucas1');
 
 
 --
@@ -5306,13 +5287,6 @@ INSERT INTO public.preguntas OVERRIDING SYSTEM VALUE VALUES (14663, 'MIR 2024-20
 INSERT INTO public.preguntas OVERRIDING SYSTEM VALUE VALUES (14664, 'MIR 2025-2026, P16', '1. La Isquemia Arterial Crónica', 'Mujer de 63 años de edad con diagnóstico de cáncer de endometrio estadio I. Ha sido intervenida mediante histerectomía radical más linfadenectomía pélvica y para-aórtica, finalizando con radioterapia. En la exploración física se objetiva un signo de Stemmer positivo. Tras visualizar la imagen (IMAGEN 16), ¿cuál de estas opciones considera que es la correcta?', NULL, 2026, NULL, false, 'MEDIO', 'PUBLICADA', 35, 2, '2026-05-06 09:01:54.544406+00', '2026-05-06 09:11:59.195723+00');
 INSERT INTO public.preguntas OVERRIDING SYSTEM VALUE VALUES (14665, 'MIR 2025-2026, P202', '1. La Isquemia Arterial Crónica', 'Respecto a la Trombosis Venosa Profunda, señale lo correcto:', NULL, 2026, NULL, false, 'MEDIO', 'PUBLICADA', 35, 2, '2026-05-06 09:01:54.544406+00', '2026-05-06 09:11:59.195723+00');
 
-
---
--- Data for Name: profesores; Type: TABLE DATA; Schema: public; Owner: -
---
-
-INSERT INTO public.profesores VALUES (8, 'Ginecologia');
-INSERT INTO public.profesores VALUES (10, 'Ginecologia');
 
 
 --
@@ -28638,3 +28612,4 @@ SELECT pg_catalog.setval('public.usuarios_id_usuario_seq', 14, true);
 -- PostgreSQL database dump complete
 --
 
+COMMIT;
