@@ -20,6 +20,7 @@ import java.security.SecureRandom;
 public class AuthService {
 
     private final JwtService jwtService;
+    private final com.jugamir.backend.security.ProfessorRegistrationPolicy professorRegistrationPolicy;
     private final UsuarioRepository usuarioRepository;
     private final JugadorRepository jugadorRepository;
     private final ProfesorRepository profesorRepository;
@@ -58,6 +59,7 @@ public class AuthService {
 
     @Transactional
     public void registerProfesor(RegisterProfesorRequest request) {
+        professorRegistrationPolicy.requireApproved(request.getEmail());
 
         validarUsuario(request);
 

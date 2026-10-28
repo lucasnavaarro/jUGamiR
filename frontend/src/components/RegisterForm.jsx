@@ -101,6 +101,7 @@ export default function RegisterForm() {
                 </button>
             </div>
 
+            {tipo === 'profesor' && <p>El registro de profesores requiere un correo @ugr.es autorizado previamente por el administrador.</p>}
             <form onSubmit={handleSubmit} className="auth-form" noValidate>
 
                 {/* Campos comunes */}

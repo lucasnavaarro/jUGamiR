@@ -53,6 +53,7 @@ services:
             MAIL_USERNAME: ${MAIL_USERNAME}
             MAIL_PASSWORD: ${MAIL_PASSWORD}
             JWT_SECRET: ${JWT_SECRET}
+            PROFESSOR_ALLOWED_EMAILS: ${PROFESSOR_ALLOWED_EMAILS:-}
             SCRIPTS_PATH: /app/db
             IMAGENES_PATH: /app/static
             APP_URL: ${APP_URL:-http://localhost:3000}
