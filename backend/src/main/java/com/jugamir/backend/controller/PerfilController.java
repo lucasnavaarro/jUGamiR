@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 public class PerfilController {
 
     private final PerfilService perfilService;
+    private final com.jugamir.backend.service.EmailChangeService emailChanges;
 
     @GetMapping("/perfil")
     public ResponseEntity<PerfilResponseDTO> obtenerPerfil(@AuthenticationPrincipal Usuario usuario) {
@@ -26,11 +27,15 @@ public class PerfilController {
     @PutMapping("/perfil")
     public ResponseEntity<?> editarPerfil(@AuthenticationPrincipal Usuario usuario,
             @Valid @RequestBody EditarPerfilRequest req) {
-        String nuevoJwt = perfilService.editarPerfil(usuario, req);
-        if (nuevoJwt != null) {
-            return ResponseEntity.ok(Map.of("token", nuevoJwt));
-        }
-        return ResponseEntity.ok().build();
+        boolean reauthenticate = perfilService.editarPerfil(usuario, req);
+        return ResponseEntity.ok(Map.of("reauthenticate", reauthenticate));
+    }
+
+    @PostMapping("/email/codigo")
+    public ResponseEntity<Void> emailCode(@AuthenticationPrincipal Usuario usuario,
+            @Valid @RequestBody com.jugamir.backend.dto.EmailChangeRequest request) {
+        emailChanges.issue(usuario.getIdUsuario(), request.email(), request.currentPassword());
+        return ResponseEntity.accepted().build();
     }
 
     @DeleteMapping("/perfil")

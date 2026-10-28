@@ -140,7 +140,9 @@ public class AuthService {
         if (rt.getExpiraEn().isBefore(LocalDateTime.now()))
             throw new BusinessException("El token ha expirado");
 
-        Usuario usuario = rt.getUsuario();
+        Usuario usuario = accounts.current(rt.getUsuario().getIdUsuario());
+        if (refreshTokenRepository.findByToken(refreshToken).isEmpty())
+            throw new org.springframework.security.authentication.BadCredentialsException("Sesión caducada");
         String rol = jugadorRepository.existsByUsuario(usuario) ? "JUGADOR" : "PROFESOR";
         String nuevoJwt = jwtService.generateToken(usuario.getEmail(), usuario.getTokenVersion(), rol);
 
@@ -153,13 +155,16 @@ public class AuthService {
         RefreshToken rt = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new BusinessException("Token no encontrado"));
 
-        Usuario usuario = rt.getUsuario();
+        Usuario usuario = accounts.current(rt.getUsuario().getIdUsuario());
+        if (refreshTokenRepository.findByToken(refreshToken).isEmpty())
+            throw new org.springframework.security.authentication.BadCredentialsException("Sesión caducada");
         // Al subir la versión, todos los JWT con versión anterior son rechazados
         // inmediatamente en la siguiente petición
         usuario.setTokenVersion(usuario.getTokenVersion() + 1);
         usuarioRepository.save(usuario);
 
-        refreshTokenRepository.delete(rt);
+        refreshTokenRepository.deleteByUsuario(usuario);
+        codigo2faRepository.deleteByUsuario(usuario);
     }
 
     private void validarUsuario(RegisterRequest request) {
@@ -214,11 +219,15 @@ public class AuthService {
         if (resetToken.getExpiraEn().isBefore(LocalDateTime.now()))
             throw new BusinessException("El enlace ha expirado");
 
-        Usuario usuario = resetToken.getUsuario();
+        Usuario usuario = accounts.current(resetToken.getUsuario().getIdUsuario());
+        if (passwordResetTokenRepository.consume(request.token(), LocalDateTime.now()) != 1)
+            throw new BusinessException("Token inválido o ya usado");
+        usuario.setTokenVersion(usuario.getTokenVersion() + 1);
+        refreshTokenRepository.deleteByUsuario(usuario);
+        codigo2faRepository.deleteByUsuario(usuario);
         usuario.setContrasenaHash(passwordEncoder.encode(request.nuevaPassword()));
         usuarioRepository.save(usuario);
 
-        resetToken.setUsado(true);
-        passwordResetTokenRepository.save(resetToken);
+        passwordResetTokenRepository.deleteByUsuario(usuario);
     }
 }
