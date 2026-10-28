@@ -29,7 +29,7 @@ public class JuegoController {
     public ResponseEntity<Void> responderPregunta(@AuthenticationPrincipal Usuario usuario,
             @PathVariable Long partidaId, @Valid @RequestBody ResponderPreguntaRequest request) {
 
-        juegoService.responderPregunta(partidaId, usuario.getIdUsuario(), request.respuestaId(), request.tiempoMs());
+        juegoService.responderPregunta(partidaId, usuario.getIdUsuario(), request.respuestaId(), request.preguntaPartidaId());
         return ResponseEntity.ok().build();
     }
 
@@ -39,8 +39,9 @@ public class JuegoController {
     }
 
     @PostMapping("/{partidaId}/pasarse")
-    public ResponseEntity<Void> pasarTurno(@AuthenticationPrincipal Usuario usuario, @PathVariable Long partidaId) {
-        juegoService.pasarTurno(partidaId, usuario.getIdUsuario());
+    public ResponseEntity<Void> pasarTurno(@AuthenticationPrincipal Usuario usuario, @PathVariable Long partidaId,
+            @Valid @RequestBody com.jugamir.backend.dto.PasarTurnoRequest request) {
+        juegoService.pasarTurno(partidaId, usuario.getIdUsuario(), request.preguntaPartidaId());
         return ResponseEntity.ok().build();
     }
 }

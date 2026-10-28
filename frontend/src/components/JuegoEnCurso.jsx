@@ -25,7 +25,9 @@ export default function JuegoEnCurso({ lobby }) {
     const [imagenesActuales, setImagenesActuales] = useState([]);
     const baseUrl = import.meta.env.DEV ? 'http://localhost:8080' : ''; // En prod no es necesario, pero nos ahorra tener que poner http://localhost:8080/api en cada fetch
     const miIdUsuario = parseInt(localStorage.getItem('idUsuario'), 10);
-    const tiempoInicioRef = useRef(null);
+    const [preguntaPartidaId, setPreguntaPartidaId] = useState(null);
+    const [venceEn, setVenceEn] = useState(null);
+    const questionTimer = useRef(null);
 
     //Cargar estado inicial + conectar WebSocket
 
@@ -38,14 +40,19 @@ export default function JuegoEnCurso({ lobby }) {
             return;
         }
 
-        apiFetch(`/api/juego/${lobby.idPartida}/estado`)
-            .then(res => res.json())
-            .then(data => setEstadoJuego(data))
+        const loadState = () => apiFetch(`/api/juego/${lobby.idPartida}/estado`)
+            .then(res => { if (!res.ok) throw new Error('No se pudo cargar la partida'); return res.json(); })
+            .then(data => {
+                setEstadoJuego(data);
+                if (data.preguntaActual) handleEvent(data.preguntaActual);
+                else { clearTimeout(questionTimer.current); setFase('ESPERANDO_TIRADA'); setPreguntaActual(null); setRespuestas([]); }
+            }).catch(err => setError(err.message));
 
         const client = authenticatedClient({
             accessUrl: `/api/juego/${lobby.idPartida}/estado`,
             onAccessLost: () => navigate('/jugador'),
             onConnect: () => {
+                loadState();
                 client.subscribe(`/topic/juego/${lobby.idPartida}`, (message) => {
                     const data = JSON.parse(message.body);
                     handleEvent(data);
@@ -54,7 +61,7 @@ export default function JuegoEnCurso({ lobby }) {
         });
 
         client.activate();
-        return () => client.stop();
+        return () => { client.stop(); clearTimeout(questionTimer.current); };
 
     }, [lobby.idPartida]);
 
@@ -63,6 +70,9 @@ export default function JuegoEnCurso({ lobby }) {
         switch (data.evento) {
 
             case 'PREGUNTA':
+                clearTimeout(questionTimer.current);
+                setPreguntaPartidaId(data.preguntaPartidaId);
+                setVenceEn(data.venceEn);
                 setFase('GIRANDO_RULETA');
                 setCategoriaActual(data.categoria);
                 setPreguntaActual(data.pregunta);
@@ -70,13 +80,12 @@ export default function JuegoEnCurso({ lobby }) {
                 setRespuestaElegida(null);
                 setResultado(null);
                 setImagenesActuales(data.pregunta.imagenesUrl || []);
-                setTimeout(() => {
-                    setFase('MOSTRANDO_PREGUNTA');
-                    tiempoInicioRef.current = Date.now();
-                }, 4200);
+                questionTimer.current = setTimeout(() => setFase('MOSTRANDO_PREGUNTA'),
+                    Math.max(0, Date.parse(data.emitidaEn) - Date.now()));
                 break;
 
             case 'RESULTADO':
+                clearTimeout(questionTimer.current);
                 setResultado(data);
                 setFase('MOSTRANDO_RESULTADO');
                 setEstadoJuego(prev => ({
@@ -112,6 +121,7 @@ export default function JuegoEnCurso({ lobby }) {
                 break;
 
             case 'TURNO_PASADO':
+                clearTimeout(questionTimer.current);
                 setEstadoJuego(prev => ({
                     ...prev,
                     turnoActual: data.turnoActual
@@ -134,6 +144,7 @@ export default function JuegoEnCurso({ lobby }) {
                     )
                 }));
                 if (data.eraSuTurno) {
+                    clearTimeout(questionTimer.current);
                     setFase('ESPERANDO_TIRADA');
                     setPreguntaActual(null);
                     setRespuestas([]);
@@ -161,21 +172,28 @@ export default function JuegoEnCurso({ lobby }) {
         if (respuestaElegida) return;
         setRespuestaElegida(respuestaId);
 
-        const tiempoMs = Date.now() - tiempoInicioRef.current;
-        await apiFetch(`/api/juego/${lobby.idPartida}/responder`, {
+        const response = await apiFetch(`/api/juego/${lobby.idPartida}/responder`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 respuestaId,
-                tiempoMs,
+                preguntaPartidaId,
             }),
         });
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            setError(data.error || 'La respuesta no se pudo aceptar');
+            setRespuestaElegida(null);
+        }
     }
 
     async function onTiempoAgotado() {
 
         if (esMiTurno) {
-            await apiFetch(`/api/juego/${lobby.idPartida}/pasarse`, { method: 'POST' });
+            await apiFetch(`/api/juego/${lobby.idPartida}/pasarse`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preguntaPartidaId }),
+            });
         }
     }
 
@@ -271,7 +289,7 @@ export default function JuegoEnCurso({ lobby }) {
                                 letra={['A', 'B', 'C', 'D', 'E'][i]}
                                 texto={r.texto}
                                 onClick={() => responder(r.id)}
-                                deshabilitada={!esMiTurno || respuestaElegida !== null || fase === 'MOSTRANDO_RESULTADO'}
+                                deshabilitada={!esMiTurno || respuestaElegida !== null || fase !== 'MOSTRANDO_PREGUNTA'}
                                 estado={
                                     resultado
                                         ? r.id === resultado.respuestaCorrectaId
@@ -302,8 +320,7 @@ export default function JuegoEnCurso({ lobby }) {
                     {/* Temporizador */}
                     {fase === 'MOSTRANDO_PREGUNTA' && (
                         <Temporizador
-                            segundos={estadoJuego.tiempoRespuesta}
-                            onFin={onTiempoAgotado}
+                            venceEn={venceEn}
                         />
                     )}
                     {fase === 'MOSTRANDO_PREGUNTA' && esMiTurno && !respuestaElegida && (

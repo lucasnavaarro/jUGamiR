@@ -143,7 +143,7 @@ public class LobbyService {
     }
 
     public void iniciarPartida(Long partidaId, Long usuarioId) {
-        Partida partida = partidaRepository.findById(partidaId)
+        Partida partida = partidaRepository.findLockedById(partidaId)
                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
 
         if (!partida.getCreadaPor().getIdUsuario().equals(usuarioId))
@@ -185,7 +185,7 @@ public class LobbyService {
 
     public void abandonarPartida(Long partidaId, Long usuarioId) {
 
-        Partida partida = partidaRepository.findById(partidaId)
+        Partida partida = partidaRepository.findLockedById(partidaId)
                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
 
         JugadorPartida jugadorPartida = jugadorPartidaRepository
@@ -337,7 +337,7 @@ public class LobbyService {
 
     public void expulsarJugador(Long partidaId, Long anfitrionId, Long expulsadoId) {
 
-        Partida partida = partidaRepository.findById(partidaId)
+        Partida partida = partidaRepository.findLockedById(partidaId)
                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
 
         if (!partida.getCreadaPor().getIdUsuario().equals(anfitrionId))

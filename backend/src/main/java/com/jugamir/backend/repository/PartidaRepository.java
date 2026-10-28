@@ -9,6 +9,10 @@ import java.util.Optional;
 
 public interface PartidaRepository extends JpaRepository<Partida, Long> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from Partida p where p.id = :id")
+    Optional<Partida> findLockedById(@Param("id") Long id);
+
     // Para que el jugador se una con el código de la partida
     Optional<Partida> findByCodigoUnion(String codigoUnion);
 
