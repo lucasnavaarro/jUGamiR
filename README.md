@@ -161,7 +161,8 @@ y activa el perfil `local`. Fuera de Docker, usar `SPRING_PROFILES_ACTIVE=local`
 HTTP en localhost. Las cookies de renovación son `HttpOnly`, `SameSite=Strict` y
 `Secure` por defecto; la excepción HTTP solo funciona con ese perfil y una URL de loopback.
 
-Para producción, Docker Compose 2.24.4 o superior:
+Para producción con certificados gestionados por la propia aplicación,
+Docker Compose 2.24.4 o superior:
 
 ```bash
 # APP_URL debe ser el origen HTTPS exacto, sin barra final.
@@ -173,6 +174,103 @@ El proxy redirige HTTP a HTTPS, limita autenticación por IP y no publica Postgr
 ni el backend. Si hay otro proxy delante de Nginx, configurar los rangos de proxies
 confiables para recuperar la IP real; no aceptar cabeceras de IP arbitrarias.
 La renovación de certificados corresponde al despliegue.
+
+### Servidor con Nginx y HTTPS gestionados por el administrador
+
+Este es el modo para el servidor facilitado por la universidad. Requiere que el
+Nginx del administrador esté en el mismo servidor que Docker. No combinarlo con
+`docker-compose.production.yml` ni instalar certificados dentro de los contenedores.
+
+1. En el Mac, guardar la clave privada fuera del repositorio, por ejemplo en
+   `~/.ssh/andalnet-jugamir-deploy`, conservando todas sus líneas. Darle permisos
+   con `chmod 600 ~/.ssh/andalnet-jugamir-deploy`. No subirla a GitHub.
+2. Conectar usando los datos del correo:
+
+   ```bash
+   ssh -i ~/.ssh/andalnet-jugamir-deploy -p PUERTO_SSH USUARIO@SERVIDOR
+   ```
+
+   En la primera conexión, comparar la huella ED25519 SHA256 mostrada con la del
+   correo antes de aceptarla. No desactivar la comprobación de identidad del servidor.
+3. Dentro del servidor, comprobar `docker version` y `docker compose version`.
+   Se necesita Compose >= 2.24.4; usar Docker Engine >= 28 para el aislamiento de
+   puertos de loopback. Si no están disponibles, pedir al administrador que los
+   prepare; esta cuenta no dispone de `sudo`.
+4. Entrar en el directorio de despliegue indicado en el correo. Clonar allí el
+   repositorio si está vacío, o actualizar la instalación existente tras hacer
+   una copia de seguridad. No sobrescribir archivos de otros servicios:
+
+   ```bash
+   cd /RUTA/DE/DESPLIEGUE
+   git clone https://github.com/lucasnavaarro/jUGamiR.git .
+   ```
+
+5. Crear en ese directorio un `.env` nuevo con las variables descritas arriba,
+   contraseñas de producción y una clave JWT propia. Añadir lo siguiente:
+
+   ```dotenv
+   APP_URL=https://DOMINIO_PUBLICO_CONFIRMADO
+   APP_HTTP_PORT=3000
+   ```
+
+   Confirmar el dominio público con el administrador: no tiene por qué coincidir
+   con el nombre utilizado para SSH. `APP_URL` debe ser el origen HTTPS exacto,
+   sin barra final ni subruta. Proteger `.env` con `chmod 600 .env`. Mantener las
+   cookies seguras; el salto HTTP interno no requiere activar el perfil `local`.
+   Comprobar que el puerto 3000 esté disponible o acordar otro con el administrador.
+6. Validar sin mostrar secretos y arrancar:
+
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.managed-proxy.yml config --quiet
+   docker compose -f docker-compose.yml -f docker-compose.managed-proxy.yml up -d --build
+   docker compose -f docker-compose.yml -f docker-compose.managed-proxy.yml ps
+   curl -I http://127.0.0.1:3000/
+   ```
+
+   La primera importación del banco puede tardar varios minutos. El frontend
+   publica únicamente `127.0.0.1:3000` (HTTP); PostgreSQL y el backend no publican
+   puertos, y pgAdmin no arranca. Los datos y las imágenes persisten en volúmenes.
+   Todos los comandos posteriores de esta instalación deben usar ambos archivos
+   Compose. No usar `docker compose down -v`.
+7. Comunicar al administrador: «La aplicación escucha por HTTP en
+   `127.0.0.1:3000`. Incluye Nginx dentro del contenedor, que sirve la web y hace
+   proxy al backend. Necesitamos publicar el dominio por HTTPS y permitir
+   WebSockets en `/ws`». Si se eligió otro puerto, comunicar ese valor.
+
+El Nginx del administrador debe reenviar el dominio original y la IP del cliente,
+y permitir cambios de protocolo WebSocket. Esta es una referencia para su bloque
+`server` HTTPS; el administrador gestiona certificados y redirección HTTP a HTTPS:
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_read_timeout 90s;
+    client_max_body_size 100m;
+}
+```
+
+El proxy interno confía únicamente en su gateway Docker y loopback para recuperar
+la IP del visitante. Si el administrador usa otra topología, debe ajustar
+`TRUSTED_PROXY_IP` a la IPv4 exacta del proxy que conecta; no usar rangos amplios.
+Después de activar HTTPS, probar desde el dominio público el registro y login
+con correo real, la renovación de sesión, una partida entre dos navegadores y
+la carga/consulta de imágenes. Probar también el reinicio de los contenedores para
+confirmar la persistencia. Las pruebas HTTP por SSH solo verifican que el servicio
+responde, no el funcionamiento del login con cookies seguras.
+
+Una instalación nueva importa el banco de preguntas y empieza sin cuentas reales.
+No se copian automáticamente los usuarios ni las imágenes añadidas en el Mac.
+Si se quieren conservar, preparar antes una copia de PostgreSQL y del volumen de
+imágenes; los archivos semilla no contienen esos cambios.
+
+### Comportamiento de seguridad
 
 - El registro de profesores está abierto a cualquier correo cuyo dominio sea exactamente
   `ugr.es`, sin lista de autorización ni configuración adicional en `.env`. El backend

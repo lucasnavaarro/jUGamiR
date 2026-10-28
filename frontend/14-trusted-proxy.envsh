@@ -1,0 +1,20 @@
+#!/bin/sh
+# Sourced by the official Nginx entrypoint before 20-envsubst-on-templates.sh.
+# Only the host proxy may supply client IPs. Never trust an entire Docker subnet.
+if [ -z "${TRUSTED_PROXY_IP:-}" ]; then
+    TRUSTED_PROXY_IP=$(ip -4 route show default | awk '/^default via / {print $3; exit}')
+fi
+
+if ! printf '%s\n' "$TRUSTED_PROXY_IP" | awk -F. '
+    NF != 4 {exit 1}
+    {
+        for (i = 1; i <= 4; i++) {
+            if ($i !~ /^[0-9]+$/ || length($i) > 3 || $i > 255) exit 1
+        }
+        if ($0 == "0.0.0.0") exit 1
+    }
+'; then
+    echo 'Cannot identify the host proxy. Set TRUSTED_PROXY_IP to its single IPv4 address.' >&2
+    exit 1
+fi
+export TRUSTED_PROXY_IP
