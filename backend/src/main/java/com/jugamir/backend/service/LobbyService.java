@@ -21,6 +21,7 @@ import java.util.Map;
 public class LobbyService {
 
     private final PartidaRepository partidaRepository;
+    private final com.jugamir.backend.security.GameAccess gameAccess;
     private final JugadorRepository jugadorRepository;
     private final JugadorPartidaRepository jugadorPartidaRepository;
     private final SimpMessagingTemplate messagingTemplate;
@@ -96,7 +97,8 @@ public class LobbyService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Object> obtenerEstadoLobby(Long partidaId) {
+    public Map<String, Object> obtenerEstadoLobby(Long partidaId, Long usuarioId) {
+        gameAccess.requireMember(partidaId, usuarioId);
         Partida partida = partidaRepository.findById(partidaId)
                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
         return construirEstadoLobby(partida);

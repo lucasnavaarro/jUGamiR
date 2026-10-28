@@ -34,8 +34,8 @@ public class JuegoController {
     }
 
     @GetMapping("/{partidaId}/estado")
-    public ResponseEntity<Map<String, Object>> obtenerEstadoJuego(@PathVariable Long partidaId) {
-        return ResponseEntity.ok(juegoService.obtenerEstadoJuego(partidaId));
+    public ResponseEntity<Map<String, Object>> obtenerEstadoJuego(@PathVariable Long partidaId, @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(juegoService.obtenerEstadoJuego(partidaId, usuario.getIdUsuario()));
     }
 
     @PostMapping("/{partidaId}/pasarse")

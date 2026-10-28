@@ -21,6 +21,7 @@ import java.util.HashMap;
 public class JuegoService {
 
         private final PartidaRepository partidaRepository;
+        private final com.jugamir.backend.security.GameAccess gameAccess;
         private final JugadorPartidaRepository jugadorPartidaRepository;
         private final PreguntaRepository preguntaRepository;
         private final PreguntaPartidaRepository preguntaPartidaRepository;
@@ -264,7 +265,8 @@ public class JuegoService {
         }
 
         @Transactional(readOnly = true)
-        public Map<String, Object> obtenerEstadoJuego(Long partidaId) {
+        public Map<String, Object> obtenerEstadoJuego(Long partidaId, Long usuarioId) {
+                gameAccess.requireMember(partidaId, usuarioId);
 
                 Partida partida = getPartidaEnCurso(partidaId);
 
@@ -438,7 +440,7 @@ public class JuegoService {
                                 .findByPartidaAndJugador_Usuario_IdUsuario(partida, usuarioId)
                                 .orElseThrow(() -> new IllegalStateException("No estás jugando esta partida"));
 
-                if (!jugador.getOrdenTurno().equals(partida.getTurnoActual()))
+                if (jugador.getResultado() != ResultadoJugador.PENDIENTE || !jugador.getOrdenTurno().equals(partida.getTurnoActual()))
                         throw new IllegalStateException("No es tu turno");
                 return jugador;
         }
