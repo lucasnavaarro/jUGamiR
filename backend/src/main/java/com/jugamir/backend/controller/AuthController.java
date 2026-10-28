@@ -17,6 +17,7 @@ import java.time.Duration;
 public class AuthController {
 
     private final AuthService authService;
+    private final com.jugamir.backend.security.RefreshCookiePolicy cookies;
 
     @PostMapping("/register/jugador")
     public ResponseEntity<Void> registerJugador(@Valid @RequestBody RegisterJugadorRequest request) {
@@ -43,13 +44,7 @@ public class AuthController {
         AuthService.VerifyResult result = authService.verify(request);
 
         // EL REFRESH TOKEN VIAJA EN UNA COOKIE
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", result.refreshToken())
-                .httpOnly(true)
-                .secure(false) // false en localhost, true en producción
-                .path("/api/auth") // solo se envía en peticiones a /api/auth/*
-                .maxAge(Duration.ofDays(30))
-                .sameSite("Strict")
-                .build();
+        ResponseCookie cookie = cookies.create(result.refreshToken(), Duration.ofDays(30));
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -75,13 +70,7 @@ public class AuthController {
         }
 
         // Destruye la cookie en el navegador: maxAge(0) hace que caduque inmediatamente
-        ResponseCookie cookieBorrada = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
-                .secure(false) // false en localhost, true en producción
-                .path("/api/auth")
-                .maxAge(0)
-                .sameSite("Strict")
-                .build();
+        ResponseCookie cookieBorrada = cookies.create("", Duration.ZERO);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookieBorrada.toString())

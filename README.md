@@ -125,7 +125,7 @@ El fichero `.env` debe contener las siguientes variables:
 ```dotenv
 # Base de datos
 DB_USER=jugamir
-DB_PASSWORD=jugamir_pw
+DB_PASSWORD=<contraseña-aleatoria>
 
 # JWT (clave generada con: openssl rand -base64 64)
 JWT_SECRET=
@@ -136,7 +136,7 @@ MAIL_PASSWORD=
 
 # pgAdmin
 PGADMIN_EMAIL=admin@jugamir.com
-PGADMIN_PASSWORD=admin
+PGADMIN_PASSWORD=<contraseña-aleatoria>
 ```
 
 ```bash
@@ -153,6 +153,62 @@ Para que el envío de correos funcione, la cuenta de Gmail usada en `MAIL_USERNA
 | Frontend (React) | http://localhost:3000 |
 | Backend (API REST) | http://localhost:8080 |
 | pgAdmin (gestión BD) | http://localhost:5050 |
+
+## Configuración y actualización de seguridad
+
+El Compose base es para desarrollo local: publica los puertos únicamente en `127.0.0.1`
+y activa el perfil `local`. Fuera de Docker, usar `SPRING_PROFILES_ACTIVE=local` para
+HTTP en localhost. Las cookies de renovación son `HttpOnly`, `SameSite=Strict` y
+`Secure` por defecto; la excepción HTTP solo funciona con ese perfil y una URL de loopback.
+
+Para producción, Docker Compose 2.24.4 o superior:
+
+```bash
+# APP_URL debe ser el origen HTTPS exacto, sin barra final.
+# TLS_CERTS_DIR contiene fullchain.pem y privkey.pem de tu dominio.
+docker compose -f docker-compose.yml -f docker-compose.production.yml up --build -d
+```
+
+El proxy redirige HTTP a HTTPS, limita autenticación por IP y no publica PostgreSQL
+ni el backend. Si hay otro proxy delante de Nginx, configurar los rangos de proxies
+confiables para recuperar la IP real; no aceptar cabeceras de IP arbitrarias.
+La renovación de certificados corresponde al despliegue.
+
+- `PROFESSOR_ALLOWED_EMAILS`: lista de correos `@ugr.es` autorizados por el administrador,
+  separados por comas. Vacía bloquea altas nuevas de profesor; conserva cuentas existentes.
+- El login devuelve `challengeId` tras comprobar la contraseña. Verificar y reenviar
+  requieren ese identificador. Cada desafío caduca en 10 minutos, admite cinco intentos
+  y dos reenvíos separados por al menos 60 segundos. Hay límites adicionales por cuenta.
+- Cambiar correo exige contraseña actual y código enviado al nuevo correo. Tanto el
+  cambio de correo como la recuperación de contraseña revocan sesiones anteriores.
+- Las partidas exigen pertenencia en HTTP y STOMP. El servidor fija y guarda el plazo
+  de cada pregunta, calcula el tiempo y cierra los turnos vencidos aunque el cliente se desconecte.
+- Solo se aceptan PNG/JPEG reales, reencodificados sin metadatos, hasta 10 MiB y 16 millones
+  de píxeles. Los ZIP deben usar rutas `imagenes/...`: máximo 500 entradas, 200 MiB
+  descomprimidos y recodificados, con un presupuesto de procesamiento de 30 segundos
+  comprobado entre operaciones (no un timeout de CPU estricto), sin traversal ni enlaces simbólicos.
+
+Flyway aplica V2–V4 sobre el esquema existente, baselining en V1. Hacer una copia de
+seguridad antes de actualizar. V2 invalida códigos de login antiguos; V4 cierra
+preguntas anteriores que no tenían un plazo fiable. No es necesario borrar la base.
+En una instalación vacía, el Compose carga primero `db/schema.sql`.
+
+Las nuevas imágenes se guardan en el volumen `imagenes_data`; los originales del
+classpath siguen disponibles. Si hay imágenes antiguas en el bind mount local,
+volver a subir las necesarias mediante el importador validado. No copiar a ciegas
+archivos antiguos al volumen ni eliminar el volumen de PostgreSQL durante la actualización.
+El contenedor backend usa un usuario sin privilegios y los scripts de importación son de solo lectura.
+
+### Pruebas de regresión de seguridad
+
+```bash
+sh scripts/test-security.sh
+docker build -f frontend/Dockerfile -t jugamir-frontend:check .
+```
+
+El script crea una base temporal sin puertos públicos, carga solo el esquema, ejecuta
+las pruebas con correo simulado y elimina la base y su red al terminar. No lee `.env`
+ni importa `db/data.sql`. Requiere Docker y las imágenes PostgreSQL 16 y Maven/Java 17.
 
 ---
 
