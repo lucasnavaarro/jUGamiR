@@ -2,6 +2,7 @@ package com.jugamir.backend.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import com.jugamir.backend.security.PasswordPolicy;
 
 @Data
 public class RegisterRequest {
@@ -17,8 +18,7 @@ public class RegisterRequest {
     private String email;
 
     @NotBlank
-    @Size(min = 8, message = "La contraseña dene tener al menos 8 caractreres")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$", message = "La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial")
+    @Pattern(regexp = PasswordPolicy.REGEX, message = PasswordPolicy.MESSAGE)
     private String password;
 
 }
