@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { apiFetch } from "../services/api";
 import CrearPartidaForm from "../components/CrearPartidaForm";
@@ -7,8 +7,13 @@ export default function CrearPartida() {
     const navigate = useNavigate();
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const mounted = useRef(true);
+    const sending = useRef(false);
+    useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
 
     async function handleCrearPartida(formData) {
+        if (sending.current) return;
+        sending.current = true;
         setIsLoading(true);
         setError('');
 
@@ -21,13 +26,14 @@ export default function CrearPartida() {
 
             if (!res || !res.ok) throw new Error();
             const data = await res.json(); //convierte el string JSON en un objeto JavaScript
-            navigate(`/partida/${data.idPartida}`); //redirige a la partida creada
+            if (mounted.current) navigate(`/partida/${data.idPartida}`); //redirige a la partida creada
 
         } catch {
-            setError('Error al crear la partida. Inténtalo de nuevo');
+            if (mounted.current) setError('Error al crear la partida. Inténtalo de nuevo');
 
         } finally {
-            setIsLoading(false);
+            sending.current = false;
+            if (mounted.current) setIsLoading(false);
         }
     }
 

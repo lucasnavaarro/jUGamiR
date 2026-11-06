@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { apiFetch } from "../services/api";
 import EntrenamientoForm from "../components/EntrenamientoForm";
@@ -6,9 +6,14 @@ import EntrenamientoForm from "../components/EntrenamientoForm";
 export default function Entrenamiento() {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const mounted = useRef(true);
+    const sending = useRef(false);
+    useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
     const [error, setError] = useState('');
 
     async function handleCrear(formData) {
+        if (sending.current) return;
+        sending.current = true;
         setIsLoading(true);
         setError('');
 
@@ -21,11 +26,12 @@ export default function Entrenamiento() {
 
             if (!res || !res.ok) throw new Error();
             const data = await res.json();
-            navigate(`/partida/${data.idPartida}`);
+            if (mounted.current) navigate(`/partida/${data.idPartida}`);
         } catch (err) {
-            setError('Error al crear la sesión de entrenamiento');
+            if (mounted.current) setError('Error al crear la sesión de entrenamiento');
         } finally {
-            setIsLoading(false);
+            sending.current = false;
+            if (mounted.current) setIsLoading(false);
         }
     }
 

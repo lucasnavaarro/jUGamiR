@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {assert,caseTest,compose,ROOT,delay,PASSWORD} from './common.mjs';
+await caseTest('OPS-03','restauración de volumen y arranque de aplicación aparte',async()=>{
+ const volume='jugamir-fullqa-20261104_qa_restore_images';
+ execFileSync('docker',['volume','create',volume]);
+ execFileSync('docker',['run','-i','--rm','--network','none','--user','root','--entrypoint','sh','-v',volume+':/restore','jugamir-fullqa-backend:20261104','-c','tar -xzf - -C /restore'],{input:fs.readFileSync('/private/tmp/jugamir-fullqa-image-backup.tar.gz')});
+ compose('--profile','restore','up','-d','--no-deps','restorebackend');
+ const base='http://127.0.0.1:18083';
+ let up=false;for(let i=0;i<80;i++){try{if((await fetch(base+'/actuator/health')).ok){up=true;break;}}catch{}await delay(250);}assert.ok(up);
+ const query=s=>compose('exec','-T','db','psql','-X','-qAt','-U','audit_test','-d','audit_restore','-c',s).trim();
+ const email=query("select u.email from usuarios u join jugadores j on j.id_usuario=u.id_usuario where u.es_activo=true order by u.id_usuario limit 1");
+ const req=async(path,body,token)=>fetch(base+path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined});
+ const login=await req('/api/auth/login',{email,password:PASSWORD});assert.equal(login.status,202);const challenge=(await login.json()).challengeId;
+ const otp=query(`select codigo from codigos_2fa where challenge_id='${challenge}'`);
+ const verify=await req('/api/auth/verify',{challengeId:challenge,codigo:otp});assert.equal(verify.status,200);const token=(await verify.json()).token;
+ assert.equal((await req('/api/usuario/perfil',undefined,token)).status,200);
+ assert.equal((await fetch(base+'/imagenes/qa-persistence.png')).status,200);
+ assert.equal(query("select max(version::integer) from flyway_schema_history where success and version~'^[0-9]+$'"),'5');
+ return 'Aplicación independiente con audit_restore y volumen restaurado: login OTP, perfil, imagen y Flyway v5 correctos.';
+});

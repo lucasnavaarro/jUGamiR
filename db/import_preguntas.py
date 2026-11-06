@@ -57,7 +57,8 @@ def extract_anio(identificador: str) -> int | None:
     second = m.group(2)      # p.ej. "25", "2000" o None
     if second:
         if len(second) == 2:
-            return int(first[:2] + second)   # "20" + "25" = 2025
+            candidate = (int(first) // 100) * 100 + int(second)
+            return candidate + 100 if candidate < int(first) else candidate
         else:
             return int(second)               # "2000"
     return int(first)
@@ -85,16 +86,8 @@ def parse_dificultad(valor: str) -> str:
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
-    # Leer CSV completo (separador ';')
-    with open(CSV_PATH, encoding="utf-8") as f:
-        raw = f.read().splitlines()
-
-    if not raw:
-        print("El CSV está vacío.")
-        sys.exit(1)
-
-    header = [h.strip() for h in raw[0].split(";")]
-    filas  = [dict(zip(header, line.split(";"))) for line in raw[1:] if line.strip()]
+    from csv_rows import read_rows
+    filas = read_rows(CSV_PATH)
     print(f"Filas leídas del CSV: {len(filas)}")
 
     # Conectar a la BD

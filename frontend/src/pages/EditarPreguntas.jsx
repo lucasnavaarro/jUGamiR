@@ -173,7 +173,7 @@ export default function EditarPreguntas() {
                                                         {editandoId === p.id ? 'Cerrar' : 'Editar'}
                                                     </button>
                                                     <button type="button" className="btn btn--danger btn--sm"
-                                                        onClick={() => handleEliminar(p.id)}>🗑</button>
+                                                        aria-label={`Eliminar pregunta ${p.identificador}`} onClick={() => handleEliminar(p.id)}>🗑</button>
                                                 </td>
                                             </tr>
                                             {editandoId === p.id && editForm && (
@@ -275,7 +275,7 @@ export default function EditarPreguntas() {
                                                                     </div>
                                                                     <div className="editar__campo">
                                                                         <label>Comentario</label>
-                                                                        <input className="gestion__input" value={editForm.comentario}
+                                                                        <input aria-label="Comentario" className="gestion__input" value={editForm.comentario}
                                                                             onChange={e => setEditForm(p => ({ ...p, comentario: e.target.value }))} />
                                                                     </div>
                                                                     <div className="editar__campo">

@@ -289,9 +289,15 @@ imágenes; los archivos semilla no contienen esos cambios.
   descomprimidos y recodificados, con un presupuesto de procesamiento de 30 segundos
   comprobado entre operaciones (no un timeout de CPU estricto), sin traversal ni enlaces simbólicos.
 
-Flyway aplica V2–V4 sobre el esquema existente, baselining en V1. Hacer una copia de
+Flyway aplica V2–V8 sobre el esquema existente, baselining en V1. Hacer una copia de
 seguridad antes de actualizar. V2 invalida códigos de login antiguos; V4 cierra
 preguntas anteriores que no tenían un plazo fiable. No es necesario borrar la base.
+V5 amplía el límite de progreso por categoría hasta 30 aciertos para admitir los
+umbrales configurables de quesito; conserva los registros y su progreso actual.
+V6 libera las plazas ocupadas por expulsados sin borrar su historial. V7 impide
+duplicados de email/nick por mayúsculas o espacios exteriores. Si detecta cuentas
+existentes que colisionan, se detiene para resolverlas sin fusionar ni borrar datos.
+V8 incorpora a instalaciones existentes el índice de búsqueda de partidas por jugador que ya incluye el esquema inicial.
 En una instalación vacía, el Compose carga primero `db/schema.sql`.
 Después importa `db/data.sql` en una transacción. El banco inicial usa un autor
 interno deshabilitado, sin perfil de profesor/jugador y sin contraseña utilizable;
@@ -320,3 +326,9 @@ y su red al terminar. No lee `.env`. Requiere Docker y las imágenes PostgreSQL 
 ---
 
 Autor: Lucas Navarro Moreno
+
+## Regresiones automáticas
+
+El workflow [jUGamiR regressions](.github/workflows/regression.yml) comprueba backend con PostgreSQL desechable, sesiones/utilidades del frontend, build, lector CSV y código de salida del ejecutor QA. Las suites de integración requieren `JUGAMIR_DISPOSABLE_DB_TEST=true` y una base llamada `audit_test`; sus fixtures borran únicamente datos de prueba. No activarlas sobre una instalación compartida. El CI rechaza pruebas omitidas y no despliega. Se activará cuando se publiquen estos cambios.
+
+La [revisión final del 6 de noviembre](docs/REVISION-FINAL-2026-11-06.md) contiene resultados y límites. Los recorridos de navegador y la carga de treinta minutos siguen siendo pruebas de aceptación separadas. El [procedimiento de despliegue](docs/PASOS-DESPLIEGUE-PENDIENTE.md) incluye comprobación pública de salud, observación y reversión.

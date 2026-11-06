@@ -16,6 +16,10 @@ public interface PartidaRepository extends JpaRepository<Partida, Long> {
     // Para que el jugador se una con el código de la partida
     Optional<Partida> findByCodigoUnion(String codigoUnion);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from Partida p where p.codigoUnion = :codigo")
+    Optional<Partida> findLockedByCodigoUnion(@Param("codigo") String codigo);
+
     // Listar partidas públicas — CAST explícito necesario para enums nativos de PostgreSQL
     @Query(value = "SELECT * FROM partidas WHERE tipo = CAST(:tipo AS tipo_partida) AND estado = CAST(:estado AS estado_partida)", nativeQuery = true)
     List<Partida> findByTipoAndEstado(@Param("tipo") String tipo, @Param("estado") String estado);

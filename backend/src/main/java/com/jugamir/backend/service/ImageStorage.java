@@ -34,7 +34,7 @@ public class ImageStorage {
         this.root = Path.of(base).toAbsolutePath().normalize().resolve("imagenes");
     }
 
-    Path destination(String name) throws IOException {
+    Path destination(String name) {
         if (name == null || name.isBlank() || name.contains("\\") || name.indexOf('\0') >= 0)
             throw new IllegalArgumentException("Ruta de imagen inválida");
         String relative = name.startsWith("/") ? name.substring(1) : name;
@@ -57,6 +57,10 @@ public class ImageStorage {
                 throw new IllegalArgumentException("No se permiten enlaces simbólicos");
         }
         return target;
+    }
+
+    String canonicalName(String name) {
+        return "imagenes/" + root.relativize(destination(name)).toString().replace('\\', '/');
     }
 
     void publish(Path staged, String name) throws IOException {
@@ -87,12 +91,20 @@ public class ImageStorage {
     }
 
     public void uploadZip(MultipartFile file) throws IOException {
+        uploadZip(file, name -> {});
+    }
+
+    public void uploadZip(MultipartFile file, java.util.function.Consumer<String> beforePublish) throws IOException {
         var stages = new java.util.LinkedHashMap<String, Path>();
         long total = 0;
         long sanitizedTotal = 0;
         long deadline = System.nanoTime() + 30_000_000_000L;
         int count = 0;
-        try (ZipInputStream zip = new ZipInputStream(file.getInputStream())) {
+        Path archive = Files.createTempFile("jugamir-archive-", ".zip");
+        try (InputStream input = file.getInputStream()) {
+            copyBounded(input, archive, MAX_ZIP_BYTES + 1024 * 1024, deadline);
+            rejectSpecialEntries(archive);
+            try (ZipInputStream zip = new ZipInputStream(Files.newInputStream(archive))) {
             java.util.zip.ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
                 if (++count > MAX_ENTRIES || System.nanoTime() > deadline)
@@ -103,9 +115,10 @@ public class ImageStorage {
                     if (zip.read() != -1) throw new IllegalArgumentException("Directorio ZIP con contenido");
                     continue;
                 }
-                if (stages.containsKey(entry.getName())) throw new IllegalArgumentException("Entrada ZIP duplicada");
+                String canonical = canonicalName(entry.getName());
+                if (stages.containsKey(canonical)) throw new IllegalArgumentException("Entrada ZIP duplicada");
                 Path stage = Files.createTempFile("jugamir-zip-", ".tmp");
-                stages.put(entry.getName(), stage);
+                stages.put(canonical, stage);
                 long size = copyBounded(zip, stage, Math.min(MAX_IMAGE_BYTES, MAX_ZIP_BYTES - total), deadline);
                 total += size;
                 if (entry.getCompressedSize() > 0 && size > entry.getCompressedSize() * 200L)
@@ -118,10 +131,43 @@ public class ImageStorage {
             }
             if (stages.isEmpty()) throw new IllegalArgumentException("El ZIP no contiene imágenes");
             // Validate the complete archive before publishing any image.
+            for (String name : stages.keySet()) beforePublish.accept(name);
             for (var staged : stages.entrySet()) publish(staged.getValue(), staged.getKey());
+            }
         } finally {
+            Files.deleteIfExists(archive);
             for (Path stage : stages.values()) Files.deleteIfExists(stage);
         }
+    }
+
+    // ZipInputStream does not expose Unix attributes; inspect the central directory first.
+    private void rejectSpecialEntries(Path archive) throws IOException {
+        try (var file = new java.io.RandomAccessFile(archive.toFile(), "r")) {
+            int tailSize = (int) Math.min(file.length(), 65557);
+            byte[] tail = new byte[tailSize];
+            file.seek(file.length() - tailSize);
+            file.readFully(tail);
+            var end = java.nio.ByteBuffer.wrap(tail).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+            int eocd = -1;
+            for (int i = tailSize - 22; i >= 0; i--) {
+                if (end.getInt(i) == 0x06054b50 && i + 22 + Short.toUnsignedInt(end.getShort(i + 20)) == tailSize) { eocd = i; break; }
+            }
+            if (eocd < 0) throw new IllegalArgumentException("ZIP inválido");
+            int entries = Short.toUnsignedInt(end.getShort(eocd + 10));
+            if (end.getShort(eocd + 4) != 0 || end.getShort(eocd + 6) != 0 || entries == 65535 || entries > MAX_ENTRIES)
+                throw new IllegalArgumentException("ZIP dividido, ZIP64 o demasiadas entradas no admitido");
+            long position = Integer.toUnsignedLong(end.getInt(eocd + 16));
+            for (int i = 0; i < entries; i++) {
+                file.seek(position);
+                byte[] header = new byte[46]; file.readFully(header);
+                var h = java.nio.ByteBuffer.wrap(header).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+                if (h.getInt(0) != 0x02014b50) throw new IllegalArgumentException("Directorio ZIP inválido");
+                int mode = (h.getInt(38) >>> 16) & 0170000;
+                if (mode != 0 && mode != 0100000 && mode != 0040000)
+                    throw new IllegalArgumentException("No se admiten enlaces ni archivos especiales en ZIP");
+                position += 46L + Short.toUnsignedInt(h.getShort(28)) + Short.toUnsignedInt(h.getShort(30)) + Short.toUnsignedInt(h.getShort(32));
+            }
+        } catch (java.io.EOFException ex) { throw new IllegalArgumentException("ZIP truncado", ex); }
     }
 
     public void delete(String name) throws IOException {

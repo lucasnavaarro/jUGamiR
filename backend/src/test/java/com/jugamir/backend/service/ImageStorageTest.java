@@ -28,4 +28,17 @@ class ImageStorageTest {
         assertThrows(IllegalArgumentException.class, () -> storage.destination("imagenes/link/file.png"));
         assertFalse(Files.exists(outside.resolve("file.png")));
     }
+    @Test void rejectsZipSymlinkAttributesBeforePublishingAnyFile() throws Exception {
+        var pixels=new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(new java.awt.image.BufferedImage(2,2,java.awt.image.BufferedImage.TYPE_INT_RGB),"png",pixels);
+        var archive=new java.io.ByteArrayOutputStream();
+        try(var zip=new java.util.zip.ZipOutputStream(archive)) {
+            zip.putNextEntry(new java.util.zip.ZipEntry("imagenes/link.png"));zip.write(pixels.toByteArray());zip.closeEntry();
+        }
+        byte[] data=archive.toByteArray();var bytes=java.nio.ByteBuffer.wrap(data).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+        for(int j=0;j<data.length-46;j++)if(bytes.getInt(j)==0x02014b50){bytes.putShort(j+4,(short)0x0314);bytes.putInt(j+38,0120777<<16);break;}
+        var file=new MockMultipartFile("file","links.zip","application/zip",data);
+        assertThrows(IllegalArgumentException.class,()->new ImageStorage(temp.toString()).uploadZip(file));
+        assertFalse(Files.exists(temp.resolve("imagenes/link.png")));
+    }
 }

@@ -157,7 +157,7 @@ BEGIN
   END IF;
   SELECT COUNT(*) INTO v_count
   FROM jugadores_partida
-  WHERE partida_id = NEW.partida_id;
+  WHERE partida_id = NEW.partida_id AND resultado = 'PENDIENTE';
   IF v_count >= v_max THEN
     RAISE EXCEPTION 'La partida % ya está completa (máximo % jugadores).', NEW.partida_id, v_max;
   END IF;
@@ -563,7 +563,7 @@ CREATE TABLE public.progreso_categoria (
     jugador_partida_id bigint NOT NULL,
     categoria_id bigint NOT NULL,
     aciertos integer DEFAULT 0 NOT NULL,
-    CONSTRAINT progreso_categoria_aciertos_check CHECK (((aciertos >= 0) AND (aciertos <= 5)))
+    CONSTRAINT progreso_categoria_aciertos_check CHECK (((aciertos >= 0) AND (aciertos <= 30)))
 );
 
 
@@ -1102,6 +1102,13 @@ CREATE INDEX idx_jugadores_partida_partida ON public.jugadores_partida USING btr
 
 
 --
+-- Name: idx_jugadores_partida_jugador; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_jugadores_partida_jugador ON public.jugadores_partida USING btree (jugador_id);
+
+
+--
 -- Name: idx_partidas_codigo_union; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1440,3 +1447,7 @@ ALTER TABLE ONLY public.respuestas
 -- PostgreSQL database dump complete
 --
 
+
+-- Account identity is insensitive to surrounding spaces and case.
+CREATE UNIQUE INDEX IF NOT EXISTS usuarios_email_normalized_key ON public.usuarios (lower(btrim(email)));
+CREATE UNIQUE INDEX IF NOT EXISTS jugadores_nick_normalized_key ON public.jugadores (lower(btrim(nick)));

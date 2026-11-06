@@ -7,13 +7,13 @@ import com.jugamir.backend.security.PasswordPolicy;
 @Data
 public class RegisterRequest {
 
-    @NotBlank
+    @NotBlank @Size(max=120)
     private String nombre;
 
-    @NotBlank
+    @NotBlank @Size(max=120)
     private String apellidos;
 
-    @Email
+    @Email @Size(max=255)
     @NotBlank
     private String email;
 
@@ -21,4 +21,5 @@ public class RegisterRequest {
     @Pattern(regexp = PasswordPolicy.REGEX, message = PasswordPolicy.MESSAGE)
     private String password;
 
+    public void setEmail(String email) { this.email = email == null ? null : email.strip().toLowerCase(java.util.Locale.ROOT); }
 }

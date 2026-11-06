@@ -11,6 +11,8 @@ export default function RespuestaCard({ letra, texto, onClick, deshabilitada, es
         >
             <span className="respuesta-card__letra">{letra}</span>
             <span className="respuesta-card__texto">{texto}</span>
+            {estado === 'correcta' && <span className="respuesta-card__estado">✓ Correcta</span>}
+            {estado === 'incorrecta' && <span className="respuesta-card__estado">✗ Incorrecta</span>}
         </button>
     );
 }

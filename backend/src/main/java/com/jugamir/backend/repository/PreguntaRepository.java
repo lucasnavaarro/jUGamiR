@@ -12,6 +12,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PreguntaRepository extends JpaRepository<Pregunta, Long> {
+        boolean existsByAsignatura_Id(Long id);
+
+        @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+        @Query("select p from Pregunta p where p.id = :id")
+        Optional<Pregunta> findLockedById(@Param("id") Long id);
+
 
         @Query("SELECT p FROM Pregunta p"
                         + " WHERE p.asignatura.id = :asignaturaId"

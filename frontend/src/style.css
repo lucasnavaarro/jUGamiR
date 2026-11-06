@@ -17,7 +17,7 @@
   /* Texto */
   --text-primary: #ffffff;
   --text-secondary: #A09BB8;
-  --text-muted: #5E5870;
+  --text-muted: #ADA9BE;
 
   /* Status */
   --color-online: #22C55E;
@@ -1590,8 +1590,12 @@ button.crear-partida__back {
 }
 
 .crear-partida__option input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
 }
+
 
 .crear-partida__categories {
   display: flex;
@@ -1615,8 +1619,12 @@ button.crear-partida__back {
 }
 
 .crear-partida__cat input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
 }
+
 
 .crear-partida__cat-color {
   width: 10px;
@@ -2459,8 +2467,12 @@ button.crear-partida__back {
 }
 
 .entrenamiento__cat input[type="checkbox"] {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
 }
+
 
 .entrenamiento__cat-header {
   display: flex;
@@ -3340,5 +3352,46 @@ button.crear-partida__back {
   .stats__grid {
     grid-template-columns: 1fr;
     text-align: left;
+  }
+}
+.crear-partida__option:focus-within,
+.crear-partida__cat:focus-within,
+.entrenamiento__cat:focus-within {
+  outline: 3px solid var(--color-primary, #60a5fa);
+  outline-offset: 3px;
+}
+@media (max-width: 480px) {
+  .stats { padding: var(--space-md); min-width: 0; }
+  .stats__header, .stats__cat-header { flex-wrap: wrap; }
+  .stats__cards > *, .stats__asig-fila > * { min-width: 0; max-width: 100%; }
+  .stats__card { flex: 1 1 120px; padding: var(--space-md); }
+  .stats__asig-fila { flex-wrap: wrap; }
+  .stats__orden-btns { flex-wrap: wrap; }
+  .stats__categorias { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Keep wide tables and import examples inside their scroll containers. */
+.gestion, .gestion__container, .gestion__seccion { min-width: 0; width: 100%; }
+.gestion__tabla-wrapper { min-width: 0; max-width: 100%; }
+.gestion__container p, .gestion__container code, .importar__log { overflow-wrap: anywhere; }
+.gestion__form-inline { flex-wrap: wrap; }
+.gestion__form-inline > * { min-width: 0; max-width: 100%; }
+
+.crear-partida__option--active, .crear-partida__cat--active { color: #D4C5FF; }
+
+.juego__estado { grid-column: 1 / -1; color: var(--text-muted); margin: 0; }
+.respuesta-card__estado { font-size: 0.85em; font-weight: 700; }
+.scoreboard__turno-texto { font-size: 0.75em; color: var(--text-muted); }
+
+.dashboard__title { overflow-wrap: anywhere; }
+
+/* Mantiene los eventos de fin de transición y reduce el movimiento decorativo. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

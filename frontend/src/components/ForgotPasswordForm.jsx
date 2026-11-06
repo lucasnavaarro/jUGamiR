@@ -9,7 +9,8 @@ export default function ForgotPasswordForm() {
     const [isLoading, setIsLoading] = useState(false);
 
     async function handleSubmit(e) {
-        e.preventDefault(); //Para no recargar la página al enviar el formulario
+        e.preventDefault();
+        if (isLoading) return; //Para no recargar la página al enviar el formulario
         setError(null); //Para limpiar el error anterior
 
         if (!email) {
@@ -18,21 +19,25 @@ export default function ForgotPasswordForm() {
         }
 
         setIsLoading(true);
-        const res = await fetch('/api/auth/forgot-password',
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }, //Tipo de contenido
-                body: JSON.stringify({ email }), //Datos que enviamos
-            }
-        );
+        try {
+            const res = await fetch('/api/auth/forgot-password',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }, //Tipo de contenido
+                    body: JSON.stringify({ email }), //Datos que enviamos
+                }
+            );
 
-        setIsLoading(false);
 
-        if (res.ok)
-            setEnviado(true);
-        else
-            setError("No existe ninguna cuenta asociada a ese email");
-
+            if (res.ok)
+                setEnviado(true);
+            else
+                setError("No se pudo enviar el enlace. Comprueba el email e inténtalo de nuevo.");
+        } catch {
+            setError("No se pudo conectar. Comprueba tu conexión y vuelve a intentarlo.");
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (

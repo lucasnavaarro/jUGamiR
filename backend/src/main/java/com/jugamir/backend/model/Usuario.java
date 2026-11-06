@@ -42,4 +42,6 @@ public class Usuario {
     @Column(name = "token_version", nullable = false)
     @Builder.Default
     private Integer tokenVersion = 1;
+    @PrePersist @PreUpdate
+    void normalizeIdentity() { if (email != null) email = email.strip().toLowerCase(java.util.Locale.ROOT); }
 }

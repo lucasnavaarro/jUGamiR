@@ -41,7 +41,8 @@ export default function App() {
 
     // Escucha el storage event (otra pestaña del mismo navegador)
     const handleStorage = (event) => {
-      if (event.key === 'jwt' && event.newValue === null) {
+      if ((event.key === 'jwt' && event.newValue === null) ||
+          (event.key === null && !localStorage.getItem('jwt'))) {
         setSessionExpired(true);
       }
     };

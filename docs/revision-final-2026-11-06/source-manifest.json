@@ -1,0 +1,1058 @@
+[
+  {
+    "path": "backend/src/main/resources/application-local.yaml",
+    "sha256": "fbd8bbdfc591652799afa8c5bcda9269796ed3eda3d4e7f9d7d4b287dd8e7eed"
+  },
+  {
+    "path": "backend/src/main/resources/application.yaml",
+    "sha256": "aa4c7ff94d235b39f4bee2cdbb69a95760ad6ed9ab2c480df3af5375df568b04"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/BackendApplication.java",
+    "sha256": "af014ec18ccaf3ee9a9be62a6e46f676b96d5a28711866a35d18cdd006eeb7e0"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/EstadisticasCategoriaDTO.java",
+    "sha256": "786318e3cff89e5fa92165d4d1f54d8682418ae34ba456727c4a0bce95b55975"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/EditarPerfilRequest.java",
+    "sha256": "f2acce856c34f212ab4d463a1f51e1f8fe0360526493d8a6efb54455db04c367"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/PreguntaDTO.java",
+    "sha256": "8dc2dc85755bd02515676a7bddabdbb1171bb612895808918852c16db936c359"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/GirarRuletaResponse.java",
+    "sha256": "e4d20cecf17aaf6fdf94c9f31ce4a561b0ba3228f45512c463030e65e51a29ad"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/PuntoProgresoCategoriaDTO.java",
+    "sha256": "87aa33ca62940e3179c7ebcb929f73d5677a9d76e29aa7d99357de7f0b796215"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/AsignaturaDTO.java",
+    "sha256": "bf674c1f4d2f3c2426cdb71ba69f82887371e0fb179cc87bf24a66aea0e29da1"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/VerifyRequest.java",
+    "sha256": "ba49fcd3441f880e15e4c44526b921bc0043532f40b3e90aa02c3dec617f14b2"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/RegisterJugadorRequest.java",
+    "sha256": "bfb220b652fb19a043373e930829a1e4d050801835493ec6d5f3372954ef8b75"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/CrearPartidaResponse.java",
+    "sha256": "f4b108070daf08dc45b61225d6def6564a0be940082bbf446417bff119f44da6"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/EditarPreguntaRequest.java",
+    "sha256": "b92ca30e741f461bfd157d6ed7ed94e08e87819a212e7c4bc83a57f743f9d4a0"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/CrearPartidaRequest.java",
+    "sha256": "ceedb2fdf5823e8775e762a08eea40f575b972e74ad625a0d6885e9b12494e3e"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/RegisterRequest.java",
+    "sha256": "0ec7a6a20666c4fead42949c2611761be196a00162bc700368c653e59beb31b3"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/PasarTurnoRequest.java",
+    "sha256": "14c1aa78cae5b33ad1efa24eca3b90d757f72e8b1514ff2d0b6c2a81a71658fa"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/PuntoProgresoDTO.java",
+    "sha256": "bc10eeda642e3424d6dd4f9e17166a05d0f637eca46bd6c01b93f03a95e2953e"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/EstadisticasAsignaturasDTO.java",
+    "sha256": "8b7c5a324942260cccf0fb6b69da48165759ab0e41739ab1f9765482f9583e7f"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/RespuestaDTO.java",
+    "sha256": "4135d5311b38e7427aec73e9f9ffe82c224697998450fef92bec566cfa1771b2"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/PerfilResponseDTO.java",
+    "sha256": "6f0fc97ef4b93ce0cba50f5e36adf410e75a440e7cc5b04cd5b5af7960fea531"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/PreguntaResumenDTO.java",
+    "sha256": "079adebda7ce84b8431650b78cd539c9a320fb4bc58055c8dea1c5d4fc896d7a"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/RegisterProfesorRequest.java",
+    "sha256": "219ccfadecad4b54a77afa41d5cebeb77637e42786ce9e920d2c168e2482155f"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/AuthResponse.java",
+    "sha256": "852258bf056bbfa5af39a84026e5165e8f43d977cf2d0a8ddf1f0e73e495a8ba"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/PartidaPublicaDTO.java",
+    "sha256": "3f98e0bcc2681f122365b06cdbf172bc042803869db31d7e4b784392ff1d56eb"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/ImportarResultadoDTO.java",
+    "sha256": "0586c36b8445493b1cfa47d0f3e376a53e16b51f2389048c98888380ffd3c611"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/LoginRequest.java",
+    "sha256": "ffe1d8e38f6b944186ee18cdc6aacf97f6947c93813f61f6344cbacb60056fdc"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/ForgotPasswordRequest.java",
+    "sha256": "c2e2d2702e24ecf0ca7941dfaf05d53d905a839da2d4b24f6edb933bbdc9c87e"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/EmailChangeRequest.java",
+    "sha256": "4a82845cbfc6a45e10f45411dbdad8471270dbf7a38bcd2b361ff9526c7f6c35"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/ResetPasswordRequest.java",
+    "sha256": "bedf821be0a30ac21df87a977fc8dd308ee2e0336b8d582be4cf8bcfac96c22c"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/RefreshTokenRequest.java",
+    "sha256": "da747a29ab858b37805ae98ae96e3461a4f275fb5a347d376d9594f1ee6fe696"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/ResendCodeRequest.java",
+    "sha256": "70c97698576543bdc5fabf890d8a954c33ec58e1119c497d14981e0906330e35"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/EstadisticasGlobalesDTO.java",
+    "sha256": "dcc45b2659db76c5f7c1311178f6996e2d4cc76bf3b9906e15cab987ad3725bf"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/CrearAsignaturaRequest.java",
+    "sha256": "e9062851726e2e6eab7d8a80359d9559ecd3b081aa0b296f2fd5b9b431a4f4b3"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/dto/ResponderPreguntaRequest.java",
+    "sha256": "5059b5102a04cf3efc34c98254fb0b0b5e99986d385c0e9befb81d54f5e1d782"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/CategoriaRepository.java",
+    "sha256": "315219c58399c5ced100a3091816da5138fe683ece92dc195fa6385c141c8c86"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/PartidaRepository.java",
+    "sha256": "338ade1dd0ecaa22b8a38f4d376c2966812d954efcccf37c9450ce3eb0c3efda"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/RespuestaJugadorRepository.java",
+    "sha256": "d47f95695aa6ae5aa5a68c98b088ccd9ba6dc890751a77870b74ae4d8830dd81"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/JugadorPartidaRepository.java",
+    "sha256": "ac87685ccd500a3762e55027730111e4aa523005031dd63b71346357111863ad"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/PartidaCategoriaWeightRepository.java",
+    "sha256": "55cabe0b0b3ee33c5e9541296b22907618447c9e0d46e71041d414ccf20a6317"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/ProgresoCategoriaRepository.java",
+    "sha256": "7116dc9c7cc00bb2a6b7eb639175709364fbf708c639626c0d4447b5e49405da"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/RefreshTokenRepository.java",
+    "sha256": "5c0a0ff1a23d6e730f92d847b38fc553e53f5df026e77382233f539580a5e999"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/PreguntaPartidaRepository.java",
+    "sha256": "a4368359457810cc1fcad845265acdbe29ed6bd1894ba19cad327e0cc652841c"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/RespuestaRepository.java",
+    "sha256": "42ad1601d629a08f0633213eef2db52c80886e907b1181d21f3eabf2929be93e"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/QuesitosGanadosRepository.java",
+    "sha256": "3edd2dc818c55930db9454fa8acdcda987ec0fd03e18f2d672af3b2ac95622f3"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/PreguntaRepository.java",
+    "sha256": "da94729b18c63f8696c0ef5a4a657623f0c5310375593929ba83a32535d450bb"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/ProfesorRepository.java",
+    "sha256": "23fa5cf4792ab97ac4255113fb1a141e51d42ccf9c4130458519c42d31b14c30"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/PasswordResetTokenRepository.java",
+    "sha256": "ffbcc88f934c23bfd2654b9e763bd4775ebb25c70e5eadb7fa4769f166a2b085"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/UsuarioRepository.java",
+    "sha256": "280b35a3322bfff521fe5fbb59023dec91cba93db02725b04f94a56d42234d8a"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/JugadorRepository.java",
+    "sha256": "06c88881c0e1cb90dafc2f859dd1c92ca214e84729b1cedbfe119e104379af0a"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/AsignaturaRepository.java",
+    "sha256": "1a925bfd5d20eef8f3d92beb95468027d3e8d03af642b61755553611b7c8cfea"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/repository/Codigo2faRepository.java",
+    "sha256": "d0ae817b24a36575657d3e6a4b5984a3cc5c1dfdf7f374e6e4b8bb0677ee0eaf"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/config/SecurityConfig.java",
+    "sha256": "b30bfe8445075a5a9ad631c040dd28a9b9511f3af851dc9c0592a23ce4b9c160"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/config/TimeConfig.java",
+    "sha256": "9f9966037eb42827f1d5d5bc1212514da4689fe72136872e88516fe61fbc0f6e"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/config/WebSocketConfig.java",
+    "sha256": "be27ebdcacf661f2c848d4796e78050eacb3384fb1f643b0dd6d03e58270672f"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/security/JwtService.java",
+    "sha256": "4d40a1cbda16c48b9a057b0dee2fcbe904edffc94887755bdfa3d5eefcf1d76c"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/security/AuthRateLimiter.java",
+    "sha256": "4ff78bbeed81474ae7b6b6000286b19b24e8801cbbe139175ca36b9304c698fb"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/security/StompSecurity.java",
+    "sha256": "9bc82dc263af07bea060d81cf7103cb26f389c24cd411f77c5b801e2b8c53572"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/security/JwtAuthFilter.java",
+    "sha256": "d9954ce5cdacd99004d7d9ac85d5cb6c52ecfd1c7345e63fdc3ab88f54a60f87"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/security/AccountLock.java",
+    "sha256": "021ca38f846681c9aee29002e486b242e995a36a5b724f14563da4e417f075c0"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/security/GameAccess.java",
+    "sha256": "d4a5a8df5b668342f4005ea9f8d85d4cc14e46482dfc4ea6705e922a221066c8"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/security/PasswordPolicy.java",
+    "sha256": "89916514000871e2e6b354e64471417847fcccb1322782aeebec7a7ad803059f"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/security/RefreshCookiePolicy.java",
+    "sha256": "5d9902ff250d3edffb4bf50eba3b1f1ba52bb58213b93ee543bbb18b92b68b29"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/security/ProfessorRegistrationPolicy.java",
+    "sha256": "7c2e64d1dc4f0c52ee9b6ad49cdd0f3a2f7b95cc94769b5db9274bc06a3786a6"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/controller/CategoriaController.java",
+    "sha256": "e04630d5a88485a607196c620ecc4e966f0da0a024f05ea1295be11829b6fec1"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/controller/JuegoController.java",
+    "sha256": "5398eb768ee6837c1121664365a45cb93c0cebf8d7b470f4d85468ff62a286b5"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/controller/AuthController.java",
+    "sha256": "f5df564f78d4942dee344f4b83106ebc7adea889787d4f0329bf784d26ba7468"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/controller/ProfesorController.java",
+    "sha256": "04ac0f060b863ccced107c980929f7ecd432fb68b7b2737ebb5fddcadee29daf"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/controller/LobbyController.java",
+    "sha256": "89fe1b008eda9ee693f5b434609433748591ad2651be5abcd60b16b3e6561471"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/controller/PerfilController.java",
+    "sha256": "0c1489ff544fbb9d3c3d76fb4f574670c90d20881143b2147f6977c7d6414107"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/controller/StatsController.java",
+    "sha256": "3291b42805c48bf5285a4eec0664b04d0e0574635e9dcc5f2afd4ef6fbd3962a"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/JugadorPartida.java",
+    "sha256": "aa667d15fd5823f52ee51e24193fa59f4b94d1b81fe196fad43b6eb004215b39"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/RefreshToken.java",
+    "sha256": "80cb303f358269f2e7c10014beb5532e19cb280aa604f389ff2cd6272808d248"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/Codigo2fa.java",
+    "sha256": "44a86748fabc90bb7c75eed7c2e30d7af71c3cb61a9fd89bba9c879917831aac"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/PasswordResetToken.java",
+    "sha256": "483a00f7fecfd9ecf2b1bb23f4f8e0d949f721e2a5c5f9a3eb7f991c0e9b3be7"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/PreguntaPartida.java",
+    "sha256": "a50db610a94d35c387cb47d1e1cda6ea8476efeeba5f6f00bf45ac518659a542"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/Respuesta.java",
+    "sha256": "6d2e04b243692640a14a98980149199571996a8cb7a4b5715a225649af81703f"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/Profesor.java",
+    "sha256": "d646c1fbef3a6e02c4934540e46e873d0ca0ef49857170fde20fcdafcb933e3f"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/Partida.java",
+    "sha256": "7292038e4fdd8d1ccfacfc80b8b15a2cfc08ffa19eea5dfcc4cf7fa8a9a0c37b"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/Pregunta.java",
+    "sha256": "0ff0b1037da4af6940a995b1784af2ee3b134349296b074cd5082000abaa7603"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/Usuario.java",
+    "sha256": "4a040c234f0b307648c7b46fe597453b2c8a51665b8a2ad3cc391bf1f7a4d4b1"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/Categoria.java",
+    "sha256": "34eac42f39d947e5bc39292ac225f425e403c7c0dd5ac944b2c2efbba24c1f86"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/QuesitosGanados.java",
+    "sha256": "a721206452096b39672b41f174f9e867b6ac5c2d7f541e4d98b78763d27a2fd9"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/Jugador.java",
+    "sha256": "035b03125283d0bbba926770b27ad4bf29285b8925659d801aa96741cab02835"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/PartidaCategoriaWeight.java",
+    "sha256": "902e4a367783aacffb7c119ea4765377ba3fe4dc2eb9829e0f9875a2d1c9e0e4"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/ProgresoCategoria.java",
+    "sha256": "fe93023a4e2d4bd13f5f23343df8c2f8abbe72201ed16e8eb57949872ce87b9c"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/RespuestaJugador.java",
+    "sha256": "72391ffb4ac8becd61b35185ec958b222773dd3febb9eeef57b00f0791add926"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/QuesitosGanadosId.java",
+    "sha256": "fc6adde72f21cc38b258931c9de60d8b3fbc53a120b894c93ebe7ad7aa9cd984"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/Asignatura.java",
+    "sha256": "80a44a5800549b39b3766a5080bd07fb18457fa963cb078537f6a77db689b8c1"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/StatsService.java",
+    "sha256": "2ef81bf9250611125591670ddc088c89d605946dd0b8e26012e972a2190f9b62"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/ProfesorService.java",
+    "sha256": "64067d52349d1651187d19a65217928348650630776f9512439da3d154bd1d67"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/LoginChallengeService.java",
+    "sha256": "358b6ab1bf8929fd49bcc69042ed84fdb12ad97167c7319e15e41428459420b4"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/GameDeadlineScheduler.java",
+    "sha256": "8c2d1a2d8a2b7739140239c4c58a38bf709e4367141625b035d682ef6f56d272"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/ImageStorage.java",
+    "sha256": "6f1e3bf650d4ebee8055a9fb30dab03bcf3f3bbc43af226505f72392fcda4aee"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/PerfilService.java",
+    "sha256": "f425f228c79578dd90ba7ca4e94caeb67cf5160556a1b722f79521ca8481a852"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/AuthService.java",
+    "sha256": "c35394436f2681a704cb6ca5caf11fab2f947a528fa459501bca10aecd9ca596"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/CommittedMessages.java",
+    "sha256": "ee0625455c5953a386861e087cbdfc018cb7da340045ef611be752b3c4a80198"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/JuegoService.java",
+    "sha256": "e7c5e55174a525de9d576732216c4476acf57b7da1a85ca515734a64f5e46c43"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/RasterImages.java",
+    "sha256": "79b35e08053eb8a6cf0f71b362aca39a451d0f2b3e3f00eba16bd7419e9d0be9"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/EmailService.java",
+    "sha256": "758ad2a98d1a245147a4fd94488d692509d3b7b888deb6051a69ae6a43b5bac5"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/LobbyService.java",
+    "sha256": "2dc4b81470e498d4fe3c84683044063721863544c602ccb99ae52b044c10338c"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/service/EmailChangeService.java",
+    "sha256": "32ae77585f156ce5a22290dadcce4cb8237f4b9f876423e4100d043e8daef3be"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/exception/GlobalExceptionHandler.java",
+    "sha256": "ca37f2535f317df3225987205aeafcd9f9d8fddcc3ce0e7e9d72300f592958ec"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/exception/BusinessException.java",
+    "sha256": "4576b3a33e065a0aaef0153f335affc43a8db7ec9729ed505961433c6377e647"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/enums/EstadoPregunta.java",
+    "sha256": "2f4e8e0213f59c040701266e900be91b110f9e415336cac40af8021041e14d5a"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/enums/Dificultad.java",
+    "sha256": "da85827683071636609096bdd2678e9d9fa509481b48cc1894ae4422ebf0bfff"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/enums/EstadoPartida.java",
+    "sha256": "699f9c7397a4ace3c4b9c05dbb435c60312d500850441c1f6a682d0f31cfb57f"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/enums/TipoPartida.java",
+    "sha256": "9b616b6b0547c9ce22296610041165334a1a365af00642fef9e753795b0c2cc1"
+  },
+  {
+    "path": "backend/src/main/java/com/jugamir/backend/model/enums/ResultadoJugador.java",
+    "sha256": "8aa13daf7292b22b423628e66473cbf4c270202b99ddd060c43289f0e999b99d"
+  },
+  {
+    "path": "backend/src/main/resources/db/migration/V2__login_security.sql",
+    "sha256": "d7024f4b3dba8232a2ceff36beb9b92f93f78f58463027e7071de3f73e88ab88"
+  },
+  {
+    "path": "backend/src/main/resources/db/migration/V6__capacity_counts_active_members.sql",
+    "sha256": "84b7a680a4632deb18632bdcea25f0bce6f675660663dfab820a740ee56eab69"
+  },
+  {
+    "path": "backend/src/main/resources/db/migration/V4__authoritative_question_deadlines.sql",
+    "sha256": "70f794eff08bff87a8f25d8016d8716f6adc6646abe5ba29ff1a7f643a360287"
+  },
+  {
+    "path": "backend/src/main/resources/db/migration/V3__email_change_security.sql",
+    "sha256": "ad61e564e3ee0d849b9326d920b34107f75dc4bccb9fc04635bd8c8c071a0b45"
+  },
+  {
+    "path": "backend/src/main/resources/db/migration/V5__expand_category_progress_limit.sql",
+    "sha256": "9735544eeca30994350b51fb856330c05b5c0ea63306d44329304c04b8ca39be"
+  },
+  {
+    "path": "backend/src/main/resources/db/migration/V7__normalized_account_uniqueness.sql",
+    "sha256": "1241190d0661a8fa16833286de7353c60e9111a5aa7d088307e2f0a2bda9bf80"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/BackendApplicationTests.java",
+    "sha256": "9ab3f7e92c277b970a84f5ff037975dbcabbf543f91e41f3fa42fec5fa5bfd42"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/security/PasswordPolicyTest.java",
+    "sha256": "eff51946a97d85f268f30cdc53db645d95dbc7afc3c14505237cbd67db4598d0"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/security/StompSecurityTest.java",
+    "sha256": "da8309aa1bba892339986facb66fbb1c2d6e7fa78e85fa92219e9fc613d9f116"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/security/ProfessorRegistrationPolicyTest.java",
+    "sha256": "119ad64ed350f2eef80873f3986bcddabbbb32dd411c482c195149c647c4a634"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/security/RefreshCookiePolicyTest.java",
+    "sha256": "e645323e0ebab08a9753d9f51a51f5b90ecf39fa69b20a054475a0c5234332d0"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/service/DeadlineBoundaryTest.java",
+    "sha256": "24e992a5319def9abc8d8101c13d1d17dce06c6dd414da71a48462c0ab90fa97"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/service/ImageAcceptanceBoundaryTest.java",
+    "sha256": "0da6525809355a92eca0b4d380d30d95c92a375fc0fb8e1d71892ce5139c0af5"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/service/FunctionalRegressionTest.java",
+    "sha256": "b0ffe6381aaf2665b62a9dd662f2ab47e826a69269753628ad8a4e0c05612bb3"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/service/AcceptanceCorrectionsTest.java",
+    "sha256": "8972927ce24ca1bb6d01ad15dccea62a21ee123b3f9ea35ba13e686abbf9fe5d"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/service/HttpFunctionalRegressionTest.java",
+    "sha256": "a4da8a9cafc6922e63e23dcba3fe0b293d82af4f40ce85f79ce3a6acda61e046"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/service/ZipLimitsTest.java",
+    "sha256": "9ec8985964bd6974aef204a0f1d35be080776b2f4148eb75ed596d9b9d84e29e"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/service/SecurityIntegrationTest.java",
+    "sha256": "bb2c41b98382707bde303c5c6cf4f20274d77a5e792d51f2b76c7371fc6f82f1"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/service/ImageStorageTest.java",
+    "sha256": "c9820f98806a73129f82a68fe0a02e3709edf1a043ea567ace5b2ebf9e1254fb"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/service/SharedImagesPolicyTest.java",
+    "sha256": "76d368d390d46ae3275068ab21d74442133ce1a2dc32d3efccde13f26423b315"
+  },
+  {
+    "path": "backend/src/test/java/com/jugamir/backend/service/RasterImagesTest.java",
+    "sha256": "03c11b8ade7179e6cb0d6dd30eb736dfbee8e35fe3a5198ec2bd4d152526ee80"
+  },
+  {
+    "path": "frontend/src/main.jsx",
+    "sha256": "287ed0f6800696b9013f1204790b6a5d9c93c0364cc33e225534c786060f83c5"
+  },
+  {
+    "path": "frontend/src/style.css",
+    "sha256": "3cf408cf8dcb6a35bb1821a815dd245b0e6d9c6e9f4fd28aa3446c0f1cd78ef1"
+  },
+  {
+    "path": "frontend/src/App.jsx",
+    "sha256": "f3daaba13325f64f924086e3ed01d875c030f9161ff535ca6f6e0c29bd8b69fb"
+  },
+  {
+    "path": "frontend/src/utils/passwordPolicy.test.js",
+    "sha256": "333f2544167b8eeec98dcf4575ba1316dfa8ee1ca40b00e03f864c0773e7536f"
+  },
+  {
+    "path": "frontend/src/utils/passwordPolicy.js",
+    "sha256": "eb98202c1a1797a71265c2474e46911483dd20cb47ce83c528ff501333226b66"
+  },
+  {
+    "path": "frontend/src/components/JugadorLobby.jsx",
+    "sha256": "87c3f0e1661eba7c61e7a6c784d3f3ae641197b4d49d0824e884f276c8ce3545"
+  },
+  {
+    "path": "frontend/src/components/JuegoEnCurso.jsx",
+    "sha256": "339e67a1ba250c12abe4ae69b0ddee262c4bf6b4b0c06e1c10fe0dcda97c5bdd"
+  },
+  {
+    "path": "frontend/src/components/DashboardLayout.jsx",
+    "sha256": "0953fcdb3628185e7da1458794ce352b99ba209d69ce450bf5df5ab107cb9808"
+  },
+  {
+    "path": "frontend/src/components/Stats.jsx",
+    "sha256": "e72d0e77e0a6ef2e9fddc46e45de7a4eb8a00690bf0a159d0cf602a9ea9e2fa1"
+  },
+  {
+    "path": "frontend/src/components/GraficoLineal.jsx",
+    "sha256": "e89ff97a7b282716a2ef48e19916128f78d5537ce208f62c1e469f8126eb9ee5"
+  },
+  {
+    "path": "frontend/src/components/CrearPartidaForm.jsx",
+    "sha256": "360d42e6fbfdb5490f5be34c622ba6404ab9eddb2571de5151190ee9add32f92"
+  },
+  {
+    "path": "frontend/src/components/Footer.jsx",
+    "sha256": "9a7e969dffc7e78c0d7178b71111ab22863a287c3fdcdbfd08644badff6079fa"
+  },
+  {
+    "path": "frontend/src/components/LobbyEspera.jsx",
+    "sha256": "91eb8e19e216108ba2dcd1d970c44bdfcef5466f9bea1881c5fb10e32bdf8eaf"
+  },
+  {
+    "path": "frontend/src/components/Categories.jsx",
+    "sha256": "2001c1202531b4065b2b367963bc96bdd91862300dfd09d0276ce368c23c0dc8"
+  },
+  {
+    "path": "frontend/src/components/ExpulsadoModal.jsx",
+    "sha256": "535aa1849afea0aa800520ba1e4d9edb7b3acbd34d28d7f6f1499f6911030915"
+  },
+  {
+    "path": "frontend/src/components/HowToPlay.jsx",
+    "sha256": "63a781454c2d31bbf7a171c053c48c3fd1b8b0c303e33ded5397f0bf6646a9db"
+  },
+  {
+    "path": "frontend/src/components/ScoreboardJugador.jsx",
+    "sha256": "52f36dbd95c6fa34f1c132de03c25c84a7c26526b149c8f807641b015c5e6df4"
+  },
+  {
+    "path": "frontend/src/components/VerifyForm.jsx",
+    "sha256": "d453ef4a63cf710a6602e8cf69b62a568026559bf7d7fd3a09fb0f9920e894ce"
+  },
+  {
+    "path": "frontend/src/components/RespuestaCard.jsx",
+    "sha256": "e9d2fdefa684390ddd58bc39afa752af17d3bc807e41de8f4d9abce8ab64c09c"
+  },
+  {
+    "path": "frontend/src/components/ActionCard.jsx",
+    "sha256": "cbd43ef1abe5ca4c6a61bf5808a74fa344134e82d557399243608d1375a4120e"
+  },
+  {
+    "path": "frontend/src/components/IconoMedico.jsx",
+    "sha256": "d41f19f21c40fd07378f7d65e8550eaf68ed20a099e153fcd14b130e47763f1d"
+  },
+  {
+    "path": "frontend/src/components/RegisterConfirmationForm.jsx",
+    "sha256": "1f17b66afe65baa0253ad7aec96c6a19f78857d32004562f9ed71fc7bee312aa"
+  },
+  {
+    "path": "frontend/src/components/Ruleta.jsx",
+    "sha256": "0538b2ad77bf4e9483ffbb3a56ed6f208772d94d80dde874a6245754e4b85ecd"
+  },
+  {
+    "path": "frontend/src/components/ModalDialog.jsx",
+    "sha256": "1ea5fce50194369ce5dd2c53b11a50b4a68d4abc9b902f665e2f77c199c5d06b"
+  },
+  {
+    "path": "frontend/src/components/CodigoEnLobby.jsx",
+    "sha256": "61b21684527b5d1059db23eacd8ba5cd6c722b50f9debdffaff37cd319c8d45b"
+  },
+  {
+    "path": "frontend/src/components/SessionExpiredModal.jsx",
+    "sha256": "89b0fbe14094e9b2beb1f6c527cc346f6fbc347633477366d151fa2c0cd6d686"
+  },
+  {
+    "path": "frontend/src/components/UserMenu.jsx",
+    "sha256": "730fbcee4cdd3b66c171a883c1701a4834cfcd99094625a9a9a46213159e705e"
+  },
+  {
+    "path": "frontend/src/components/PublicRoute.jsx",
+    "sha256": "42ffd6e4165235eb716026a9f5fed44a2770300faaccb9febdf50c46b856280c"
+  },
+  {
+    "path": "frontend/src/components/Temporizador.jsx",
+    "sha256": "d0d50fb552aae133b98cffccbb5a694b62bd6812b0cf95befa70d710e434160d"
+  },
+  {
+    "path": "frontend/src/components/ProtectedRoute.jsx",
+    "sha256": "70401c0b478251c54de58bbb20d656ca387e90e9c53825325b1eed9aa739cc38"
+  },
+  {
+    "path": "frontend/src/components/ResetPasswordForm.jsx",
+    "sha256": "61ec22eed28282c36c100187cd1a6a4483918a9361a9ebf05d6e8f13261907f0"
+  },
+  {
+    "path": "frontend/src/components/EntrenamientoForm.jsx",
+    "sha256": "247a92a18fdfcfc6c4106881f26e9b99b8411bf5017f110db6837c4008186243"
+  },
+  {
+    "path": "frontend/src/components/UnirsePartidaForm.jsx",
+    "sha256": "4e58781c445f5a876daf3d287ed139a793d77f300a6d3a0554b119c30a6f59bf"
+  },
+  {
+    "path": "frontend/src/components/RegisterForm.jsx",
+    "sha256": "fb0480ab4330231971bb9466ee311d0649969d3f7d397b552a3cda511433fb55"
+  },
+  {
+    "path": "frontend/src/components/LoginForm.jsx",
+    "sha256": "1fbb00dee8739c029aaacd52af761ef0eae5e456fcfdec8e890cc2ef3901e488"
+  },
+  {
+    "path": "frontend/src/components/Navbar.jsx",
+    "sha256": "350113322b41e5cd2643a49f949b565d94f7ef386061845ef5599a2958d63932"
+  },
+  {
+    "path": "frontend/src/components/Hero.jsx",
+    "sha256": "a222b0ba1050e9f4058065e6241d01040cb67850ae09585cfdf2e430b9683460"
+  },
+  {
+    "path": "frontend/src/components/ForgotPasswordForm.jsx",
+    "sha256": "379940ab88627e6ec179734e266febb9accadf933a8d491f05b8d6aa6b6139e6"
+  },
+  {
+    "path": "frontend/src/components/ChangePasswordConfirmationForm.jsx",
+    "sha256": "02591a186ecc413d974c9f179a63547c02da4b84010733f86e75677bb6b44eb5"
+  },
+  {
+    "path": "frontend/src/components/PreguntaCard.jsx",
+    "sha256": "dab2f9d86acead2381e708dd9dbef4fc1aeda4ae6f12a247957df355f7722837"
+  },
+  {
+    "path": "frontend/src/components/Deslizante.jsx",
+    "sha256": "4f731037edddbeb4fb1ce93f854d3680033eb1a96530d9a855953eb07903eb72"
+  },
+  {
+    "path": "frontend/src/layouts/AppLayout.jsx",
+    "sha256": "509d7e0816ab26efdf8643e8fe46ed7384bd5231806113d972fad4f98b798186"
+  },
+  {
+    "path": "frontend/src/layouts/PublicLayout.jsx",
+    "sha256": "a327a7ae07acbec5579a807b88146cddae4c1c68e7f7334e429ae352f214642d"
+  },
+  {
+    "path": "frontend/src/layouts/CleanLayout.jsx",
+    "sha256": "97e8b9095822fb3b34324033a8863ba6feef6f94fcdb695a8db7c0726b559376"
+  },
+  {
+    "path": "frontend/src/pages/ChangePasswordConfirmation.jsx",
+    "sha256": "2e604cfbc90cbba0fde19c9564e50c0bad878f11d97d1339f998f631fc824472"
+  },
+  {
+    "path": "frontend/src/pages/DashboardJugador.jsx",
+    "sha256": "89a871ecde3d9a964d78f5bbf1785702335d4dea884eae0512d61c491c653847"
+  },
+  {
+    "path": "frontend/src/pages/EditarPerfil.jsx",
+    "sha256": "f49c912cd3528bb9d1f885c1f92592b40bfd0bded54213bba8b2631cabde6d3b"
+  },
+  {
+    "path": "frontend/src/pages/CrearPartida.jsx",
+    "sha256": "330a2aa57ffd61b251e7b99c5246a6862193e27e58f2add7f2c2be0048237a74"
+  },
+  {
+    "path": "frontend/src/pages/ResetPassword.jsx",
+    "sha256": "b1572cac63bc7441acc36adb5ab25959b5e552bbf0796ba3bdf8bb0267bfc379"
+  },
+  {
+    "path": "frontend/src/pages/NotFound.jsx",
+    "sha256": "f05d80ce7c8c4fd988a9faa6475fea23e63f9e5e56d60a8614d81b7c5185e151"
+  },
+  {
+    "path": "frontend/src/pages/EditarPreguntas.jsx",
+    "sha256": "26d662f1eb6c5fa404b483b84bf16f3933d31f8525e7e9ec7739debb6e88ab7b"
+  },
+  {
+    "path": "frontend/src/pages/ForgotPassword.jsx",
+    "sha256": "840bd54c01ec54781ee32a87e732b2a75ef6dca8c569e7ca5ff8ec8e92dd8e70"
+  },
+  {
+    "path": "frontend/src/pages/PartidasPublicas.jsx",
+    "sha256": "615ae1551dce252a25e496f616ff8af8438a18fc25be82dc24ec00db47913245"
+  },
+  {
+    "path": "frontend/src/pages/Login.jsx",
+    "sha256": "5c715bf5a8a908f32c68b0cc970ca8e9c90d71208110a3dacefd24c4ed05fd24"
+  },
+  {
+    "path": "frontend/src/pages/Lobby.jsx",
+    "sha256": "512d4b243b9c5a5e284744d4bf648efedca92c837bcd3f081d2ae51632a03d78"
+  },
+  {
+    "path": "frontend/src/pages/GestionAsignaturas.jsx",
+    "sha256": "79b03b174bcfac3ee8d03862c6a8384ffe83296ee8bfbdb19ca4ee9379f6cef8"
+  },
+  {
+    "path": "frontend/src/pages/ImportarPreguntas.jsx",
+    "sha256": "362905b23d8c74ccf94c9a51446e2af9808eebe19f0ab8f513db69e1a5e25282"
+  },
+  {
+    "path": "frontend/src/pages/DashboardProfesor.jsx",
+    "sha256": "bd381ec066c3d7b2a46bbfb3f630d32709afff28eef0eca923e0ba41fa4f97f7"
+  },
+  {
+    "path": "frontend/src/pages/Register.jsx",
+    "sha256": "882742d9b28ac9168fa92733355fc9011bfc5ed20cfaebf501ba28e87645c799"
+  },
+  {
+    "path": "frontend/src/pages/Entrenamiento.jsx",
+    "sha256": "4bbcc21a5218d757a004f47c624223800d357ff8846c46cd585e9eefede7ca9a"
+  },
+  {
+    "path": "frontend/src/pages/UnirsePartida.jsx",
+    "sha256": "2d1c51192d8a8cda610977a77c63e986fdf80aced0946a025fc00609a91092d7"
+  },
+  {
+    "path": "frontend/src/pages/EstadisticasJugador.jsx",
+    "sha256": "20a31897dbe03d50b9f1f4f0cece232177dc6168cb3d8bd7773d3604d3f64759"
+  },
+  {
+    "path": "frontend/src/pages/Home.jsx",
+    "sha256": "78a01adf3c6d9340f27ce82aa3ce9d06889ca0a512d18019047890d12841ab6c"
+  },
+  {
+    "path": "frontend/src/pages/RegisterConfirmation.jsx",
+    "sha256": "539b18096f99ed18d9f9b6fd66c2b1ff3597416275204a2066063c4e38389beb"
+  },
+  {
+    "path": "frontend/src/services/formatTiempo.js",
+    "sha256": "78cee36945e8334235c0fabee4f8cfe0eb9d27882f5f3b6b32ca4570fb1f5b0d"
+  },
+  {
+    "path": "frontend/src/services/api.test.js",
+    "sha256": "88067cdc740e4c4c0411040b9190fa8eec0b1f5290a2da73b160c9d7090488f0"
+  },
+  {
+    "path": "frontend/src/services/socket.js",
+    "sha256": "2f577fa723aacd7707eec180e8bde605e39379e883bd690999d11d42e386f1d6"
+  },
+  {
+    "path": "frontend/src/services/api.js",
+    "sha256": "40dc6fce346e99f0473d16ad70d8615c75208f4c14852dda09c6dfbf4047c5d1"
+  },
+  {
+    "path": "db/csv_rows.py",
+    "sha256": "4c72c0489b57ac355e30ec3cc447b2576e2c5a31449663c9675e792cb340a30f"
+  },
+  {
+    "path": "db/data.sql",
+    "sha256": "110ff06c379e89a9cf698adb34a06ff536a7aa79da8af5254ea1d62cadba4927"
+  },
+  {
+    "path": "db/backup_completo.sql",
+    "sha256": "e4a9250633be48b282a766a706f194264860c3ad7bad21ca522ef7488232a87c"
+  },
+  {
+    "path": "db/schema.sql",
+    "sha256": "9f5b10c318b8bc0614f600106f1432a27045247f2cdbf6d74da15156c5271178"
+  },
+  {
+    "path": "db/import_respuestas.py",
+    "sha256": "459730cffd3a47a296cefff98932c024699760e66ce7c86fede70ee5a4ff4034"
+  },
+  {
+    "path": "db/import_csv.py",
+    "sha256": "228e5f870551693a2e32cb31a615aefe568107793b3ec41e83447dd973c32516"
+  },
+  {
+    "path": "db/import_preguntas.py",
+    "sha256": "98d11c7d6b22f4e13f25dd34821d761e7651d7bf044d69b16ba8a5e77a745ab0"
+  },
+  {
+    "path": "db/tests/test_csv_rows.py",
+    "sha256": "bfea1abab74c41524bd6218eed15f72c2840a8cff12836654a47d5330a9d3ad0"
+  },
+  {
+    "path": "scripts/qa/check-junit.py",
+    "sha256": "43d3b82b62c64acc953234cd7a7d9c1c0f196486a121cd97e5dbffeb2822d348"
+  },
+  {
+    "path": "scripts/qa/deeper-variants.mjs",
+    "sha256": "317c64b9a046b7db5cb8997b604c13b4b6978aeb75cc45fd516001c0194374b3"
+  },
+  {
+    "path": "scripts/qa/nginx-managed-edge.conf",
+    "sha256": "82f8e1ba450afa53c2adc5167f62a832c9d78adeb70001e9cd79dc45dfeba896"
+  },
+  {
+    "path": "scripts/qa/remaining.mjs",
+    "sha256": "00d84f6a1d56028c11c0fe409d68833d4c036f4fbfb415d0d23481e25f307559"
+  },
+  {
+    "path": "scripts/qa/corrections-browser.mjs",
+    "sha256": "59a6eb31c67d17ed30c6d133238479435d1f166383e32b467badd906430935f1"
+  },
+  {
+    "path": "scripts/qa/review-browser.mjs",
+    "sha256": "9fa693f8be52c4dca84964fbd73ec516fe8cc456a0ce29cd5aefaaac86c6b59f"
+  },
+  {
+    "path": "scripts/qa/finish-load-summary.py",
+    "sha256": "492841955513ba118c153e063bce9c5b4bc291e41e55d7cdc057aa795b179982"
+  },
+  {
+    "path": "scripts/qa/generate-fixtures.py",
+    "sha256": "021e50ec38627052251762d37a055231de1a3065ebf2d26ecaf3ee8b77e47033"
+  },
+  {
+    "path": "scripts/qa/stats-training.mjs",
+    "sha256": "99334133a6de05dd342f4ad0f86bb0df172f8d3ec326c0459bfcc4d67965d243"
+  },
+  {
+    "path": "scripts/qa/finish-teacher.mjs",
+    "sha256": "2767fe8734a1ee82296fc1245fd02f4df684ed0071a20e2c5ed6b378bc2e1287"
+  },
+  {
+    "path": "scripts/qa/common.mjs",
+    "sha256": "951f52f9bce96e8613aeee50368b90ba1a1e66d8fc6824f0614bcbb190d99f87"
+  },
+  {
+    "path": "scripts/qa/faults.mjs",
+    "sha256": "080a510aedb0ede6eaa60c8311d4927bc0ef9dad2007ebadedeaa14d8e76dd8c"
+  },
+  {
+    "path": "scripts/qa/private-browser.mjs",
+    "sha256": "868cdca00e5a62c1f62a66ad0fad76d1eede82dbabcb0a361da1a6fc66efe244"
+  },
+  {
+    "path": "scripts/qa/finish-stats.mjs",
+    "sha256": "ddce871cea974e9165c5be6b98fc1e7a06e024c5cbbed7b8dcb21db7629b7812"
+  },
+  {
+    "path": "scripts/qa/finish-proxy-replacement.mjs",
+    "sha256": "56f8663ff216c0a6679c43b6e111e9032feefc59c61d0ade237bd39cad73880f"
+  },
+  {
+    "path": "scripts/qa/finish-latency.mjs",
+    "sha256": "89c4b5b4d79a82c7aab09ff07893be74f0087b687198f9de842d18e8379a6ad8"
+  },
+  {
+    "path": "scripts/qa/restore-check.mjs",
+    "sha256": "c690cfe62d9e0fe82a9c6112e2c945f54bb66187113a8e6eef2e2274b1dd4fb3"
+  },
+  {
+    "path": "scripts/qa/corrections-report.py",
+    "sha256": "c869e410736541752c3275620314b671ba7f92b40cdbc0f2684422b64a287c67"
+  },
+  {
+    "path": "scripts/qa/corrections-import-mail.mjs",
+    "sha256": "95c340942be3eb93db2596f18199ca41c198850507afaca0f1c358cad79b551f"
+  },
+  {
+    "path": "scripts/qa/load.mjs",
+    "sha256": "397b92f85ffed17b6956e13cbe9a2625f10e273e556607f7d68326e86f7c3c4d"
+  },
+  {
+    "path": "scripts/qa/evidence-completion.mjs",
+    "sha256": "c0452812971afd0a8748eb3ad276ee67ab94092b4ec2f1913ec31f47685de450"
+  },
+  {
+    "path": "scripts/qa/finish-report.py",
+    "sha256": "f49248bd07e5639c3bf6d10382385ec8d5ddc1b67f594ef7838478ea6ae0b7ca"
+  },
+  {
+    "path": "scripts/qa/finish-auth.mjs",
+    "sha256": "f41ef425cf4d9735b07414f52f89316ab6b2f79a9483c997a7dd78de824cb38e"
+  },
+  {
+    "path": "scripts/qa/ws-ops.mjs",
+    "sha256": "21e32cbe81073e56898bda309441263b4e4651dea85a98601383741d5345e510"
+  },
+  {
+    "path": "scripts/qa/finish-games.mjs",
+    "sha256": "be19db0ae7632246c01e512b6a1f91aeb611bf42038274ebfd8a1a7ee993449e"
+  },
+  {
+    "path": "scripts/qa/public-health.mjs",
+    "sha256": "9704ecd944ccc8223de6de663f2f9b017b47ec588663499521da1fed84a9ca5e"
+  },
+  {
+    "path": "scripts/qa/nginx-managed-qa.conf",
+    "sha256": "33f9e455ffb19b39c82a0aa84971ca60a1adbbe370a3e6e1f308262e064fb46a"
+  },
+  {
+    "path": "scripts/qa/finish-network-forms.mjs",
+    "sha256": "7de16c896aa3d2a8d56eb0d394b7fa0a302da71e9414a2304134f3b6b3903003"
+  },
+  {
+    "path": "scripts/qa/finish-lifecycle.mjs",
+    "sha256": "b746d0d716d13fbe08ef8612b237090f3ed3a76b18f13bac89a19a90d81328f9"
+  },
+  {
+    "path": "scripts/qa/wss-diagnostic.mjs",
+    "sha256": "2eaadb306a645cb451e204582adf5d8d9a4d1cf8744d0f5b8411ee1923bb67a0"
+  },
+  {
+    "path": "scripts/qa/compose.yaml",
+    "sha256": "b283fa583b1749d0c0b315eee29bdccea7ba9896bd93658a2d75684c5e29f7e7"
+  },
+  {
+    "path": "scripts/qa/auth.mjs",
+    "sha256": "b65cd9755891e19e796eb67086003936b0ebfa00a29e7c66de20a8c82a8d2fe5"
+  },
+  {
+    "path": "scripts/qa/finish-a11y.mjs",
+    "sha256": "efe4bc9ad90f631057ab021001f2cf78aec6bba2c2e38026c9e2699491c9e716"
+  },
+  {
+    "path": "scripts/qa/files.mjs",
+    "sha256": "8fffa93c97f22e2aea23eb6fcf7365c56a827736913640a4430d700aa53ddfdf"
+  },
+  {
+    "path": "scripts/qa/finish-history.mjs",
+    "sha256": "3e5c83fb684b52eb0106761c5bd44a436747c2a87869147bb375125d0cfff915"
+  },
+  {
+    "path": "scripts/qa/public-browser.mjs",
+    "sha256": "e270a679c04baedf7cf2197ab2285f15de57ecfc60b4b2058b181df418168ab3"
+  },
+  {
+    "path": "scripts/qa/nginx-reader.conf",
+    "sha256": "fe337729aeddc0839bf7adce692c0762f1b200be0723048a596b575223f2593f"
+  },
+  {
+    "path": "scripts/qa/form-completion.mjs",
+    "sha256": "8a844ac1f50596f8d871a0d13fffcee41e8a7ab838d81a50a78ec7cf3081ad7a"
+  },
+  {
+    "path": "scripts/qa/games.mjs",
+    "sha256": "447f5944b24c0a3275c4cfc4d3ebfa28f0f134217529b55ab4cafa4b089cb6c6"
+  },
+  {
+    "path": "scripts/qa/ready-game-browser.mjs",
+    "sha256": "7d46b589428090e7b35b5b07de6271fcfeb5c5d2ebebc2d2ce723c9c8fa95451"
+  },
+  {
+    "path": "scripts/qa/report.py",
+    "sha256": "710ccd76dc610b37d4af473dfaff55449134de14829dfea4dcb3c393c9dafa4b"
+  },
+  {
+    "path": "scripts/qa/finish-outages.mjs",
+    "sha256": "44fffe4e0892b88f21e5d67bf7f425268b20dc59c6ce69b0125d1712ab108498"
+  },
+  {
+    "path": "scripts/qa/corrections.mjs",
+    "sha256": "423ff2dc186b14d19a78919c303445d9d027f1fb82b15a782e26c00419e7a497"
+  },
+  {
+    "path": "scripts/qa/finish-ws.mjs",
+    "sha256": "fb8c600594a796ddbbecb35699b3a2640b0c9bfe8d9b5cad7a238919e557b682"
+  },
+  {
+    "path": "scripts/qa/profile-professor.mjs",
+    "sha256": "f600958d7ca28f0512a39a5914e329bfad3b2e477d870a890c2edf7ff5073a3d"
+  },
+  {
+    "path": "scripts/qa/tests/runner.test.mjs",
+    "sha256": "177b26a05b4277cc4eb5d5902cc28f61c797309e71af3f0b1c8d05e2c2cfc986"
+  },
+  {
+    "path": ".github/workflows/regression.yml",
+    "sha256": "72a196defd925bbc3c1ea947e33c63936bc797f1e1b8fa4cb6aac3396d721010"
+  },
+  {
+    "path": "README.md",
+    "sha256": "8ed6c7d6e8e319d3484a6f2649062ecb9dfd8798fc3380d3e361475405e09643"
+  },
+  {
+    "path": "backend/Dockerfile",
+    "sha256": "b0426b1dbea01597c53844d57df8454d03ae0a106c64bf6fc61505a6236d5f14"
+  },
+  {
+    "path": "backend/pom.xml",
+    "sha256": "284572bfd86ce8e3d6d6d180a9747ee131f77a3548623be553c99d7ee46c33f4"
+  },
+  {
+    "path": "frontend/Dockerfile",
+    "sha256": "6b993b61662ccc98f7a33017cbda1ef77b2882d2e6e68328578d02ef1c3170d2"
+  },
+  {
+    "path": "frontend/package.json",
+    "sha256": "b93b04aef0196d470d1c709e993449a3a4884729064759793970b6934999746f"
+  },
+  {
+    "path": "frontend/package-lock.json",
+    "sha256": "42e70ff75b4d022c25db92bccd50922395e6c6c2a819d0b67e10ff730a377143"
+  },
+  {
+    "path": "docker-compose.managed-proxy.yml",
+    "sha256": "f4a4bdd75bb9699495d24f9495f48bcdb39f408804380e9259dfaa6e6f4f15fa"
+  },
+  {
+    "path": "docker-compose.production.yml",
+    "sha256": "9f6f36602322da19d0e4a20b212a4499d73a8ffd44bfbb8f0c0bc27c3a879c57"
+  },
+  {
+    "path": "docker-compose.yml",
+    "sha256": "f769400439e7691825c01029efbbd06449ce8b8e4cab281427067047d9ef4a2f"
+  },
+  {
+    "path": "frontend/nginx.managed-proxy.conf.template",
+    "sha256": "1cbfb538a24087068579378c25dc455c30285ef15d89bfdde9d45210e718e0b9"
+  },
+  {
+    "path": "frontend/nginx.production.conf",
+    "sha256": "fa16847be3c722abeb3de883cec44db238e21a9846cf83e54167238efd13101a"
+  },
+  {
+    "path": "frontend/nginx.conf",
+    "sha256": "aa1420eb926b7552434c6600e4e30371dbca5098b12a8a50f95b59c3efe9f17d"
+  }
+]

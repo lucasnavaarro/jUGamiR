@@ -130,7 +130,7 @@ export default function GestionAsignaturas() {
                             onChange={e => setForm(prev => ({ ...prev, nombre: e.target.value }))}
                         />
                         <select
-                            className="gestion__select"
+                            aria-label="Categoría de la nueva asignatura" className="gestion__select"
                             value={form.categoriaId}
                             onChange={e => setForm(prev => ({ ...prev, categoriaId: e.target.value }))}
                         >
@@ -164,14 +164,14 @@ export default function GestionAsignaturas() {
                                             <>
                                                 <td>
                                                     <input
-                                                        className="gestion__input gestion__input--sm"
+                                                        aria-label="Nombre de la asignatura" className="gestion__input gestion__input--sm"
                                                         value={editForm.nombre}
                                                         onChange={e => setEditForm(prev => ({ ...prev, nombre: e.target.value }))}
                                                     />
                                                 </td>
                                                 <td>
                                                     <select
-                                                        className="gestion__select gestion__select--sm"
+                                                        aria-label="Categoría de la asignatura" className="gestion__select gestion__select--sm"
                                                         value={editForm.categoriaId}
                                                         onChange={e => setEditForm(prev => ({ ...prev, categoriaId: e.target.value }))}
                                                     >
@@ -191,7 +191,7 @@ export default function GestionAsignaturas() {
                                                 <td>{a.categoriaNombre}</td>
                                                 <td className="gestion__acciones">
                                                     <button className="btn btn--outline btn--sm" onClick={() => iniciarEdicion(a)}>Editar</button>
-                                                    <button className="btn btn--danger btn--sm" onClick={() => handleEliminar(a.id)}>🗑</button>
+                                                    <button className="btn btn--danger btn--sm" aria-label={`Eliminar asignatura ${a.nombre}`} onClick={() => handleEliminar(a.id)}>🗑</button>
                                                 </td>
                                             </>
                                         )}

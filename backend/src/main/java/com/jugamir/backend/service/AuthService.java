@@ -139,6 +139,8 @@ public class AuthService {
             throw new BusinessException("El token ha expirado");
 
         Usuario usuario = accounts.current(rt.getUsuario().getIdUsuario());
+        if (!Boolean.TRUE.equals(usuario.getEsActivo()))
+            throw new org.springframework.security.authentication.BadCredentialsException("Cuenta no disponible");
         if (refreshTokenRepository.findByToken(refreshToken).isEmpty())
             throw new org.springframework.security.authentication.BadCredentialsException("Sesión caducada");
         String rol = jugadorRepository.existsByUsuario(usuario) ? "JUGADOR" : "PROFESOR";

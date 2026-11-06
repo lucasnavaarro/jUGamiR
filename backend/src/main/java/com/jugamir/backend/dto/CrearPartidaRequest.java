@@ -4,15 +4,15 @@ import com.jugamir.backend.model.enums.Dificultad;
 import com.jugamir.backend.model.enums.TipoPartida;
 import java.util.List;
 import java.util.Map;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 public record CrearPartidaRequest(
         @NotNull TipoPartida tipo,
-        @NotNull List<Dificultad> dificultades,
+        @NotEmpty List<@NotNull Dificultad> dificultades,
         @jakarta.validation.constraints.Min(5) @jakarta.validation.constraints.Max(600) int tiempoRespuesta,
-        int maxJugadores,
-        @NotNull List<Long> categoriaIds,
-        int aciertosParaQuesito,
+        @Min(1) @Max(6) int maxJugadores,
+        @NotEmpty List<@NotNull @Positive Long> categoriaIds,
+        @Min(1) @Max(30) int aciertosParaQuesito,
         boolean modoEntrenamiento,
-        Map<Long, Integer> categoriaPesos) {
+        Map<@NotNull @Positive Long, @NotNull @Positive Integer> categoriaPesos) {
 }
