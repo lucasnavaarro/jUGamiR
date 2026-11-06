@@ -7,6 +7,13 @@ const duration=Number(process.env.QA_LOAD_MS||1800000);
 assert.ok(duration>=1800000,'REN-03 requires at least thirty real minutes');
 const command=(s)=>execFileSync('docker',['compose','-f',ROOT+'/scripts/qa/compose.yaml','exec','-T','db','psql','-X','-qAt','-U','audit_test','-d','audit_load','-v','ON_ERROR_STOP=1','-c',s],{encoding:'utf8',timeout:20000}).trim();
 assert.equal(command('select current_database()'),'audit_load');
+// A fresh CI database is migrated by the backend. Never seed it before startup.
+let backendReady=false;
+for(let i=0;i<120;i++){
+ try{const response=await fetch(BASE+'/actuator/health',{signal:AbortSignal.timeout(2000)});if(response.ok&&(await response.json()).status==='UP'){backendReady=true;break;}}catch{}
+ await delay(500);
+}
+assert.ok(backendReady,'Load backend must finish startup and migrations before fixtures');
 command(`TRUNCATE usuarios,categorias,security_rate_limits RESTART IDENTITY CASCADE;
  INSERT INTO usuarios(nombre,apellidos,email,contraseña_hash) SELECT 'Load','QA','load'||n||'@example.invalid','!disabled-content-owner' FROM generate_series(1,50) n;
  INSERT INTO jugadores(id_usuario,nick) SELECT id_usuario,'load'||id_usuario FROM usuarios;
@@ -37,7 +44,6 @@ fs.writeFileSync(OUT+'/load-errors.json','[]');
 const metrics={publicEvents:0,publicIsolationErrors:0,started:new Date().toISOString(),durationRequiredMs:duration,http:[],stomp:[],errors:[],samples:[],cycles:0,sockets:50};
 const starts=new Map(),sockets=[],actions=new Map();
 async function req(method,url,user,body){const t=performance.now();try{const r=await fetch(BASE+url,{method,headers:{Authorization:'Bearer '+user.token,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(10000)});const data=await r.json().catch(()=>null);metrics.http.push({at:Date.now(),method,ms:performance.now()-t,status:r.status,path:url,game:user.game,players:user.game===9?2:6});if(r.status>=400){metrics.errors.push({status:r.status,path:url,body:data,at:new Date().toISOString()});fs.writeFileSync(OUT+'/load-errors.json',JSON.stringify(metrics.errors,null,2));}return{status:r.status,data};}catch(e){metrics.errors.push({path:url,error:e.message});return{status:0,data:null};}}
-for(let i=0;i<40;i++){try{if((await fetch(BASE+'/actuator/health')).ok)break;}catch{}await delay(500);}
 for(const u of users){const ws=new WebSocket(BASE.replace('http:','ws:')+'/ws');sockets.push(ws);let buffer='';ws.addEventListener('message',e=>{buffer+=String(e.data);let end;while((end=buffer.indexOf('\0'))>=0){const frame=buffer.slice(0,end);buffer=buffer.slice(end+1);if(frame.startsWith('CONNECTED'))ws.send(`SUBSCRIBE\nid:load${u.id}\ndestination:/topic/juego/${u.game}\n\n\0`);if(frame.trim().startsWith('MESSAGE')){try{const event=JSON.parse(frame.slice(frame.indexOf('\n\n')+2));if(event.evento==='PREGUNTA'){const start=starts.get(u.game);if(start)metrics.stomp.push(performance.now()-start);}}catch{}}}});await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});});ws.send(`CONNECT\naccept-version:1.2\nheart-beat:0,0\nAuthorization:Bearer ${u.token}\n\n\0`);}
 const spectators=[];
 for(let i=0;i<3;i++){const ws=new WebSocket(BASE.replace('http:','ws:')+'/ws');spectators.push(ws);let buffer='';ws.addEventListener('message',e=>{buffer+=String(e.data);let end;while((end=buffer.indexOf('\0'))>=0){const frame=buffer.slice(0,end).trim();buffer=buffer.slice(end+1);if(frame.startsWith('CONNECTED'))ws.send(`SUBSCRIBE\nid:public${i}\ndestination:/topic/partidas-publicas\n\n\0`);if(frame.startsWith('MESSAGE')){metrics.publicEvents++;try{const games=JSON.parse(frame.slice(frame.indexOf('\n\n')+2));if(games.some(g=>g.id<=9))metrics.publicIsolationErrors++;}catch{metrics.publicIsolationErrors++;}}}});await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});});ws.send(`CONNECT\naccept-version:1.2\nheart-beat:0,0\nAuthorization:Bearer ${users[0].token}\n\n\0`);}
