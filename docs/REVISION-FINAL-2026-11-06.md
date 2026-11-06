@@ -45,3 +45,5 @@ Los resultados de carga del 5 de noviembre siguen correspondiendo al código de 
 Siguen pendientes el despliegue, la repetición de esta versión a través del proxy público y las pruebas físicas de suspensión y cambio Wi-Fi/datos. El iPhone solo puede acceder a producción; no hay Android físico. VoiceOver continúa excluido por decisión del usuario. SMTP se verifica mediante captura en QA, no mediante entrega a un buzón externo real.
 
 Esta revisión reduce riesgos y deja regresiones reproducibles. No demuestra que la aplicación carezca de cualquier fallo desconocido.
+
+Actualización posterior: [pasos 2 y 3 completados y candidata exacta validada](VALIDACION-PASOS-2-3-2026-11-06.md).

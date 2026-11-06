@@ -7,3 +7,5 @@
 **/dist
 SECURITY-AUDIT-*.md
 db/data.sql
+
+.release-candidates

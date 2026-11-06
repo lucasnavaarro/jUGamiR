@@ -1,0 +1,92 @@
+{
+  "steps": {
+    "2": "completed: published workflow and successful GitHub execution",
+    "3": "completed: candidate accepted on AMD64, exact images retained by CI"
+  },
+  "candidateCommit": "6ace3dea2ea98d989290a37830e0f5b1146a463d",
+  "pr": "https://github.com/lucasnavaarro/jUGamiR/pull/6",
+  "ciRun": "https://github.com/lucasnavaarro/jUGamiR/actions/runs/42192772272",
+  "java": {
+    "tests": 84,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontendTests": 11,
+  "csvTests": 5,
+  "qaRunnerTests": 2,
+  "ciObservations": 35,
+  "ciFailures": 0,
+  "amd64Load": {
+    "durationMs": 1803709,
+    "httpP95Ms": 59.19080399995437,
+    "stompP95Ms": 16.07416899999953,
+    "totalRequests": 26742,
+    "errors": 0,
+    "statusCounts": {
+      "200": 26742
+    },
+    "publicEvents": 246,
+    "publicIsolationErrors": 0,
+    "groups": {
+      "twoPlayers": {
+        "requests": 1449,
+        "p95Ms": 54.437395999993896,
+        "errors": 0
+      },
+      "sixPlayers": {
+        "requests": 24391,
+        "p95Ms": 55.86089299991727,
+        "errors": 0
+      },
+      "teacherSearch": {
+        "requests": 410,
+        "p95Ms": 12.028592000016943,
+        "errors": 0
+      },
+      "statistics": {
+        "requests": 410,
+        "p95Ms": 99.10879500000738,
+        "errors": 0
+      }
+    }
+  },
+  "localArm64Load": {
+    "durationMs": 1803857,
+    "httpP95Ms": 58.07004199991934,
+    "stompP95Ms": 13.053916000004392,
+    "totalRequests": 27143,
+    "errors": 0,
+    "statusCounts": {
+      "200": 27143
+    },
+    "publicEvents": 252,
+    "publicIsolationErrors": 0,
+    "groups": {
+      "twoPlayers": {
+        "requests": 1466,
+        "p95Ms": 49.44041600008495,
+        "errors": 0
+      },
+      "sixPlayers": {
+        "requests": 24759,
+        "p95Ms": 53.370708000147715,
+        "errors": 0
+      },
+      "teacherSearch": {
+        "requests": 417,
+        "p95Ms": 12.305749999999534,
+        "errors": 0
+      },
+      "statistics": {
+        "requests": 417,
+        "p95Ms": 99.4073339999959,
+        "errors": 0
+      }
+    }
+  },
+  "productionConfigManuallyCompared": true,
+  "requiredTmpfsMiB": 512,
+  "deployed": false,
+  "merged": false
+}

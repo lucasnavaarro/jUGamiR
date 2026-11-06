@@ -26,7 +26,7 @@ La actualización prevista no exige cambiar `.env`, reimportar preguntas ni elim
 
 ## Comprobaciones añadidas tras la revisión del 6 de noviembre
 
-Antes de fusionar, publicar el workflow de regresiones y exigir que los dos trabajos de CI estén aprobados sobre el commit que vaya a desplegarse. La validación local y el borrador de descripción están en `REVISION-FINAL-2026-11-06.md` y `PR-CORRECCIONES-PREPARADA.md`. El CI todavía no está publicado ni configurado como comprobación obligatoria de la rama.
+Antes de fusionar, publicar el workflow de regresiones y exigir que los dos trabajos de CI estén aprobados sobre el commit que vaya a desplegarse. La validación local y el borrador de descripción están en `REVISION-FINAL-2026-11-06.md` y `PR-CORRECCIONES-PREPARADA.md`. El CI está publicado y ejecutado en la PR #6; no se han cambiado las comprobaciones obligatorias de la rama.
 
 Durante la ventana de mantenimiento, conservar el SHA anterior, los identificadores de las dos imágenes anteriores y copias verificadas de PostgreSQL y del volumen de imágenes. Evitar nuevas escrituras hasta terminar las comprobaciones iniciales. Si se permite actividad real después, restaurar una copia antigua puede perder esos cambios y exige conciliarlos antes.
 
@@ -41,3 +41,5 @@ El comprobador solo hace un GET de salud y falla ante HTTP distinto de 200, HTML
 Si fallan el arranque, las migraciones o los recorridos críticos, mantener el mantenimiento y revertir la versión de aplicación junto con la copia coherente de BD e imágenes. No basta con cambiar al commit antiguo: su validación Flyway puede rechazar migraciones V5–V8 ya aplicadas. La restauración debe ensayarse sobre una copia aislada antes de usarla en el servidor real, sin borrar volúmenes de producción a ciegas.
 
 La validación equivalente a producción detectó que 256 MiB de `/tmp` no permitían procesar un ZIP válido de 192 MiB. La versión candidata transfiere el spool multipart sin duplicarlo y ambos overlays de producción asignan 512 MiB temporales. Confirmar ese valor al recrear el backend; no requiere modificar `.env`.
+
+Para esta candidata, sustituir la reconstrucción por [las imágenes AMD64 exactas que superaron la aceptación](DESPLEGAR-IMAGENES-VALIDADAS.md). El CI y la carga completa están aprobados en el [informe de pasos 2 y 3](VALIDACION-PASOS-2-3-2026-11-06.md); el despliegue continúa pendiente y es manual.

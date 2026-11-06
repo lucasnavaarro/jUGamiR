@@ -329,8 +329,10 @@ Autor: Lucas Navarro Moreno
 
 ## Regresiones automáticas
 
-El workflow [jUGamiR regressions](.github/workflows/regression.yml) comprueba backend con PostgreSQL desechable, sesiones/utilidades del frontend, build, lector CSV y código de salida del ejecutor QA. Las suites de integración requieren `JUGAMIR_DISPOSABLE_DB_TEST=true` y una base llamada `audit_test`; sus fixtures borran únicamente datos de prueba. No activarlas sobre una instalación compartida. El CI rechaza pruebas omitidas y no despliega. Se activará cuando se publiquen estos cambios.
+El workflow [jUGamiR regressions](.github/workflows/regression.yml) comprueba backend con PostgreSQL desechable, sesiones/utilidades del frontend, build, lector CSV y código de salida del ejecutor QA. Las suites de integración requieren `JUGAMIR_DISPOSABLE_DB_TEST=true` y una base llamada `audit_test`; sus fixtures borran únicamente datos de prueba. No activarlas sobre una instalación compartida. El CI rechaza pruebas omitidas y no despliega. Está publicado y ejecutado en la PR #6; se incorporará a `main` al fusionarla.
 
 La [revisión final del 6 de noviembre](docs/REVISION-FINAL-2026-11-06.md) contiene resultados y límites. Los recorridos de navegador y la carga de treinta minutos siguen siendo pruebas de aceptación separadas. El [procedimiento de despliegue](docs/PASOS-DESPLIEGUE-PENDIENTE.md) incluye comprobación pública de salud, observación y reversión.
 
 El backend de producción usa un filesystem de solo lectura y `/tmp` limitado a 512 MiB. Ese presupuesto permite procesar ZIP de hasta 200 MiB sin duplicar el spool multipart; conserva límites de tamaño, píxeles, entradas y tiempo. Al actualizar desde la configuración anterior de 256 MiB se debe recrear el backend con el overlay actualizado.
+
+[Validación de los pasos 2 y 3 e imágenes exactas de despliegue](docs/VALIDACION-PASOS-2-3-2026-11-06.md).
