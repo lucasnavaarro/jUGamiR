@@ -136,6 +136,29 @@ jobs:
         run: |
           python3 scripts/qa/generate-large-zip.py "$QA_LARGE_ZIP"
           node scripts/qa/large-zip-budget.mjs
+      - name: Preserve validated AMD64 images
+        if: github.event_name == 'pull_request'
+        env:
+          CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          mkdir -p /tmp/jugamir-candidate
+          backend_tag="jugamir-backend:candidate-${CANDIDATE_SHA:0:12}"
+          frontend_tag="jugamir-frontend:candidate-${CANDIDATE_SHA:0:12}"
+          docker tag jugamir-fullqa-backend:20261104 "$backend_tag"
+          docker tag jugamir-fullqa-frontend:20261104 "$frontend_tag"
+          docker save "$backend_tag" "$frontend_tag" | gzip > /tmp/jugamir-candidate/images-linux-amd64.tar.gz
+          docker image inspect "$backend_tag" "$frontend_tag" --format '{{.Id}} {{.Os}}/{{.Architecture}} {{json .RepoTags}}' > /tmp/jugamir-candidate/images.txt
+          printf '%s\n' "$CANDIDATE_SHA" > /tmp/jugamir-candidate/source-commit.txt
+          sha256sum docker-compose.yml docker-compose.managed-proxy.yml docker-compose.candidate.yml frontend/nginx.managed-proxy.conf.template frontend/14-trusted-proxy.envsh > /tmp/jugamir-candidate/deployment-files.sha256
+          cd /tmp/jugamir-candidate
+          sha256sum images-linux-amd64.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        if: success() && github.event_name == 'pull_request'
+        with:
+          name: candidate-linux-amd64
+          path: /tmp/jugamir-candidate/
+          compression-level: 0
+          retention-days: 1
       - name: Collect QA diagnostics
         if: always()
         run: |
