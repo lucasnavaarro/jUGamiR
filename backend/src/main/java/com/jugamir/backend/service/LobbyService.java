@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Optional;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +27,7 @@ public class LobbyService {
     private final com.jugamir.backend.security.GameAccess gameAccess;
     private final JugadorRepository jugadorRepository;
     private final JugadorPartidaRepository jugadorPartidaRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final CommittedMessages messagingTemplate;
     private final CategoriaRepository categoriaRepository;
     private final QuesitosGanadosRepository quesitosGanadosRepository;
     private final ProgresoCategoriaRepository progresoCategoriaRepository;
@@ -34,12 +37,39 @@ public class LobbyService {
             int maxJugadores, List<Long> categoriaIds, int aciertosParaQuesito, boolean modoEntrenamiento,
             Map<Long, Integer> categoriaPesos) {
 
+        // Validate here as well as in the HTTP DTO: callers may invoke the service directly.
+        if (tipo == null || dificultades == null || dificultades.isEmpty() || dificultades.stream().anyMatch(java.util.Objects::isNull))
+            throw new IllegalArgumentException("Debes seleccionar al menos una dificultad válida");
+        if (tiempoRespuesta < 5 || tiempoRespuesta > 600)
+            throw new IllegalArgumentException("El tiempo de respuesta debe estar entre 5 y 600 segundos");
+        if (maxJugadores < 1 || maxJugadores > 6)
+            throw new IllegalArgumentException("El número de jugadores debe estar entre 1 y 6");
+        if (modoEntrenamiento && (tipo != TipoPartida.PRIVADA || maxJugadores != 1))
+            throw new IllegalArgumentException("El entrenamiento debe ser privado e individual");
+        if (aciertosParaQuesito < 1 || aciertosParaQuesito > 30)
+            throw new IllegalArgumentException("Los aciertos para obtener un quesito deben estar entre 1 y 30");
+        if (categoriaIds == null || categoriaIds.isEmpty() || categoriaIds.stream().anyMatch(id -> id == null || id <= 0))
+            throw new IllegalArgumentException("Debes seleccionar al menos una categoría válida");
+        Set<Long> seleccionadas = new HashSet<>(categoriaIds);
+        if (seleccionadas.size() != categoriaIds.size())
+            throw new IllegalArgumentException("No puedes seleccionar categorías duplicadas");
+        if (categoriaPesos != null) {
+            long totalPeso = 0;
+            for (Map.Entry<Long, Integer> entry : categoriaPesos.entrySet()) {
+                if (!seleccionadas.contains(entry.getKey()) || entry.getValue() == null || entry.getValue() <= 0)
+                    throw new IllegalArgumentException("Los pesos deben ser positivos y pertenecer a las categorías seleccionadas");
+                totalPeso += entry.getValue();
+                if (totalPeso > Integer.MAX_VALUE)
+                    throw new IllegalArgumentException("La suma de pesos es demasiado grande");
+            }
+        }
+
         Jugador jugador = jugadorRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalStateException("El usuario no es un jugador"));
 
         List<Categoria> categorias = categoriaRepository.findAllById(categoriaIds);
-        if (categorias.isEmpty()) {
-            throw new IllegalArgumentException("Debes seleccionar al menos una categoria");
+        if (categorias.size() != seleccionadas.size()) {
+            throw new IllegalArgumentException("Alguna de las categorías seleccionadas no existe");
         }
 
         String codigoUnion = (tipo == TipoPartida.PRIVADA) ? generarCodigoUnico() : null;
@@ -78,7 +108,7 @@ public class LobbyService {
 
         if (tipo == TipoPartida.PUBLICA) {
             List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
-            messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
+            messagingTemplate.send("/topic/partidas-publicas", (Object) lista);
         }
 
         if (modoEntrenamiento && categoriaPesos != null) {
@@ -105,7 +135,9 @@ public class LobbyService {
     }
 
     public Long unirseAPartidaPrivada(String codigoUnion, Long usuarioId) {
-        Partida partida = partidaRepository.findByCodigoUnion(codigoUnion)
+        if (codigoUnion == null || !codigoUnion.matches("[0-9]{6}"))
+            throw new IllegalArgumentException("El código debe contener seis dígitos");
+        Partida partida = partidaRepository.findLockedByCodigoUnion(codigoUnion)
                 .orElseThrow(() -> new IllegalArgumentException("Código de partida incorrecto"));
 
         if (partida.getTipo() != TipoPartida.PRIVADA)
@@ -116,7 +148,7 @@ public class LobbyService {
     }
 
     public void unirseAPartidaPublica(Long partidaId, Long usuarioId) {
-        Partida partida = partidaRepository.findById(partidaId)
+        Partida partida = partidaRepository.findLockedById(partidaId)
                 .orElseThrow(() -> new IllegalArgumentException("Partida no encontrada"));
 
         if (partida.getTipo() != TipoPartida.PUBLICA)
@@ -131,8 +163,8 @@ public class LobbyService {
                 .stream()
                 .map(partida -> new PartidaPublicaDTO(
                         partida.getId(),
-                        partida.getCreadaPor() != null ? partida.getCreadaPor().getNombre() : "Desconocido",
-                        partida.getCreadaPor() != null ? partida.getCreadaPor().getEmail() : "",
+                        partida.getCreadaPor() != null ? jugadorRepository.findById(partida.getCreadaPor().getIdUsuario())
+                                .map(Jugador::getNick).orElse("Desconocido") : "Desconocido",
                         jugadorPartidaRepository.countByPartidaAndResultado(partida, ResultadoJugador.PENDIENTE.name()),
                         partida.getMaxJugadores(),
                         partida.getDificultades().stream()
@@ -152,12 +184,12 @@ public class LobbyService {
         if (!partida.getEstado().equals(EstadoPartida.ESPERANDO))
             throw new IllegalStateException("La partida no está en estado de espera");
 
-        int numJugadores = jugadorPartidaRepository.countByPartida(partida);
-        if (numJugadores < 1)
-            throw new IllegalStateException("Se necesitan al menos 1 jugadores para iniciar la partida");
+        List<JugadorPartida> jugadores = new ArrayList<>(jugadorPartidaRepository.findByPartida(partida)
+                .stream().filter(jp -> jp.getResultado() == ResultadoJugador.PENDIENTE).toList());
+        if (jugadores.size() < (partida.isModoEntrenamiento() ? 1 : 2))
+            throw new IllegalStateException("No hay suficientes jugadores para iniciar la partida");
 
         // Asignar turnos aleatorios
-        List<JugadorPartida> jugadores = jugadorPartidaRepository.findByPartida(partida);
         Collections.shuffle(jugadores);
 
         for (int i = 0; i < jugadores.size(); i++) {
@@ -171,14 +203,14 @@ public class LobbyService {
         partidaRepository.save(partida);
 
         Map<String, Object> estadoLobby = construirEstadoLobby(partida);
-        messagingTemplate.convertAndSend(
+        messagingTemplate.send(
                 "/topic/lobby/" + partida.getId(),
                 (Object) estadoLobby);
 
         // Si es publica, actualizamos la lista de partidas publicas
         if (partida.getTipo() == TipoPartida.PUBLICA) {
             List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
-            messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
+            messagingTemplate.send("/topic/partidas-publicas", (Object) lista);
         }
 
     }
@@ -222,12 +254,12 @@ public class LobbyService {
             }
 
             Map<String, Object> estadoLobby = construirEstadoLobby(partida);
-            messagingTemplate.convertAndSend("/topic/lobby/" + partida.getId(), (Object) estadoLobby);
+            messagingTemplate.send("/topic/lobby/" + partida.getId(), (Object) estadoLobby);
 
             // Si es publica, actualizamos la lista de partidas publicas
             if (partida.getTipo() == TipoPartida.PUBLICA) {
                 List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
-                messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
+                messagingTemplate.send("/topic/partidas-publicas", (Object) lista);
             }
 
         } else if (estado.equals(EstadoPartida.EN_CURSO)) {
@@ -236,14 +268,13 @@ public class LobbyService {
 
             long jugadoresActivos = jugadorPartidaRepository.findByPartida(partida)
                     .stream()
-                    .filter(jp -> jp.getResultado() != ResultadoJugador.ABANDONADA) // filtra los que no tienen estado
-                                                                                    // abandonada
+                    .filter(jp -> jp.getResultado() == ResultadoJugador.PENDIENTE)
                     .count();
 
             if (jugadoresActivos < 2) {
                 List<JugadorPartida> activos = jugadorPartidaRepository.findByPartida(partida)
                         .stream()
-                        .filter(jp -> jp.getResultado() != ResultadoJugador.ABANDONADA)
+                        .filter(jp -> jp.getResultado() == ResultadoJugador.PENDIENTE)
                         .toList();
                 activos.forEach(jp -> {
                     jp.setResultado(ResultadoJugador.VICTORIA);
@@ -256,7 +287,7 @@ public class LobbyService {
                 JugadorPartida ganadorJp = activos.isEmpty() ? null : activos.get(0);
                 Long ganadorId = ganadorJp != null ? ganadorJp.getJugador().getIdUsuario() : null;
 
-                messagingTemplate.convertAndSend(
+                messagingTemplate.send(
                         "/topic/juego/" + partida.getId(),
                         (Object) Map.of(
                                 "evento", "JUGADOR_ABANDONO",
@@ -283,7 +314,7 @@ public class LobbyService {
                                 .toList()
                         : List.of();
 
-                messagingTemplate.convertAndSend(
+                messagingTemplate.send(
                         "/topic/juego/" + partida.getId(),
                         (Object) Map.of(
                                 "evento", "RESULTADO",
@@ -320,7 +351,7 @@ public class LobbyService {
                     }
                 }
 
-                messagingTemplate.convertAndSend(
+                messagingTemplate.send(
                         "/topic/juego/" + partida.getId(),
                         (Object) Map.of(
                                 "evento", "JUGADOR_ABANDONO",
@@ -362,14 +393,14 @@ public class LobbyService {
 
         // Notificar a todos los jugadores del lobby que se ha expulsado a alguien
         Map<String, Object> estadoLobby = construirEstadoLobby(partida);
-        messagingTemplate.convertAndSend(
+        messagingTemplate.send(
                 "/topic/lobby/" + partida.getId(),
                 (Object) estadoLobby);
 
         // Si es publica, actualizamos el contador en la lista de partidas publicas
         if (partida.getTipo() == TipoPartida.PUBLICA) {
             List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
-            messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
+            messagingTemplate.send("/topic/partidas-publicas", (Object) lista);
         }
     }
 
@@ -398,7 +429,8 @@ public class LobbyService {
         JugadorPartida jugadorPartida = JugadorPartida.builder()
                 .jugador(jugador)
                 .partida(partida)
-                .ordenUnion(numJugadores + 1)
+                .ordenUnion(jugadorPartidaRepository.findByPartida(partida).stream()
+                        .mapToInt(JugadorPartida::getOrdenUnion).max().orElse(0) + 1)
                 .puntos(0)
                 .numAcertadas(0)
                 .numFalladas(0)
@@ -413,12 +445,12 @@ public class LobbyService {
         // Si es publica, actualizamos el contador en la lista de partidas publicas
         if (partida.getTipo() == TipoPartida.PUBLICA) {
             List<PartidaPublicaDTO> lista = obtenerPartidasPublicas();
-            messagingTemplate.convertAndSend("/topic/partidas-publicas", (Object) lista);
+            messagingTemplate.send("/topic/partidas-publicas", (Object) lista);
         }
 
         // Notificar a todos los jugadores del lobby que se ha unido uno nuevo
         Map<String, Object> estadoLobby = construirEstadoLobby(partida);
-        messagingTemplate.convertAndSend(
+        messagingTemplate.send(
                 "/topic/lobby/" + partida.getId(),
                 (Object) estadoLobby);
     }

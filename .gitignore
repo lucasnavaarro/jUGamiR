@@ -28,3 +28,6 @@ db/backup_*.sql
 # Informes locales de seguridad
 SECURITY-AUDIT-*.md
 
+# Exact validated container archives, preserved locally and never committed.
+.release-candidates/
+

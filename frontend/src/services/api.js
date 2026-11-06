@@ -34,6 +34,8 @@ export async function apiFetch(url, options = {}) {
     });
 
     if (res.status === 401) {
+        // Never replay a previous session's write under a different login.
+        if (localStorage.getItem('jwt') !== jwt) return res;
 
         const token = await refreshAccessToken();
         if (token) {
@@ -47,6 +49,7 @@ export async function apiFetch(url, options = {}) {
             });
 
         } else {
+            if (localStorage.getItem('jwt') !== jwt) return res;
             // Si el refresh falla, cerramos sesión
             localStorage.clear();
             window.dispatchEvent(new CustomEvent('session-expired'));
@@ -63,10 +66,13 @@ export async function apiFetch(url, options = {}) {
 }
 let pendingRefresh;
 export function refreshAccessToken() {
+    const startedWithToken = localStorage.getItem('jwt');
+    if (!startedWithToken) return Promise.resolve(null);
     if (!pendingRefresh) pendingRefresh = fetch(API_BASE + '/auth/refresh', { method: 'POST' })
         .then(async response => {
             if (!response.ok) return null;
             const { token } = await response.json();
+            if (localStorage.getItem('jwt') !== startedWithToken || typeof token !== 'string' || !token) return null;
             localStorage.setItem('jwt', token);
             return token;
         }).finally(() => { pendingRefresh = null; });

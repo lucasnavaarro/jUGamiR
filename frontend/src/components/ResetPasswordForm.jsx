@@ -16,7 +16,8 @@ export default function ResetPasswordForm() {
     const [isLoading, setIsLoading] = useState(false);
 
     async function handleSubmit(e) {
-        e.preventDefault(); //Para no recargar la página al enviar el formulario
+        e.preventDefault();
+        if (isLoading) return; //Para no recargar la página al enviar el formulario
         setError(null); //Para limpiar el error anterior
 
         if (!newPassword) { setError('Introduce la nueva contraseña'); return; }
@@ -24,19 +25,23 @@ export default function ResetPasswordForm() {
         if (newPassword !== confirmar) { setError('Las contraseñas no coinciden'); return; }
 
         setIsLoading(true);
-        const res = await fetch('/api/auth/reset-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }, //Tipo de contenido
-            body: JSON.stringify({ token, nuevaPassword: newPassword }) //Datos que enviamos
-        });
+        try {
+            const res = await fetch('/api/auth/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }, //Tipo de contenido
+                body: JSON.stringify({ token, nuevaPassword: newPassword }) //Datos que enviamos
+            });
 
-        setIsLoading(false);
 
-        if (res.ok)
-            navigate('/password-changed');
-        else
-            setError('Error al restablecer la contraseña');
-
+            if (res.ok)
+                navigate('/password-changed');
+            else
+                setError('Error al restablecer la contraseña');
+        } catch {
+            setError("No se pudo conectar. Comprueba tu conexión y vuelve a intentarlo.");
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
@@ -54,7 +59,7 @@ export default function ResetPasswordForm() {
                             value={newPassword}
                             onChange={e => setNewPassword(e.target.value)}
                         />
-                        <button type="button" className="input-eye" onClick={() => setShowPassword(!showPassword)}>
+                        <button type="button" className="input-eye" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>
                             {showPassword ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -90,7 +95,7 @@ export default function ResetPasswordForm() {
                             value={confirmar}
                             onChange={e => setConfirmar(e.target.value)}
                         />
-                        <button type="button" className="input-eye" onClick={() => setShowConfirmar(!showConfirmar)}>
+                        <button type="button" className="input-eye" aria-label={showConfirmar ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"} aria-pressed={showConfirmar} onClick={() => setShowConfirmar(!showConfirmar)}>
                             {showConfirmar ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

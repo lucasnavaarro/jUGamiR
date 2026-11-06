@@ -15,7 +15,7 @@ public class GameAccess {
     private final PartidaRepository partidas;
     private final JugadorPartidaRepository jugadores;
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = AccessDeniedException.class)
     public Partida requireMember(Long partidaId, Long usuarioId) {
         Partida partida = partidas.findById(partidaId).orElseThrow(() -> new AccessDeniedException("No tienes acceso a esta partida"));
         var jugador = jugadores.findByPartidaAndJugador_Usuario_IdUsuario(partida, usuarioId)

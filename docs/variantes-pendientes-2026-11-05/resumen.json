@@ -1,0 +1,16 @@
+{
+  "observations": 674,
+  "semanticVariants": 490,
+  "latestFailures": 0,
+  "matrix": {
+    "VERIFICADO QA": 219,
+    "PARCIAL EXTERNO": 2,
+    "NO APLICA": 1
+  },
+  "java": {
+    "tests": 82,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

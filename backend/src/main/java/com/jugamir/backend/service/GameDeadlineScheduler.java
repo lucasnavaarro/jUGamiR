@@ -10,9 +10,10 @@ import java.time.OffsetDateTime;
 public class GameDeadlineScheduler {
     private final PreguntaPartidaRepository questions;
     private final JuegoService games;
+    private final java.time.Clock gameClock;
     @Scheduled(fixedDelay = 1000)
     public void expire() {
-        for (Long id : questions.findExpiredGameIds(OffsetDateTime.now(), org.springframework.data.domain.PageRequest.of(0, 100))) {
+        for (Long id : questions.findExpiredGameIds(OffsetDateTime.now(gameClock), org.springframework.data.domain.PageRequest.of(0, 100))) {
             try { games.expirarPregunta(id); }
             catch (RuntimeException ex) {
                 org.slf4j.LoggerFactory.getLogger(getClass()).warn("No se pudo cerrar el turno de la partida {}", id);

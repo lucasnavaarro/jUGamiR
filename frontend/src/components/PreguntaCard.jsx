@@ -1,7 +1,7 @@
-export default function PreguntaCard({ enunciado }) {
+export default function PreguntaCard({ enunciado, focusRef }) {
     return (
         <div className="pregunta-card">
-            <p className="pregunta-card__texto">{enunciado}</p>
+            <p ref={focusRef} tabIndex={-1} className="pregunta-card__texto">{enunciado}</p>
         </div>
     );
 }

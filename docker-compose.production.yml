@@ -12,7 +12,7 @@ services:
             APP_URL: ${APP_URL:?Set APP_URL to your HTTPS origin}
         read_only: true
         tmpfs:
-            - /tmp:size=256m,mode=1777
+            - /tmp:size=512m,mode=1777
     frontend:
         ports: !override
             - "80:80"

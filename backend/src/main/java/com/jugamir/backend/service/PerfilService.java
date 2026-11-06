@@ -21,6 +21,7 @@ import java.util.Optional;
 public class PerfilService {
 
     private final UsuarioRepository usuarioRepository;
+    private final jakarta.persistence.EntityManager entityManager;
     private final JugadorRepository jugadorRepository;
     private final ProfesorRepository profesorRepository;
     private final PreguntaRepository preguntaRepository;
@@ -50,11 +51,11 @@ public class PerfilService {
         usuario = accounts.current(usuario.getIdUsuario());
 
         // Validamos la unicidad del email
-        if (!usuario.getEmail().equals(req.email()) && usuarioRepository.existsByEmail(req.email())) {
+        if (!usuario.getEmail().strip().equalsIgnoreCase(req.email()) && usuarioRepository.existsByEmail(req.email())) {
             throw new BusinessException("El email ya está registrado");
         }
 
-        boolean emailCambiado = !usuario.getEmail().equals(req.email());
+        boolean emailCambiado = !usuario.getEmail().strip().equalsIgnoreCase(req.email());
 
         if (emailCambiado) {
             emailChangeService.consume(usuario, req.email(), req.currentPassword(), req.emailCode());
@@ -73,7 +74,9 @@ public class PerfilService {
         Optional<Jugador> jugadorOpt = jugadorRepository.findByUsuario_IdUsuario(usuario.getIdUsuario());
         if (jugadorOpt.isPresent()) {
             Jugador jugador = jugadorOpt.get();
-            if (!jugador.getNick().equals(req.nick()) &&
+            if (req.nick() == null || req.nick().isBlank())
+                throw new BusinessException("El nick es obligatorio para un jugador");
+            if (!jugador.getNick().strip().equalsIgnoreCase(req.nick()) &&
                     jugadorRepository.existsByNick(req.nick())) {
                 throw new BusinessException("El nick ya está en uso");
             }
@@ -93,6 +96,12 @@ public class PerfilService {
         boolean esProfesor = profesorRepository.existsById(usuario.getIdUsuario());
         if (esProfesor && preguntaRepository.existsByCreadaPor(usuario)) {
             throw new BusinessException("No puedes eliminar tu cuenta mientras tengas preguntas creadas. Elimínalas primero desde el panel de gestión.");
+        }
+        if (jugadorRepository.existsById(usuario.getIdUsuario())) {
+            // Avoid cascading deletion of competitive history or active memberships.
+            Long memberships = entityManager.createQuery("select count(j) from JugadorPartida j where j.jugador.idUsuario = :id", Long.class)
+                    .setParameter("id", usuario.getIdUsuario()).getSingleResult();
+            if (memberships > 0) throw new BusinessException("No puedes borrar una cuenta con historial de partidas");
         }
         usuarioRepository.delete(usuario);
     }

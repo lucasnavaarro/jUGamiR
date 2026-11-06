@@ -1,0 +1,2 @@
+[jugamir-backend:candidate-6ace3dea2ea9 jugamir-fullqa-backend:20261104] sha256:f4b9a3b4e4a0bfe5fa3ad65b8ffc10466cf4c1e0423e2af0fdb2c971223347f7 linux/amd64
+[jugamir-frontend:candidate-6ace3dea2ea9 jugamir-fullqa-frontend:20261104] sha256:8210cf6d9036884072a3e013f4116b10b398e5bb3eb66734e92f9f3dc7c05bc1 linux/amd64

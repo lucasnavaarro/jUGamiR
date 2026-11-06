@@ -30,7 +30,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response); // Pasa al siguiente filtro
+            filterChain.doFilter(request, response); // Pasa al siguiente filtro, es el caso de endpoints públicos
             return;
         }
 
@@ -43,7 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
 
-                if (usuario == null) {
+                if (usuario == null || !Boolean.TRUE.equals(usuario.getEsActivo())) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("Usuario no encontrado");
                     return;

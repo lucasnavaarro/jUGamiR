@@ -21,11 +21,14 @@ export default function UserMenu() {
 
     async function handleLogout() {
 
-        await fetch("/api/auth/logout", {
-            method: "POST",
-        });
-        localStorage.clear();
-        navigate("/");
+        try {
+            await fetch("/api/auth/logout", { method: "POST", signal: AbortSignal.timeout(10000) });
+        } catch {
+            // Local credentials must be cleared even when the server is unreachable.
+        } finally {
+            localStorage.clear();
+            navigate("/");
+        }
     }
 
     return (

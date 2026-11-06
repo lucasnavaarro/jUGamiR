@@ -39,18 +39,22 @@ export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) 
     //Se ejecuta cada vez que el usuario cambia el criterio o la dirección. 
     //Recarga las categorías ordenadas según las nuevas preferencias.
     useEffect(() => {
+        let active = true;
         apiFetch(`/api/stats/jugador/categorias-entrenamiento?criterio=${criterio}&direccion=${direccion}`)
             .then(res => res.json())
             .then(data => {
+                if (!active) return;
                 setCategoriasStats(Array.isArray(data) ? data : []);
                 setCriterioActivo(criterio);
                 setAnimKey(prev => prev + 1);
             })
             .catch(() => {
+                if (!active) return;
                 setCategoriasStats([]);
                 setCriterioActivo(criterio);
                 setAnimKey(prev => prev + 1);
             });
+        return () => { active = false; };
     }, [criterio, direccion]);
 
     function toggleCategoria(id) {
@@ -76,11 +80,11 @@ export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) 
             return;
         }
 
-        if (form.tiempoRespuesta < 30 || form.tiempoRespuesta > 300) {
-            const clamped = Math.min(300, Math.max(30, form.tiempoRespuesta));
+        if (form.tiempoRespuesta < 5 || form.tiempoRespuesta > 600) {
+            const clamped = Math.min(600, Math.max(5, form.tiempoRespuesta));
             setTiempoText(String(clamped));
             setForm(prev => ({ ...prev, tiempoRespuesta: clamped }));
-            setLocalError('El tiempo de respuesta debe estar entre 30 y 300 segundos');
+            setLocalError('El tiempo de respuesta debe estar entre 5 y 600 segundos');
             return;
         }
 
@@ -285,8 +289,8 @@ export default function EntrenamientoForm({ onSubmit, isLoading, serverError }) 
             { /*TIEMPO DE RESPUESTA*/}
             <Deslizante
                 label="Tiempo máximo de respuesta (segundos)"
-                min={30}
-                max={300}
+                min={5}
+                max={600}
                 step={5}
                 value={form.tiempoRespuesta}
                 text={tiempoText}

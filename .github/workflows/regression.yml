@@ -1,0 +1,188 @@
+name: jUGamiR regressions
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    branches: [main, 'codex/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: regressions-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: audit_test
+          POSTGRES_USER: audit_test
+          POSTGRES_PASSWORD: disposable-ci-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U audit_test -d audit_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: audit_test
+      DB_USER: audit_test
+      DB_PASSWORD: disposable-ci-only
+      JWT_SECRET: disposable-ci-key-not-for-production-64-characters-long-01234567890
+      MAIL_USERNAME: qa@example.invalid
+      MAIL_PASSWORD: unused
+      JUGAMIR_DISPOSABLE_DB_TEST: 'true'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Initialize disposable schema
+        run: docker exec -i ${{ job.services.postgres.id }} psql -X -v ON_ERROR_STOP=1 -U audit_test -d audit_test < db/schema.sql
+      - name: Compile, migrate and run backend regressions
+        working-directory: backend
+        run: mvn -B -ntp clean verify
+      - name: Reject missing or skipped backend tests
+        run: python3 scripts/qa/check-junit.py backend/target/surefire-reports
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: backend-test-results
+          path: backend/target/surefire-reports/
+          retention-days: 7
+
+  frontend-and-import:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Run session and utility regressions
+        working-directory: frontend
+        run: npm test
+      - name: Build production frontend
+        working-directory: frontend
+        run: npm run build
+      - name: Run CSV regressions
+        run: python3 -m unittest discover -s db/tests -v
+      - name: Verify QA runner failure status
+        run: node --test scripts/qa/tests/*.test.mjs
+
+  browser-production-like:
+    needs: [backend, frontend-and-import]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      QA_TLS_DIR: /tmp/jugamir-tls
+      QA_OUT: /tmp/jugamir-browser-results
+      QA_BASE: http://127.0.0.1:18089
+      QA_UI: https://localhost:18444
+      QA_LARGE_ZIP: /tmp/jugamir-large-zip.zip
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: scripts/qa/package-lock.json
+      - name: Install browser dependencies
+        run: |
+          npm ci --prefix scripts/qa
+          scripts/qa/node_modules/.bin/playwright install --with-deps chromium
+      - name: Create disposable TLS certificate
+        run: |
+          mkdir -p "$QA_TLS_DIR" "$QA_OUT"
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj '/CN=localhost' -keyout "$QA_TLS_DIR/privkey.pem" -out "$QA_TLS_DIR/fullchain.pem"
+      - name: Build and start production-like QA
+        run: |
+          docker compose -f scripts/qa/compose.yaml build backend frontend
+          docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed up -d --no-build managedbackend managedfrontend managededge
+          ready=0
+          for attempt in $(seq 1 90); do
+            if curl --fail --silent http://127.0.0.1:18089/actuator/health > /dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          test "$ready" = 1
+          QA_EDGE_IP=$(docker inspect jugamir-fullqa-20261104-managededge-1 --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}') docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed up -d --no-deps managedfrontend
+          docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed restart managededge
+      - name: Check sessions and password recovery in browser
+        run: node scripts/qa/finish-auth.mjs
+      - name: Check gameplay, keyboard and statistics
+        run: node scripts/qa/finish-stats.mjs
+      - name: Check network failures and uncertain writes
+        run: node scripts/qa/review-browser.mjs
+      - name: Check near-limit ZIP with production temporary storage
+        run: |
+          python3 scripts/qa/generate-large-zip.py "$QA_LARGE_ZIP"
+          node scripts/qa/large-zip-budget.mjs
+      - name: Run thirty-minute acceptance load on the validated AMD64 image
+        if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'qa:full-load')
+        run: |
+          docker compose -f scripts/qa/compose.yaml exec -T db createdb -U audit_test audit_load
+          docker compose -f scripts/qa/compose.yaml exec -T db psql -X -v ON_ERROR_STOP=1 -U audit_test -d audit_load < db/schema.sql
+          docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile load up -d --no-deps loadbackend
+          node scripts/qa/load.mjs
+          python3 scripts/qa/finish-load-summary.py
+      - name: Preserve validated AMD64 images
+        if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'qa:full-load')
+        env:
+          CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          mkdir -p /tmp/jugamir-candidate
+          backend_tag="jugamir-backend:candidate-${CANDIDATE_SHA:0:12}"
+          frontend_tag="jugamir-frontend:candidate-${CANDIDATE_SHA:0:12}"
+          docker tag jugamir-fullqa-backend:20261104 "$backend_tag"
+          docker tag jugamir-fullqa-frontend:20261104 "$frontend_tag"
+          docker save "$backend_tag" "$frontend_tag" | gzip > /tmp/jugamir-candidate/images-linux-amd64.tar.gz
+          docker image inspect "$backend_tag" "$frontend_tag" --format '{{.Id}} {{.Os}}/{{.Architecture}} {{json .RepoTags}}' > /tmp/jugamir-candidate/images.txt
+          printf '%s\n' "$CANDIDATE_SHA" > /tmp/jugamir-candidate/source-commit.txt
+          if [ -f "$QA_OUT/load-summary.json" ]; then cp "$QA_OUT/load-summary.json" /tmp/jugamir-candidate/; fi
+          sha256sum docker-compose.yml docker-compose.managed-proxy.yml docker-compose.candidate.yml frontend/nginx.managed-proxy.conf.template frontend/14-trusted-proxy.envsh > /tmp/jugamir-candidate/deployment-files.sha256
+          cd /tmp/jugamir-candidate
+          sha256sum images-linux-amd64.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        if: success() && github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'qa:full-load')
+        with:
+          name: candidate-linux-amd64
+          path: /tmp/jugamir-candidate/
+          compression-level: 0
+          retention-days: 1
+      - name: Collect QA diagnostics
+        if: always()
+        run: |
+          mkdir -p "$QA_OUT"
+          docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed --profile load ps > "$QA_OUT/containers.txt"
+          docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed --profile load logs --no-color --tail=200 > "$QA_OUT/container-logs.txt"
+          docker image inspect jugamir-fullqa-backend:20261104 jugamir-fullqa-frontend:20261104 --format '{{.RepoTags}} {{.Id}} {{.Os}}/{{.Architecture}}' > "$QA_OUT/images.txt"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: browser-production-like-results
+          path: /tmp/jugamir-browser-results/
+          retention-days: 7
+      - name: Stop disposable QA
+        if: always()
+        run: docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed --profile load down --volumes

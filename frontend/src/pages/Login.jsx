@@ -11,7 +11,7 @@ export default function Login() {
         <main className="login-page">
             {step === 'login'
                 ? <LoginForm onEmailSent={(e, id) => { setEmail(e); setChallengeId(id); setStep('verify'); }} />
-                : <VerifyForm email={email} challengeId={challengeId} />
+                : <VerifyForm email={email} challengeId={challengeId} onRestart={() => { setChallengeId(''); setStep('login'); }} />
             }
         </main>
     );

@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class RegisterProfesorRequest extends RegisterRequest {
 
-    @NotBlank
+    @NotBlank @jakarta.validation.constraints.Size(max=120)
     private String departamento;
 
 }

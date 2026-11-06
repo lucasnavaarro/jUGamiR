@@ -8,11 +8,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RespuestaRepository extends JpaRepository<Respuesta, Long> {
 
     // Obtiene las opciones de respuesta de una pregunta
     List<Respuesta> findByPregunta(Pregunta pregunta);
+
+    Optional<Respuesta> findByIdAndPregunta_Id(Long id, Long preguntaId);
 
     void deleteByPregunta_Id(Long preguntaId);
 

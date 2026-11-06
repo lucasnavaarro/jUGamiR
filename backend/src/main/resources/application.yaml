@@ -1,4 +1,11 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 201MB
+      max-request-size: 202MB
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: true
   application:
     name: backend
   
@@ -31,6 +38,9 @@ spring:
       mail:
         smtp:
           auth: true
+          connectiontimeout: 3000
+          timeout: 5000
+          writetimeout: 5000
           starttls:
             enable: true
   
