@@ -1,7 +1,7 @@
 import {createHmac} from 'node:crypto';
 import {assert,api,status,sql,scalar,quote,register,login,caseTest,delay,UI,PASSWORD,compose} from './common.mjs';
-const {chromium}=await import('/Users/lucasnavarro/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/index.mjs');
-const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
+import {launchBrowser} from './browser-runtime.mjs';
+const browser=await launchBrowser();
 const contexts=[];
 async function fresh(user){const context=await browser.newContext({ignoreHTTPSErrors:true}),page=await context.newPage();contexts.push(context);page.setDefaultTimeout(10000);if(user){await context.addCookies([{name:'refreshToken',value:user.cookie.split('=')[1],url:UI,httpOnly:true,secure:true,sameSite:'Strict'}]);await page.goto(UI+'/');await page.evaluate(u=>{for(const[k,v]of Object.entries({jwt:u.token,rol:u.role,idUsuario:u.id,nick:u.nick,email:u.email}))localStorage.setItem(k,String(v));},user);}return{context,page};}
 function expired(u){const enc=o=>Buffer.from(JSON.stringify(o)).toString('base64url');const input=enc({alg:'HS256'})+'.'+enc({sub:u.email,rol:u.role,tokenVersion:1,iat:1,exp:2});return input+'.'+createHmac('sha256','disposable-qa-key-not-for-production-64-characters-long-01234567890').update(input).digest('base64url');}

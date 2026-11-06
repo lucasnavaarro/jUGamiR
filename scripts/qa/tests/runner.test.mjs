@@ -22,3 +22,17 @@ test('a failed QA case fails the process while preserving later observations', (
         rmSync(directory, {recursive: true, force: true});
     }
 });
+
+test('QA endpoint overrides cannot target a public application', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'jugamir-endpoint-'));
+    try {
+        const moduleUrl = new URL('../common.mjs', import.meta.url).href;
+        const result = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(moduleUrl)})`], {
+            env: {...process.env, QA_OUT: directory, QA_BASE: 'https://jugamir.es'}, encoding: 'utf8',
+        });
+        assert.equal(result.status, 1);
+        assert.match(result.stderr, /QA may only target loopback endpoints/);
+    } finally {
+        rmSync(directory, {recursive: true, force: true});
+    }
+});

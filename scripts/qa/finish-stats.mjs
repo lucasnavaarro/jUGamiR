@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import {assert,api,status,register,login,sql,scalar,rows,quote,room,join,start,current,spin,openWindow,answer,caseTest,delay,UI,OUT} from './common.mjs';
 import {formatTiempo} from '../../frontend/src/services/formatTiempo.js';
-const {chromium}=await import('/Users/lucasnavarro/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/index.mjs');
-const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'}),ctx=await browser.newContext({ignoreHTTPSErrors:true,reducedMotion:'reduce'}),page=await ctx.newPage();page.setDefaultTimeout(15000);
+import {launchBrowser} from './browser-runtime.mjs';
+const browser=await launchBrowser(),ctx=await browser.newContext({ignoreHTTPSErrors:true,reducedMotion:'reduce'}),page=await ctx.newPage();page.setDefaultTimeout(15000);
 const users=await Promise.all([login(await register()),login(await register())]);const stamp=Date.now();
 const cat=rows(`insert into categorias(nombre,color) values ('Stats_${stamp}','#${(stamp%16000000).toString(16).padStart(6,'0')}') returning id,nombre`)[0];const sub=Number(scalar(`insert into asignaturas(nombre,categoria_id) values ('Stats_${stamp}',${cat.id}) returning id`));
 for(let i=0;i<4;i++){const q=Number(scalar(`insert into preguntas(identificador,enunciado,estado,dificultad,asignatura_id,creada_por) values ('STATS_${stamp}_${i}','Pregunta accesible ${i}','PUBLICADA','MEDIO',${sub},${users[0].id}) returning id`));sql(`insert into respuestas(pregunta_id,texto_respuesta,es_correcta,orden) values (${q},'Dos',true,1),(${q},'Tres',false,2)`);}

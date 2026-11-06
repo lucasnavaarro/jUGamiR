@@ -7,8 +7,13 @@ export { assert };
 export const ROOT = path.resolve(import.meta.dirname, '../..');
 export const OUT = process.env.QA_OUT ? path.resolve(process.env.QA_OUT) : path.join(ROOT, 'docs/ejecucion-completa-2026-11-04');
 fs.mkdirSync(OUT, {recursive:true});
-export const BASE = 'http://127.0.0.1:18081';
-export const UI = 'https://localhost:18443';
+function loopbackEndpoint(value) {
+  const endpoint = new URL(value);
+  assert.ok(['http:', 'https:'].includes(endpoint.protocol) && ['localhost', '127.0.0.1', '[::1]'].includes(endpoint.hostname), 'QA may only target loopback endpoints');
+  return value.replace(/\/$/, '');
+}
+export const BASE = loopbackEndpoint(process.env.QA_BASE || 'http://127.0.0.1:18081');
+export const UI = loopbackEndpoint(process.env.QA_UI || 'https://localhost:18443');
 export const PASSWORD = 'QA-acceptance@2026';
 export const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 export const quote = value => "'" + String(value).replaceAll("'", "''") + "'";

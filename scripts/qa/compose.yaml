@@ -61,7 +61,7 @@ services:
     ports: ["127.0.0.1:18080:80", "127.0.0.1:18443:443"]
     volumes:
       - ../../frontend/nginx.production.conf:/etc/nginx/conf.d/default.conf:ro
-      - /private/tmp/jugamir-fullqa-tls:/etc/nginx/tls:ro
+      - ${QA_TLS_DIR:-/private/tmp/jugamir-fullqa-tls}:/etc/nginx/tls:ro
     depends_on: [backend]
     mem_limit: 256m
   loadbackend:
@@ -129,7 +129,7 @@ services:
     ports: ["127.0.0.1:18444:443"]
     volumes:
       - ./nginx-managed-edge.conf:/etc/nginx/conf.d/default.conf:ro
-      - /private/tmp/jugamir-fullqa-tls:/etc/nginx/tls:ro
+      - ${QA_TLS_DIR:-/private/tmp/jugamir-fullqa-tls}:/etc/nginx/tls:ro
     profiles: [managed]
     depends_on: [managedfrontend]
     restart: on-failure:3

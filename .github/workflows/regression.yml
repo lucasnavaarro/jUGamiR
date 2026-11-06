@@ -87,3 +87,62 @@ jobs:
         run: python3 -m unittest discover -s db/tests -v
       - name: Verify QA runner failure status
         run: node --test scripts/qa/tests/*.test.mjs
+
+  browser-production-like:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      QA_TLS_DIR: /tmp/jugamir-tls
+      QA_OUT: /tmp/jugamir-browser-results
+      QA_BASE: http://127.0.0.1:18089
+      QA_UI: https://localhost:18444
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: scripts/qa/package-lock.json
+      - name: Install browser dependencies
+        run: |
+          npm ci --prefix scripts/qa
+          scripts/qa/node_modules/.bin/playwright install --with-deps chromium
+      - name: Create disposable TLS certificate
+        run: |
+          mkdir -p "$QA_TLS_DIR" "$QA_OUT"
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj '/CN=localhost' -keyout "$QA_TLS_DIR/privkey.pem" -out "$QA_TLS_DIR/fullchain.pem"
+      - name: Build and start production-like QA
+        run: |
+          docker compose -f scripts/qa/compose.yaml build backend frontend
+          docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed up -d --no-build managedbackend managedfrontend managededge
+          ready=0
+          for attempt in $(seq 1 90); do
+            if curl --fail --silent http://127.0.0.1:18089/actuator/health > /dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          test "$ready" = 1
+          QA_EDGE_IP=$(docker inspect jugamir-fullqa-20261104-managededge-1 --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}') docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed up -d --no-deps managedfrontend
+          docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed restart managededge
+      - name: Check sessions and password recovery in browser
+        run: node scripts/qa/finish-auth.mjs
+      - name: Check gameplay, keyboard and statistics
+        run: node scripts/qa/finish-stats.mjs
+      - name: Check network failures and uncertain writes
+        run: node scripts/qa/review-browser.mjs
+      - name: Collect QA diagnostics
+        if: always()
+        run: |
+          mkdir -p "$QA_OUT"
+          docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed ps > "$QA_OUT/containers.txt"
+          docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed logs --no-color --tail=200 > "$QA_OUT/container-logs.txt"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: browser-production-like-results
+          path: /tmp/jugamir-browser-results/
+          retention-days: 7
+      - name: Stop disposable QA
+        if: always()
+        run: docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed down --volumes

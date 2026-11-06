@@ -1,12 +1,12 @@
 import {assert,api,status,register,login,rows,scalar,sql,quote,room,start,caseTest,delay,UI} from './common.mjs';
-const {chromium}=await import('/Users/lucasnavarro/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/index.mjs');
+import {launchBrowser} from './browser-runtime.mjs';
 const user=await login(await register()),stamp=Date.now();
 const color='#'+((stamp+process.pid)%16000000).toString(16).padStart(6,'0');
 const category=rows(`insert into categorias(nombre,color) values ('Review_${stamp}','${color}') returning id,nombre`)[0];
 const subject=Number(scalar(`insert into asignaturas(nombre,categoria_id) values ('Review_${stamp}',${category.id}) returning id`));
 for(let i=0;i<4;i++){const q=Number(scalar(`insert into preguntas(identificador,enunciado,estado,asignatura_id,creada_por) values ('RV_${stamp}_${i}','Review question ${i}','PUBLICADA',${subject},${user.id}) returning id`));sql(`insert into respuestas(pregunta_id,texto_respuesta,es_correcta,orden) values (${q},'Correct',true,1),(${q},'Wrong',false,2)`);}
 const game=await room(user,category,{modoEntrenamiento:true,maxJugadores:1,aciertosParaQuesito:30,tiempoRespuesta:60});await start(game,user);
-const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'}),ctx=await browser.newContext({ignoreHTTPSErrors:true}),page=await ctx.newPage();page.setDefaultTimeout(12000);
+const browser=await launchBrowser(),ctx=await browser.newContext({ignoreHTTPSErrors:true}),page=await ctx.newPage();page.setDefaultTimeout(12000);
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 await page.goto(UI+'/');await page.evaluate(u=>{for(const[k,v]of Object.entries({jwt:u.token,rol:u.role,idUsuario:u.id,nick:u.nick,email:u.email}))localStorage.setItem(k,String(v));},user);await page.goto(UI+`/partida/${game.idPartida}`);
 await caseTest('UI-06','corte al girar permite reintentar sin bloquear la ruleta',async()=>{
