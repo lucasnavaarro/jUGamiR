@@ -8,6 +8,7 @@ await caseTest('OPS-04','migración real desde esquema anterior a V2 con OTP y p
  const run=text=>execFileSync('docker',['compose','-f',ROOT+'/scripts/qa/compose.yaml','exec','-T','db','psql','-X','-q','-U','audit_test','-d',db,'-v','ON_ERROR_STOP=1'],{input:text,encoding:'utf8',maxBuffer:5*1024*1024});
  run(fs.readFileSync(ROOT+'/db/schema.sql','utf8'));
  run(`DROP INDEX IF EXISTS usuarios_email_normalized_key;DROP INDEX IF EXISTS jugadores_nick_normalized_key;
+ DROP INDEX IF EXISTS idx_jugadores_partida_jugador;
  ALTER TABLE progreso_categoria DROP CONSTRAINT progreso_categoria_aciertos_check;
  ALTER TABLE progreso_categoria ADD CONSTRAINT progreso_categoria_aciertos_check CHECK(aciertos BETWEEN 0 AND 5);
  INSERT INTO usuarios(nombre,apellidos,email,contraseña_hash) VALUES ('Historical','QA','historical@example.invalid',${quote(hash)});
@@ -27,6 +28,7 @@ await caseTest('OPS-04','migración real desde esquema anterior a V2 con OTP y p
  assert.equal(query('select count(*) from codigos_2fa'),'0');assert.equal(query('select cerrada from preguntas_partida where id=1'),'t');
  assert.equal(query('select aciertos from progreso_categoria where id=1'),'4');assert.equal(query('select enunciado from preguntas where id=1'),'Historical preserved question');
  assert.equal(query("select max(version::int) from flyway_schema_history where success and version ~ '^[0-9]+$'"),'8');
+ assert.equal(query("select count(*) from pg_indexes where tablename='jugadores_partida' and indexname='idx_jugadores_partida_jugador'"),'1');
  run('update progreso_categoria set aciertos=29 where id=1');assert.equal(query('select aciertos from progreso_categoria where id=1'),'29');
  const post=(path,data)=>fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
  const login=await post('/api/auth/login',{email:'historical@example.invalid',password:PASSWORD});assert.equal(login.status,202);const id=(await login.json()).challengeId;

@@ -1,6 +1,9 @@
 # Isolated QA overlay: runs the real managed-proxy template and entrypoint,
 # with the same read-only filesystem and /tmp budget as production.
 services:
+  loadbackend:
+    read_only: true
+    tmpfs: ["/tmp:size=512m,mode=1777"]
   managedbackend:
     read_only: true
     tmpfs: ["/tmp:size=512m,mode=1777"]
