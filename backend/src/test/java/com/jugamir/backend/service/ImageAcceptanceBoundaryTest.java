@@ -72,7 +72,11 @@ class ImageAcceptanceBoundaryTest {
                 if(delta>0){zip.putNextEntry(new ZipEntry("imagenes/extra.png"));zip.write(png(2,2));zip.closeEntry();}
             }
             // Stream the large archive from disk instead of holding a 200 MiB multipart array.
-            var upload=new MockMultipartFile("file",new byte[0]){@Override public InputStream getInputStream() throws IOException{return Files.newInputStream(archive);}};
+            var upload=new MockMultipartFile("file",new byte[0]){
+                @Override public long getSize(){return archive.toFile().length();}
+                @Override public InputStream getInputStream() throws IOException{return Files.newInputStream(archive);}
+                @Override public void transferTo(File destination) throws IOException{Files.copy(archive,destination.toPath(),StandardCopyOption.REPLACE_EXISTING);}
+            };
             var storage=new ImageStorage(root.resolve("budget-out"+delta).toString());
             if(delta<=0)assertDoesNotThrow(()->storage.uploadZip(upload));
             else assertThrows(IllegalArgumentException.class,()->storage.uploadZip(upload));
@@ -81,7 +85,12 @@ class ImageAcceptanceBoundaryTest {
     }
     @Test void IMG09_thirtySecondProcessingBudgetIsCheckedBeforePublishing() throws Exception {
         var archive=new ByteArrayOutputStream();try(var zip=new ZipOutputStream(archive)){zip.putNextEntry(new ZipEntry("imagenes/slow.png"));zip.write(png(2,2));zip.closeEntry();}
-        var upload=new MockMultipartFile("file",new byte[0]){@Override public InputStream getInputStream(){return new FilterInputStream(new ByteArrayInputStream(archive.toByteArray())){
+        var upload=new MockMultipartFile("file",new byte[0]){
+            @Override public long getSize(){return archive.size();}
+            @Override public void transferTo(File destination) throws IOException {
+                try(var input=getInputStream()){Files.copy(input,destination.toPath(),StandardCopyOption.REPLACE_EXISTING);}
+            }
+            @Override public InputStream getInputStream(){return new FilterInputStream(new ByteArrayInputStream(archive.toByteArray())){
             boolean delayed=false;
             @Override public int read(byte[] b,int off,int len) throws IOException {if(!delayed){delayed=true;try{Thread.sleep(31_000);}catch(InterruptedException e){Thread.currentThread().interrupt();throw new IOException(e);}}return super.read(b,off,len);}
         };}};

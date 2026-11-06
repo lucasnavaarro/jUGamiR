@@ -90,6 +90,7 @@ jobs:
         run: node --test scripts/qa/tests/*.test.mjs
 
   browser-production-like:
+    needs: [backend, frontend-and-import]
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
@@ -146,7 +147,7 @@ jobs:
           node scripts/qa/load.mjs
           python3 scripts/qa/finish-load-summary.py
       - name: Preserve validated AMD64 images
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'qa:full-load')
         env:
           CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
@@ -163,7 +164,7 @@ jobs:
           cd /tmp/jugamir-candidate
           sha256sum images-linux-amd64.tar.gz > SHA256SUMS
       - uses: actions/upload-artifact@v7
-        if: success() && github.event_name == 'pull_request'
+        if: success() && github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'qa:full-load')
         with:
           name: candidate-linux-amd64
           path: /tmp/jugamir-candidate/
