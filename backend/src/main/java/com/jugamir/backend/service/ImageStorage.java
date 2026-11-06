@@ -101,8 +101,14 @@ public class ImageStorage {
         long deadline = System.nanoTime() + 30_000_000_000L;
         int count = 0;
         Path archive = Files.createTempFile("jugamir-archive-", ".zip");
-        try (InputStream input = file.getInputStream()) {
-            copyBounded(input, archive, MAX_ZIP_BYTES + 1024 * 1024, deadline);
+        try {
+            if (file.getSize() > MAX_ZIP_BYTES + 1024 * 1024)
+                throw new IllegalArgumentException("El ZIP supera el tamaño permitido");
+            // Servlet multipart uploads already live on disk. Transfer the existing
+            // spool file instead of retaining a second archive in the limited tmpfs.
+            file.transferTo(archive.toFile());
+            if (Files.size(archive) > MAX_ZIP_BYTES + 1024 * 1024 || System.nanoTime() > deadline)
+                throw new IllegalArgumentException("El ZIP supera los límites de tamaño o tiempo");
             rejectSpecialEntries(archive);
             try (ZipInputStream zip = new ZipInputStream(Files.newInputStream(archive))) {
             java.util.zip.ZipEntry entry;

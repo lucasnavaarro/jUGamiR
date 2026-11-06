@@ -96,6 +96,7 @@ jobs:
       QA_OUT: /tmp/jugamir-browser-results
       QA_BASE: http://127.0.0.1:18089
       QA_UI: https://localhost:18444
+      QA_LARGE_ZIP: /tmp/jugamir-large-zip.zip
     steps:
       - uses: actions/checkout@v7
         with:
@@ -131,12 +132,17 @@ jobs:
         run: node scripts/qa/finish-stats.mjs
       - name: Check network failures and uncertain writes
         run: node scripts/qa/review-browser.mjs
+      - name: Check near-limit ZIP with production temporary storage
+        run: |
+          python3 scripts/qa/generate-large-zip.py "$QA_LARGE_ZIP"
+          node scripts/qa/large-zip-budget.mjs
       - name: Collect QA diagnostics
         if: always()
         run: |
           mkdir -p "$QA_OUT"
           docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed ps > "$QA_OUT/containers.txt"
           docker compose -f scripts/qa/compose.yaml -f scripts/qa/compose.production-like.yaml --profile managed logs --no-color --tail=200 > "$QA_OUT/container-logs.txt"
+          docker image inspect jugamir-fullqa-backend:20261104 jugamir-fullqa-frontend:20261104 --format '{{.RepoTags}} {{.Id}} {{.Os}}/{{.Architecture}}' > "$QA_OUT/images.txt"
       - uses: actions/upload-artifact@v7
         if: always()
         with:
