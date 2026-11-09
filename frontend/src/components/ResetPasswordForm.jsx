@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { isValidPassword, PASSWORD_REQUIREMENTS } from '../utils/passwordPolicy';
 
 export default function ResetPasswordForm() {
 
@@ -19,9 +20,8 @@ export default function ResetPasswordForm() {
         setError(null); //Para limpiar el error anterior
 
         if (!newPassword) { setError('Introduce la nueva contraseña'); return; }
-        if (newPassword.length < 8) { setError('La contraseña debe tener al menos 8 caracteres'); return; }
+        if (!isValidPassword(newPassword)) { setError(PASSWORD_REQUIREMENTS); return; }
         if (newPassword !== confirmar) { setError('Las contraseñas no coinciden'); return; }
-        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(newPassword)) { setError('La contraseña debe tener al menos una mayúscula, una minúscula, un número y un carácter especial'); return; }
 
         setIsLoading(true);
         const res = await fetch('/api/auth/reset-password', {
@@ -48,6 +48,7 @@ export default function ResetPasswordForm() {
                     <div className="input-wrapper">
                         <input
                             id="newPassword"
+                            aria-describedby="password-requirements"
                             type={showPassword ? 'text' : 'password'}
                             placeholder="Introduce tu nueva contraseña"
                             value={newPassword}
@@ -78,6 +79,7 @@ export default function ResetPasswordForm() {
                     </div>
 
                 </div>
+                <small id="password-requirements">{PASSWORD_REQUIREMENTS}</small>
                 <div className="auth-form__group">
                     <label htmlFor="confirmar">Confirmar contraseña</label>
                     <div className="input-wrapper">

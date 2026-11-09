@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { isValidPassword, PASSWORD_REQUIREMENTS } from '../utils/passwordPolicy';
 
 export default function RegisterForm() {
 
@@ -46,8 +47,8 @@ export default function RegisterForm() {
             return;
         }
 
-        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password)) {
-            setError('La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial');
+        if (!isValidPassword(password)) {
+            setError(PASSWORD_REQUIREMENTS);
             return;
         }
 
@@ -80,8 +81,7 @@ export default function RegisterForm() {
         if (res.ok) {
             navigate('/register-confirmation');
         } else {
-            const mensaje = await res.text();
-            setError('Error al crear al cuenta' || mensaje);
+            setError('Error al crear la cuenta');
         }
     }
 
@@ -140,6 +140,7 @@ export default function RegisterForm() {
                     <div className="input-wrapper">
                         <input
                             id="password"
+                            aria-describedby="password-requirements"
                             type={showPassword ? 'text' : 'password'}
                             placeholder="Introduce tu contraseña"
                             value={password}
@@ -169,6 +170,7 @@ export default function RegisterForm() {
                         </button>
                     </div>
                 </div>
+                <small id="password-requirements">{PASSWORD_REQUIREMENTS}</small>
                 <div className="auth-form__group">
                     <label htmlFor="confirmar">Confirmar contraseña</label>
                     <div className="input-wrapper">
