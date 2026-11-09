@@ -1,0 +1,28 @@
+{
+  "cases": 222,
+  "variants": 584,
+  "observationsIncludingReruns": 784,
+  "statuses": {
+    "FALLO": 40,
+    "OK": 133,
+    "PARCIAL": 40,
+    "BLOQUEADO": 8,
+    "NO APLICA": 1
+  },
+  "java": {
+    "tests": 59,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "loadFinished": true,
+  "load": {
+    "actualDurationMs": 1803169,
+    "cycles": 426,
+    "httpP95": 45.854124999954365,
+    "stompP95": 9.841916000004858,
+    "sockets": 50,
+    "httpRequests": 27857,
+    "errors": 0
+  }
+}

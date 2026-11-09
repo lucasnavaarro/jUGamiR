@@ -1,25 +1,35 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function VerifyForm({ email, challengeId }) {
+export default function VerifyForm({ email, challengeId, onRestart }) {
     const [codigo, setCodigo] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [reenvCod, setReenvCod] = useState('');
+    const [resending, setResending] = useState(false);
     const navigate = useNavigate();
 
     async function handleResend() {
-        setReenvCod('');
-        const res = await fetch('/api/auth/reenviar-codigo', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ challengeId }),
-        });
-        setReenvCod(res.ok ? 'Correo reenviado correctamente.' : 'No se pudo reenviar el correo.');
+        if (resending) return;
+        setResending(true);
+        try {
+            setReenvCod('');
+            const res = await fetch('/api/auth/reenviar-codigo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ challengeId }),
+            });
+            setReenvCod(res.ok ? 'Correo reenviado correctamente.' : 'No se pudo reenviar el correo.');
+        } catch {
+            setReenvCod('No se pudo reenviar el correo. Comprueba tu conexión.');
+        } finally {
+            setResending(false);
+        }
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (isLoading) return;
         setError(null);
 
         if (!codigo) {
@@ -28,27 +38,32 @@ export default function VerifyForm({ email, challengeId }) {
         }
 
         setIsLoading(true);
-        const res = await fetch('/api/auth/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ challengeId, codigo }),
-        });
-        setIsLoading(false);
+        try {
+            const res = await fetch('/api/auth/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ challengeId, codigo }),
+            });
 
-        if (res.ok) {
-            const data = await res.json();
-            localStorage.setItem('jwt', data.token);
-            localStorage.setItem('rol', data.rol);
-            localStorage.setItem('email', data.email);
-            localStorage.setItem('nick', data.nick);
-            localStorage.setItem('nombre', data.nombre);
-            localStorage.setItem('idUsuario', data.idUsuario);
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem('jwt', data.token);
+                localStorage.setItem('rol', data.rol);
+                localStorage.setItem('email', data.email);
+                localStorage.setItem('nick', data.nick);
+                localStorage.setItem('nombre', data.nombre);
+                localStorage.setItem('idUsuario', data.idUsuario);
 
-            if (data.rol === "JUGADOR") navigate('/jugador');
-            else navigate('/profesor');
+                if (data.rol === "JUGADOR") navigate('/jugador');
+                else navigate('/profesor');
 
-        } else {
-            setError('Código incorrecto o expirado');
+            } else {
+                setError('Código incorrecto o expirado');
+            }
+        } catch {
+            setError("No se pudo conectar. Comprueba tu conexión y vuelve a intentarlo.");
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -63,6 +78,7 @@ export default function VerifyForm({ email, challengeId }) {
                     <input
                         type="text"
                         placeholder="Código 6 dígitos"
+                        aria-label="Código de verificación de seis dígitos"
                         value={codigo}
                         onChange={e => setCodigo(e.target.value)}
                         required
@@ -75,9 +91,10 @@ export default function VerifyForm({ email, challengeId }) {
                 </button>
             </form>
             {reenvCod && <p className={reenvCod.includes('correctamente') ? 'resend-msg--ok' : 'resend-msg--error'}>{reenvCod}</p>}
-            <button type="button" className="auth-link resend-button" onClick={handleResend}>
+            <button type="button" className="auth-link resend-button" onClick={handleResend} disabled={resending}>
                 ¿No has recibido ningún correo? Volver a enviar.
             </button>
+            <button type="button" className="auth-link" onClick={onRestart}>Volver al inicio de sesión</button>
         </div>
     );
 }

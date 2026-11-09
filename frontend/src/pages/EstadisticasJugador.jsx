@@ -67,14 +67,7 @@ export default function EstadisticasJugador() {
 
     function getLabelPeriodo(datos) {
         if (!datos || datos.length === 0) return 'periodo';
-        const fecha = datos[0].fecha;
-        //YYYY-MM tiene 7 caracteres
-        if (fecha.length === 7) return 'mes';
-        const d = new Date(fecha);
-        //Cuando el backend agrupa por semana, la fecha que elige para representar
-        //cada grupo es siempre el lunes de esa semana
-        if (d.getDay() === 1) return 'semana'; // 1 = lunes
-        return 'día';
+        return datos[0].periodo || 'periodo';
     }
 
     const labelPeriodo = getLabelPeriodo(progreso);

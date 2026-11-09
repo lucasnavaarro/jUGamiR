@@ -64,11 +64,11 @@ export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
             setLocalError('El número de jugadores debe estar entre 1 y 6');
             return;
         }
-        if (form.tiempoRespuesta < 30 || form.tiempoRespuesta > 300) {
-            const clamped = Math.min(300, Math.max(30, form.tiempoRespuesta));
+        if (form.tiempoRespuesta < 5 || form.tiempoRespuesta > 600) {
+            const clamped = Math.min(600, Math.max(5, form.tiempoRespuesta));
             setTiempoText(String(clamped));
             setForm(prev => ({ ...prev, tiempoRespuesta: clamped }));
-            setLocalError('El tiempo de respuesta debe estar entre 30 y 300 segundos');
+            setLocalError('El tiempo de respuesta debe estar entre 5 y 600 segundos');
             return;
         }
 
@@ -177,8 +177,8 @@ export default function CrearPartidaForm({ onSubmit, isLoading, serverError }) {
             { /*TIEMPO DE RESPUESTA*/}
             <Deslizante
                 label="Tiempo máximo de respuesta (segundos)"
-                min={30}
-                max={300}
+                min={5}
+                max={600}
                 step={5}
                 value={form.tiempoRespuesta}
                 text={tiempoText}

@@ -34,16 +34,8 @@ CSV_PATH = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
-    # Leer CSV
-    with open(CSV_PATH, encoding="utf-8") as f:
-        raw = f.read().splitlines()
-
-    if not raw:
-        print("El CSV está vacío.")
-        sys.exit(1)
-
-    header = [h.strip() for h in raw[0].split(";")]
-    filas  = [dict(zip(header, line.split(";"))) for line in raw[1:] if line.strip()]
+    from csv_rows import read_rows
+    filas = read_rows(CSV_PATH)
     print(f"Filas leídas del CSV: {len(filas)}")
 
     # Conectar a la BD

@@ -8,7 +8,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class RegisterJugadorRequest extends RegisterRequest {
 
-    @NotBlank
+    @NotBlank @jakarta.validation.constraints.Size(max=80)
     private String nick;
 
+    public void setNick(String nick) { this.nick = nick == null ? null : nick.strip(); }
 }

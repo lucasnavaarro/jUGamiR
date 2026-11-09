@@ -30,18 +30,24 @@ export default function LoginForm({ onEmailSent }) {
         }
 
         setIsLoading(true);
-        const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-        });
-        setIsLoading(false);
-
-        if (res.ok) {
-            const { challengeId } = await res.json();
-            onEmailSent(email, challengeId);
-        } else {
-            setError('Email o contraseña incorrectos');
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+                signal: AbortSignal.timeout(12000),
+            });
+            if (res.ok) {
+                const { challengeId } = await res.json();
+                onEmailSent(email, challengeId);
+            } else {
+                const data = await res.json().catch(() => ({}));
+                setError(data.error || 'No se pudo iniciar sesión. Inténtalo de nuevo');
+            }
+        } catch {
+            setError('No se pudo conectar. Comprueba tu conexión e inténtalo de nuevo');
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -77,7 +83,7 @@ export default function LoginForm({ onEmailSent }) {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
-                        <button type="button" className="input-eye" onClick={() => setShowPassword(!showPassword)}>
+                        <button type="button" className="input-eye" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>
                             {showPassword ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

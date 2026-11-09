@@ -28,10 +28,22 @@ export default function JuegoEnCurso({ lobby }) {
     const [preguntaPartidaId, setPreguntaPartidaId] = useState(null);
     const [venceEn, setVenceEn] = useState(null);
     const questionTimer = useRef(null);
+    const resultTimer = useRef(null);
+    const notificationTimer = useRef(null);
+    const reconcileState = useRef(null);
+    const pendingEvents = useRef([]);
+    const stateReady = useRef(false);
+    const questionFocus = useRef(null);
+    useEffect(() => {
+        if (fase === 'MOSTRANDO_PREGUNTA') questionFocus.current?.focus();
+    }, [fase]);
 
     //Cargar estado inicial + conectar WebSocket
 
     useEffect(() => {
+        let active = true;
+        stateReady.current = false;
+        pendingEvents.current = [];
 
         const jwt = localStorage.getItem('jwt');
 
@@ -43,25 +55,43 @@ export default function JuegoEnCurso({ lobby }) {
         const loadState = () => apiFetch(`/api/juego/${lobby.idPartida}/estado`)
             .then(res => { if (!res.ok) throw new Error('No se pudo cargar la partida'); return res.json(); })
             .then(data => {
+                if (!active) return;
+                clearTimeout(resultTimer.current);
+                setError('');
                 setEstadoJuego(data);
-                if (data.preguntaActual) handleEvent(data.preguntaActual);
+                stateReady.current = true;
+                if (data.estado === 'TERMINADA') {
+                    clearTimeout(questionTimer.current);
+                    setGanadorId(data.ganadorId ?? null);
+                    setFase('PARTIDA_TERMINADA');
+                } else if (data.preguntaActual) handleEvent(data.preguntaActual);
                 else { clearTimeout(questionTimer.current); setFase('ESPERANDO_TIRADA'); setPreguntaActual(null); setRespuestas([]); }
-            }).catch(err => setError(err.message));
+                for (const event of pendingEvents.current.splice(0)) handleEvent(event);
+            }).catch(err => { if (active) setError(err.message); });
+        reconcileState.current = loadState;
 
         const client = authenticatedClient({
             accessUrl: `/api/juego/${lobby.idPartida}/estado`,
             onAccessLost: () => navigate('/jugador'),
             onConnect: () => {
-                loadState();
                 client.subscribe(`/topic/juego/${lobby.idPartida}`, (message) => {
                     const data = JSON.parse(message.body);
-                    handleEvent(data);
+                    if (stateReady.current) handleEvent(data);
+                    else pendingEvents.current.push(data);
                 });
+                loadState();
             },
         });
 
         client.activate();
-        return () => { client.stop(); clearTimeout(questionTimer.current); };
+        return () => {
+            active = false;
+            reconcileState.current = null;
+            client.stop();
+            clearTimeout(questionTimer.current);
+            clearTimeout(resultTimer.current);
+            clearTimeout(notificationTimer.current);
+        };
 
     }, [lobby.idPartida]);
 
@@ -70,6 +100,7 @@ export default function JuegoEnCurso({ lobby }) {
         switch (data.evento) {
 
             case 'PREGUNTA':
+                clearTimeout(resultTimer.current);
                 clearTimeout(questionTimer.current);
                 setPreguntaPartidaId(data.preguntaPartidaId);
                 setVenceEn(data.venceEn);
@@ -85,6 +116,7 @@ export default function JuegoEnCurso({ lobby }) {
                 break;
 
             case 'RESULTADO':
+                clearTimeout(resultTimer.current);
                 clearTimeout(questionTimer.current);
                 setResultado(data);
                 setFase('MOSTRANDO_RESULTADO');
@@ -92,7 +124,7 @@ export default function JuegoEnCurso({ lobby }) {
                     ...prev,
                     turnoActual: data.turnoActual,
                     estado: data.estado,
-                    jugadores: prev.jugadores.map(j =>
+                    jugadores: (prev?.jugadores || []).map(j =>
                         j.idJugador === data.jugadorId
                             ? { ...j, quesitos: data.quesitos, progreso: data.progreso ?? j.progreso }
                             : j
@@ -103,13 +135,14 @@ export default function JuegoEnCurso({ lobby }) {
                         ? `¡Acabas de conseguir el quesito de ${data.nuevoQuesito.nombre}!`
                         : `${data.nuevoQuesito.nick} acaba de ganar el quesito de ${data.nuevoQuesito.nombre}`;
                     setNotificacion({ msg, color: data.nuevoQuesito.color });
-                    setTimeout(() => setNotificacion(null), 3500);
+                    clearTimeout(notificationTimer.current);
+                    notificationTimer.current = setTimeout(() => setNotificacion(null), 3500);
                 }
                 if (data.estado === 'TERMINADA') {
                     setGanadorId(data.jugadorId);
-                    setTimeout(() => setFase('PARTIDA_TERMINADA'), 3500);
+                    resultTimer.current = setTimeout(() => setFase('PARTIDA_TERMINADA'), 3500);
                 } else {
-                    setTimeout(() => {
+                    resultTimer.current = setTimeout(() => {
                         setFase('ESPERANDO_TIRADA');
                         setPreguntaActual(null);
                         setRespuestas([]);
@@ -121,6 +154,7 @@ export default function JuegoEnCurso({ lobby }) {
                 break;
 
             case 'TURNO_PASADO':
+                clearTimeout(resultTimer.current);
                 clearTimeout(questionTimer.current);
                 setEstadoJuego(prev => ({
                     ...prev,
@@ -137,7 +171,7 @@ export default function JuegoEnCurso({ lobby }) {
                 setEstadoJuego(prev => ({
                     ...prev,
                     turnoActual: data.turnoActual,
-                    jugadores: prev.jugadores.map(j =>
+                    jugadores: (prev?.jugadores || []).map(j =>
                         j.idJugador == data.jugadorId
                             ? { ...j, abandonado: true }
                             : j
@@ -158,42 +192,60 @@ export default function JuegoEnCurso({ lobby }) {
     }
 
     async function tirarRuleta() {
+        setError('');
         setCategoriaActual(null);
         setFase('GIRANDO_RULETA');
-        const res = await apiFetch(`/api/juego/${lobby.idPartida}/girar`, { method: 'POST' });
-        if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            setError(data.error || `Error ${res.status} al girar la ruleta`);
+        try {
+            const res = await apiFetch(`/api/juego/${lobby.idPartida}/girar`, { method: 'POST' });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || `Error ${res.status} al girar la ruleta`);
+            }
+        } catch (err) {
+            setFase('ESPERANDO_TIRADA');
+            await reconcileState.current?.();
+            setError(err.message === 'Failed to fetch' ? 'No se pudo conectar. Comprueba tu conexión y vuelve a intentarlo.' : err.message);
         }
     }
 
     async function responder(respuestaId) {
 
         if (respuestaElegida) return;
+        setError('');
         setRespuestaElegida(respuestaId);
 
-        const response = await apiFetch(`/api/juego/${lobby.idPartida}/responder`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                respuestaId,
-                preguntaPartidaId,
-            }),
-        });
-        if (!response.ok) {
-            const data = await response.json().catch(() => ({}));
-            setError(data.error || 'La respuesta no se pudo aceptar');
+        try {
+            const response = await apiFetch(`/api/juego/${lobby.idPartida}/responder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    respuestaId,
+                    preguntaPartidaId,
+                }),
+            });
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                setError(data.error || 'La respuesta no se pudo aceptar');
+                setRespuestaElegida(null);
+            }
+        } catch {
             setRespuestaElegida(null);
+            await reconcileState.current?.();
+            setError('No se pudo confirmar la respuesta. Comprueba tu conexión y vuelve a intentarlo.');
         }
     }
 
     async function onTiempoAgotado() {
 
         if (esMiTurno) {
-            await apiFetch(`/api/juego/${lobby.idPartida}/pasarse`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ preguntaPartidaId }),
-            });
+            try {
+                await apiFetch(`/api/juego/${lobby.idPartida}/pasarse`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ preguntaPartidaId }),
+                });
+            } catch {
+                setError('No se pudo conectar. El servidor comprobará el vencimiento del turno.');
+            }
         }
     }
 
@@ -201,8 +253,13 @@ export default function JuegoEnCurso({ lobby }) {
 
         if (!confirm('¿Seguro que quieres abandonar la partida?')) return;
 
-        await apiFetch(`/api/lobby/abandonar/${lobby.idPartida}`, { method: 'DELETE' });
-        navigate('/jugador');
+        try {
+            const response = await apiFetch(`/api/lobby/abandonar/${lobby.idPartida}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('Abandono rechazado');
+            navigate('/jugador');
+        } catch {
+            setError('No se pudo confirmar el abandono. Comprueba tu conexión y vuelve a intentarlo.');
+        }
     }
 
     if (!estadoJuego) {
@@ -239,6 +296,7 @@ export default function JuegoEnCurso({ lobby }) {
                             quesitos={j.quesitos}
                             progreso={j.progreso ?? []}
                             categorias={estadoJuego.categorias}
+                            umbral={estadoJuego.aciertosParaQuesito}
                             esTurno={false}
                             abandonado={j.abandonado ?? false}
                         />
@@ -256,6 +314,12 @@ export default function JuegoEnCurso({ lobby }) {
 
     return (
         <main className={`juego ${imagenesActuales.length > 0 && fase !== 'GIRANDO_RULETA' ? 'juego--con-imagen' : ''}`}>
+            <p className="juego__estado" role="status" aria-live="polite" aria-atomic="true">
+                {fase === 'MOSTRANDO_RESULTADO' && (resultado?.esCorrecta ? 'Respuesta correcta' : 'Respuesta incorrecta')}
+                {fase === 'GIRANDO_RULETA' && 'Preparando la pregunta'}
+                {fase === 'MOSTRANDO_PREGUNTA' && 'Pregunta disponible'}
+                {fase === 'ESPERANDO_TIRADA' && (esMiTurno ? 'Es tu turno' : `Turno de ${jugadorDelTurno?.nick || 'otro jugador'}`)}
+            </p>
             {error && <p>{error}</p>}
             <div className="juego__columna-izq">
                 {/* Marcadores de jugadores */}
@@ -267,6 +331,7 @@ export default function JuegoEnCurso({ lobby }) {
                             quesitos={j.quesitos}
                             progreso={j.progreso ?? []}
                             categorias={estadoJuego.categorias}
+                            umbral={estadoJuego.aciertosParaQuesito}
                             esTurno={j.ordenTurno === estadoJuego.turnoActual}
                             abandonado={j.abandonado ?? false}
                         />
@@ -276,6 +341,7 @@ export default function JuegoEnCurso({ lobby }) {
                 {/* Pregunta */}
                 {preguntaActual && fase !== 'GIRANDO_RULETA' && (
                     <PreguntaCard
+                        focusRef={questionFocus}
                         enunciado={preguntaActual.enunciado}
                     />
                 )}

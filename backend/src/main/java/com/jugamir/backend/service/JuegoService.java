@@ -30,7 +30,9 @@ public class JuegoService {
         private final ProgresoCategoriaRepository progresoCategoriaRepository;
         private final QuesitosGanadosRepository quesitosGanadosRepository;
         private final PartidaCategoriaWeightRepository partidaCategoriaWeightRepository;
-        private final SimpMessagingTemplate messagingTemplate;
+        private final CommittedMessages messagingTemplate;
+        private final jakarta.persistence.EntityManager entityManager;
+        private final java.time.Clock gameClock;
 
         public GirarRuletaResponse girarRuleta(Long partidaId, Long usuarioId) {
 
@@ -116,12 +118,21 @@ public class JuegoService {
                                 filtro_usadas, 1);
                 if (preguntas.isEmpty())
                         throw new IllegalStateException("No hay preguntas disponibles para esta categoría");
-                Pregunta pregunta = preguntas.get(0);
+                Pregunta pregunta = preguntaRepository.findLockedById(preguntas.get(0).getId())
+                        .orElseThrow(() -> new IllegalStateException("La pregunta ya no está disponible"));
+                // The random selection may have loaded an older entity before an editor committed.
+                entityManager.refresh(pregunta, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+                // Hold the subject against category changes until this question instance commits.
+                entityManager.refresh(pregunta.getAsignatura(), jakarta.persistence.LockModeType.PESSIMISTIC_READ);
+                if (pregunta.isAnulada() || pregunta.getEstado() != EstadoPregunta.PUBLICADA
+                        || !pregunta.getAsignatura().getCategoria().getId().equals(categoria.getId())
+                        || !partida.getDificultades().contains(pregunta.getDificultad()))
+                    throw new IllegalStateException("La pregunta ya no está disponible; vuelve a girar");
 
                 /**************************************************************** */
 
                 // Registrar en PreguntasPartida
-                OffsetDateTime emittedAt = OffsetDateTime.now().plusNanos(4_200_000_000L);
+                OffsetDateTime emittedAt = OffsetDateTime.now(gameClock).plusNanos(4_200_000_000L);
                 PreguntaPartida preguntaPartida = PreguntaPartida.builder()
                                 .partida(partida)
                                 .pregunta(pregunta)
@@ -138,7 +149,7 @@ public class JuegoService {
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> opciones = (List<Map<String, Object>>) eventoMsg.get("respuestas");
 
-                messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) eventoMsg);
+                messagingTemplate.send("/topic/juego/" + partidaId, (Object) eventoMsg);
 
                 return new GirarRuletaResponse(categoria,
                                 new PreguntaDTO(
@@ -196,7 +207,7 @@ public class JuegoService {
                 JugadorPartida jugador = validarTurno(partida, usuarioId);
 
                 PreguntaPartida preguntaPartida = pendingQuestion(partida, usuarioId, preguntaPartidaId);
-                OffsetDateTime now = OffsetDateTime.now();
+                OffsetDateTime now = OffsetDateTime.now(gameClock);
                 if (now.isBefore(preguntaPartida.getEmitidaEn()) || !now.isBefore(preguntaPartida.getVenceEn()))
                         throw new IllegalStateException("La pregunta no está dentro de su plazo de respuesta");
                 int tiempoMs = Math.toIntExact(java.time.Duration.between(preguntaPartida.getEmitidaEn(), now).toMillis());
@@ -213,7 +224,7 @@ public class JuegoService {
                                 .respuesta(respuesta)
                                 .esCorrecta(respuesta.getEsCorrecta())
                                 .tiempoMs(tiempoMs)
-                                .respondidaEl(OffsetDateTime.now())
+                                .respondidaEl(OffsetDateTime.now(gameClock))
                                 .build();
 
                 preguntaPartida.setCerrada(true);
@@ -283,7 +294,7 @@ public class JuegoService {
                                         "color", categoriaObtenida.getColor()));
                 }
 
-                messagingTemplate.convertAndSend("/topic/juego/" + partidaId, (Object) evento);
+                messagingTemplate.send("/topic/juego/" + partidaId, (Object) evento);
 
         }
 
@@ -340,8 +351,11 @@ public class JuegoService {
                                 "aciertosParaQuesito", partida.getAciertosParaQuesito(),
                                 "jugadores", jugadores,
                                 "categorias", categorias));
+                jugadorPartidaRepository.findByPartida(partida).stream()
+                        .filter(j -> j.getResultado() == ResultadoJugador.VICTORIA).findFirst()
+                        .ifPresent(j -> state.put("ganadorId", j.getJugador().getIdUsuario()));
                 preguntaPartidaRepository.findFirstByPartidaOrderByOrdenPreguntaDesc(partida)
-                        .filter(q -> !q.isCerrada() && q.getVenceEn() != null && q.getVenceEn().isAfter(OffsetDateTime.now()))
+                        .filter(q -> !q.isCerrada() && q.getVenceEn() != null && q.getVenceEn().isAfter(OffsetDateTime.now(gameClock)))
                         .ifPresent(q -> state.put("preguntaActual", questionEvent(q, q.getPregunta().getAsignatura().getCategoria())));
                 return state;
         }
@@ -361,7 +375,7 @@ public class JuegoService {
                 var pending = preguntaPartidaRepository.findFirstByPartidaOrderByOrdenPreguntaDesc(partida);
                 if (pending.isEmpty()) return;
                 var question = pending.get();
-                if (question.isCerrada() || question.getVenceEn() == null || question.getVenceEn().isAfter(OffsetDateTime.now())) return;
+                if (question.isCerrada() || question.getVenceEn() == null || question.getVenceEn().isAfter(OffsetDateTime.now(gameClock))) return;
                 var player = jugadorPartidaRepository.findByPartidaAndJugador_Usuario_IdUsuario(partida, question.getJugadorTurnoId()).orElse(null);
                 if (partida.getEstado() != EstadoPartida.EN_CURSO || player == null ||
                     player.getResultado() != ResultadoJugador.PENDIENTE || !player.getOrdenTurno().equals(partida.getTurnoActual())) {
@@ -387,7 +401,7 @@ public class JuegoService {
                 player.setNumNoRespondidas(player.getNumNoRespondidas() + 1);
                 jugadorPartidaRepository.save(player);
                 avanzarTurno(partida);
-                messagingTemplate.convertAndSend("/topic/juego/" + partida.getId(), (Object) Map.of(
+                messagingTemplate.send("/topic/juego/" + partida.getId(), (Object) Map.of(
                         "evento", "TURNO_PASADO", "turnoActual", partida.getTurnoActual(),
                         "jugadorId", player.getJugador().getIdUsuario(), "preguntaPartidaId", question.getId()));
         }
@@ -414,7 +428,7 @@ public class JuegoService {
                                 QuesitosGanados quesito = QuesitosGanados.builder()
                                                 .jugadorPartida(jugador)
                                                 .categoria(categoria)
-                                                .ganadoEl(OffsetDateTime.now())
+                                                .ganadoEl(OffsetDateTime.now(gameClock))
                                                 .build();
 
                                 quesitosGanadosRepository.save(quesito);
@@ -432,7 +446,8 @@ public class JuegoService {
                                 return categoria; // si gana quesito se devuelve la categoria
 
                         } else {
-                                // Resetear aunque ya tenga el quesito para no superar el CHECK constraint de la BD
+                                // Resetear aunque ya tenga el quesito para no superar el CHECK constraint de la
+                                // BD
                                 progreso.setAciertos(0);
                         }
                 }
@@ -453,7 +468,7 @@ public class JuegoService {
                                 });
 
                 partida.setEstado(EstadoPartida.TERMINADA);
-                partida.setTerminadaEn(OffsetDateTime.now());
+                partida.setTerminadaEn(OffsetDateTime.now(gameClock));
                 partidaRepository.save(partida);
         }
 

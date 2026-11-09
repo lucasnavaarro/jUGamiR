@@ -1,8 +1,9 @@
-export default function ScoreboardJugador({ nick, quesitos, progreso = [], categorias, esTurno, abandonado = false }) {
+export default function ScoreboardJugador({ nick, quesitos, progreso = [], categorias, esTurno, abandonado = false, umbral = 5 }) {
 
     return (
         <div className={`scoreboard__jugador ${esTurno ? 'scoreboard__jugador--turno' : ''} ${abandonado ? 'scoreboard__jugador--abandonado' : ''}`}>
             <span className="scoreboard__nick">{nick}</span>
+            {esTurno && <span className="scoreboard__turno-texto">Turno actual</span>}
             {abandonado
                 ? <span className="scoreboard__abandonado-texto">Abandonado</span>
                 : (
@@ -18,7 +19,9 @@ export default function ScoreboardJugador({ nick, quesitos, progreso = [], categ
                                         backgroundColor: ganado ? cat.color : undefined,
                                         borderColor: cat.color
                                     }}
-                                    title={`${cat.nombre}: ${ganado ? '✓' : `${aciertos}/5`}`}
+                                    role="img"
+                                    aria-label={`${cat.nombre}: ${ganado ? 'quesito conseguido' : `${aciertos}/${umbral} aciertos`}`}
+                                    title={`${cat.nombre}: ${ganado ? '✓' : `${aciertos}/${umbral}`}`}
                                 >
                                     {!ganado && aciertos}
                                 </span>

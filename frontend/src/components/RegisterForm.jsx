@@ -19,7 +19,8 @@ export default function RegisterForm() {
     const [error, setError] = useState(null);
 
     async function handleSubmit(e) {
-        e.preventDefault(); // Evita que la página se recargue
+        e.preventDefault();
+        if (isLoading) return; // Evita que la página se recargue
         setError(null); // Limpia el error anterior
 
         if (!nombre) {
@@ -71,17 +72,22 @@ export default function RegisterForm() {
         const body = tipo === 'jugador' ? { nombre, apellidos, email, password, nick } : { nombre, apellidos, email, password, departamento };
 
         setIsLoading(true);
-        const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }, //Tipo de contenido que se envía
-            body: JSON.stringify(body), //Datos que enviamos
-        });
-        setIsLoading(false);
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }, //Tipo de contenido que se envía
+                body: JSON.stringify(body), //Datos que enviamos
+            });
 
-        if (res.ok) {
-            navigate('/register-confirmation');
-        } else {
-            setError('Error al crear la cuenta');
+            if (res.ok) {
+                navigate('/register-confirmation');
+            } else {
+                setError('Error al crear la cuenta');
+            }
+        } catch {
+            setError("No se pudo conectar. Comprueba tu conexión y vuelve a intentarlo.");
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -146,7 +152,7 @@ export default function RegisterForm() {
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                         />
-                        <button type="button" className="input-eye" onClick={() => setShowPassword(!showPassword)}>
+                        <button type="button" className="input-eye" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>
                             {showPassword ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -181,7 +187,7 @@ export default function RegisterForm() {
                             value={confirmar}
                             onChange={e => setConfirmar(e.target.value)}
                         />
-                        <button type="button" className="input-eye" onClick={() => setShowConfirmar(!showConfirmar)}>
+                        <button type="button" className="input-eye" aria-label={showConfirmar ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"} aria-pressed={showConfirmar} onClick={() => setShowConfirmar(!showConfirmar)}>
                             {showConfirmar ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -23,4 +23,6 @@ public class Jugador {
     @Column(nullable = false, unique = true)
     private String nick;
 
+    @PrePersist @PreUpdate
+    void normalizeIdentity() { if (nick != null) nick = nick.strip(); }
 }

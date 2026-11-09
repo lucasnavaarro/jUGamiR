@@ -1,0 +1,8 @@
+# Load the validated image archive first; do not rebuild these images on the server.
+services:
+    backend:
+        image: ${JUGAMIR_BACKEND_IMAGE:?Set the validated backend image tag}
+        build: !reset null
+    frontend:
+        image: ${JUGAMIR_FRONTEND_IMAGE:?Set the validated frontend image tag}
+        build: !reset null

@@ -1,0 +1,34 @@
+{
+  "durationMs": 1803857,
+  "httpP95Ms": 58.07004199991934,
+  "stompP95Ms": 13.053916000004392,
+  "totalRequests": 27143,
+  "errors": 0,
+  "statusCounts": {
+    "200": 27143
+  },
+  "publicEvents": 252,
+  "publicIsolationErrors": 0,
+  "groups": {
+    "twoPlayers": {
+      "requests": 1466,
+      "p95Ms": 49.44041600008495,
+      "errors": 0
+    },
+    "sixPlayers": {
+      "requests": 24759,
+      "p95Ms": 53.370708000147715,
+      "errors": 0
+    },
+    "teacherSearch": {
+      "requests": 417,
+      "p95Ms": 12.305749999999534,
+      "errors": 0
+    },
+    "statistics": {
+      "requests": 417,
+      "p95Ms": 99.4073339999959,
+      "errors": 0
+    }
+  }
+}

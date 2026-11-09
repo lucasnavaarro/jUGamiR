@@ -1,4 +1,5 @@
 package com.jugamir.backend.dto;
 import jakarta.validation.constraints.*;
 public record EmailChangeRequest(@NotBlank @Email @Size(max=255) String email,
-                                 @NotBlank @Size(max=256) String currentPassword) {}
+                                 @NotBlank @Size(max=256) String currentPassword) {    public EmailChangeRequest { email = email == null ? null : email.strip().toLowerCase(java.util.Locale.ROOT); }
+}

@@ -75,7 +75,7 @@ export default function ImportarPreguntas() {
                     Formato de columnas: <code>Asignatura;Identificador;TituloIndice;Enunciado;Opciones;RespuestaCorrecta;Comentario;Anulada;Imagen;Dificultad</code>
                 </p>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: 'var(--space-xs)' }}>
-                    Si no tiene comentario o imagen, escribe <code>--</code> en ese campo. Si tiene más de una imagen, sepáralas con <code>|</code>. En Dificultad escribe <code>FACIL</code>, <code>MEDIO</code> o <code>DIFICIL</code>.
+                    Si no tiene comentario o imagen, escribe <code>--</code> en ese campo. Si tiene más de una imagen, sepáralas con <code>|</code>. En Dificultad escribe <code>FACIL</code>, <code>MEDIO</code> o <code>DIFICIL</code>. Una dificultad desconocida o vacía se normaliza a MEDIO. Si falta el identificador, se genera uno estable.
                 </p>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: 'var(--space-xs)', wordBreak: 'break-all' }}>
                     Ejemplo: <code>ANATOMIA;MIR 2024-25, P32;1. Neuroanatomía;Enunciado de la pregunta...;1. Opción A. | 2. Opción B. | 3. Opción C. | 4. Opción D.;1;--;NO;--;FACIL</code>

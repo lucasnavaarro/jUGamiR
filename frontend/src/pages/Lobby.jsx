@@ -22,14 +22,23 @@ export default function Lobby() {
             setError('Debes iniciar sesión para acceder al lobby');
             return;
         }
-        //Cargar datos iniciales usando fetch directo
-        apiFetch(`/api/lobby/${idPartida}`)
+        let active = true;
+        const loadLobby = () => apiFetch(`/api/lobby/${idPartida}`)
             .then(res => {
+                if (res.status === 403) { if (active && !abandonandoRef.current) setExpulsado(true); return null; }
                 if (!res.ok) throw new Error('Error al cargar el lobby');
-                return res.json(); //devuelve los datos en formato JSON
+                return res.json();
             })
-            .then(data => setLobby(data))
-            .catch(err => setError(err.message));
+            .then(data => {
+                if (active && data) {
+                    setError('');
+                    setLobby(prev => prev && prev.estado !== 'ESPERANDO' && data.estado === 'ESPERANDO' ? prev : data);
+                }
+            })
+            .catch(err => { if (active) setError(err.message); });
+        loadLobby();
+        // REST reconciles missed events, including starting before subscription is ready.
+        const poll = setInterval(loadLobby, 5000);
         const client = authenticatedClient({
             accessUrl: `/api/lobby/${idPartida}`,
             onAccessLost: () => setExpulsado(true),
@@ -53,6 +62,7 @@ export default function Lobby() {
                             client.stop(); //Cierra la conexión al ser expulsado
                         }
                     });
+                loadLobby();
             },
         });
 
@@ -60,6 +70,8 @@ export default function Lobby() {
 
         //Limpiar al salir de la página
         return () => {
+            active = false;
+            clearInterval(poll);
             client.stop(); //Cierra la conexión para no dejar procesos abiertos
         }
     }, [idPartida]); //Se ejecuta cada vez que cambia el idPartida
@@ -91,7 +103,7 @@ export default function Lobby() {
 
     }
 
-    if (lobby.estado === 'EN_CURSO') {
+    if (lobby.estado === 'EN_CURSO' || lobby.estado === 'TERMINADA') {
         return <JuegoEnCurso lobby={lobby} />;
     }
 

@@ -1,0 +1,14 @@
+{
+  "casesPreviouslyFailed": 40,
+  "productDecisionsResolved": 8,
+  "casesVerified": 48,
+  "variants": 97,
+  "observationsIncludingReruns": 155,
+  "latestVariantFailures": 0,
+  "java": {
+    "tests": 73,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

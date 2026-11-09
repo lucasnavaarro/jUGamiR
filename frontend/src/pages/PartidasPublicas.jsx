@@ -86,8 +86,8 @@ export default function PartidasPublicas() {
                             </div>
                             {partidas.map(p => (
                                 <div key={p.id} className="partidas-publicas__row">
-                                    <span className="partidas-publicas__nombre partidas-publicas__cell">Partida de {p.anfitrion}</span>
-                                    <span className="partidas-publicas__email partidas-publicas__cell">{p.emailCreador}</span>
+                                    <span className="partidas-publicas__nombre partidas-publicas__cell">Partida #{p.id}</span>
+                                    <span className="partidas-publicas__email partidas-publicas__cell">{p.anfitrion}</span>
                                     <span className="partidas-publicas__count partidas-publicas__cell">{p.jugadoresActuales}/{p.maxJugadores}</span>
                                     <button
                                         className={`btn partidas-publicas__cell ${p.jugadoresActuales >= p.maxJugadores ? 'btn--llena' : 'btn--primary'}`}

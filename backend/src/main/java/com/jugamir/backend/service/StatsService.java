@@ -35,6 +35,12 @@ public class StatsService {
         private final RespuestaJugadorRepository respuestaJugadorRepository;
         public static final double PCT = 100.0;
 
+        private boolean competitive(JugadorPartida jp) {
+                return jp.getPartida().getEstado() == com.jugamir.backend.model.enums.EstadoPartida.TERMINADA
+                        && jp.getResultado() != ResultadoJugador.PENDIENTE
+                        && !jp.getPartida().isModoEntrenamiento();
+        }
+
         public EstadisticasGlobalesDTO getEstadisticasGlobales(Long usuarioId) {
 
                 // Obtiene todas las partidas del usuario filtrando las que aún no han
@@ -42,8 +48,7 @@ public class StatsService {
                 List<JugadorPartida> partidas = jugadorPartidaRepository
                                 .findByJugador_Usuario_IdUsuario(usuarioId)
                                 .stream()
-                                .filter(jp -> jp.getResultado() != ResultadoJugador.PENDIENTE
-                                                && !jp.getPartida().isModoEntrenamiento())
+                                .filter(jp -> competitive(jp))
                                 .toList();
 
                 int partidasJugadas = partidas.size();
@@ -64,9 +69,9 @@ public class StatsService {
                                 : 0.0;
 
                 List<RespuestaJugador> respuestas = respuestaJugadorRepository
-                                .findByJugadorPartida_Jugador_Usuario_IdUsuario(usuarioId)
+                                .findByJugadorPartida_Jugador_Usuario_IdUsuarioConDatos(usuarioId)
                                 .stream()
-                                .filter(rj -> !rj.getJugadorPartida().getPartida().isModoEntrenamiento())
+                                .filter(rj -> competitive(rj.getJugadorPartida()))
                                 .toList();
                 double tiempoMedioMs = respuestas.stream()
                                 .mapToInt(RespuestaJugador::getTiempoMs)
@@ -123,12 +128,12 @@ public class StatsService {
         public List<EstadisticasAsignaturasDTO> getEstadisticasByCategoria(Long usuarioId, Long categoriaId) {
 
                 return respuestaJugadorRepository
-                                .findByJugadorPartida_Jugador_Usuario_IdUsuario(usuarioId)
+                                .findByJugadorPartida_Jugador_Usuario_IdUsuarioConDatos(usuarioId)
                                 .stream()
                                 .filter(rj -> rj.getPreguntaPartida().getPregunta().getAsignatura().getCategoria()
                                                 .getId()
                                                 .equals(categoriaId)
-                                                && !rj.getJugadorPartida().getPartida().isModoEntrenamiento())
+                                                && competitive(rj.getJugadorPartida()))
                                 .collect(Collectors.groupingBy(
                                                 rj -> rj.getPreguntaPartida().getPregunta().getAsignatura().getId()))
                                 .entrySet().stream()
@@ -167,9 +172,7 @@ public class StatsService {
                 List<JugadorPartida> partidas = jugadorPartidaRepository
                                 .findByJugador_Usuario_IdUsuario(usuarioId)
                                 .stream()
-                                .filter(jp -> jp.getResultado() != ResultadoJugador.PENDIENTE
-                                                && jp.getPartida().getTerminadaEn() != null
-                                                && !jp.getPartida().isModoEntrenamiento())
+                                .filter(jp -> competitive(jp))
                                 .toList();
 
                 if (partidas.isEmpty())
@@ -184,6 +187,7 @@ public class StatsService {
                                 .max(Comparator.naturalOrder()).get();
 
                 long dias = ChronoUnit.DAYS.between(primera, ultima);
+                String periodo = dias > 60 ? "mes" : dias > 14 ? "semana" : "día";
 
                 Function<JugadorPartida, String> clave;
                 if (dias > 60) {
@@ -219,19 +223,19 @@ public class StatsService {
                                                                 : 0.0;
                                         }).average().orElse(0.0);
                                         return new PuntoProgresoDTO(entry.getKey(), pctVictorias, pctAcierto,
-                                                        tiempoMedio);
+                                                        tiempoMedio, periodo);
                                 })
                                 .toList();
         }
 
         public List<PuntoProgresoCategoriaDTO> getProgresoPorCategoria(Long usuarioId, Long categoriaId) {
                 List<RespuestaJugador> respuestas = respuestaJugadorRepository
-                                .findByJugadorPartida_Jugador_Usuario_IdUsuario(usuarioId)
+                                .findByJugadorPartida_Jugador_Usuario_IdUsuarioConDatos(usuarioId)
                                 .stream()
                                 .filter(rj -> rj.getPreguntaPartida().getPregunta()
                                                 .getAsignatura().getCategoria().getId().equals(categoriaId)
                                                 && rj.getJugadorPartida().getPartida().getTerminadaEn() != null
-                                                && !rj.getJugadorPartida().getPartida().isModoEntrenamiento())
+                                                && competitive(rj.getJugadorPartida()))
                                 .toList();
 
                 if (respuestas.isEmpty())
@@ -244,6 +248,7 @@ public class StatsService {
                                 .map(rj -> rj.getJugadorPartida().getPartida().getTerminadaEn().toLocalDate())
                                 .max(Comparator.naturalOrder()).get();
                 long dias = ChronoUnit.DAYS.between(primera, ultima);
+                String periodo = dias > 60 ? "mes" : dias > 14 ? "semana" : "día";
 
                 Function<RespuestaJugador, String> clave;
                 if (dias > 60) {
@@ -269,7 +274,7 @@ public class StatsService {
                                         double pctAcierto = totalGrupo > 0 ? (aciertosGrupo * PCT / totalGrupo) : 0.0;
                                         double tiempoMedio = grupo.stream().mapToInt(RespuestaJugador::getTiempoMs)
                                                         .average().orElse(0.0);
-                                        return new PuntoProgresoCategoriaDTO(entry.getKey(), pctAcierto, tiempoMedio);
+                                        return new PuntoProgresoCategoriaDTO(entry.getKey(), pctAcierto, tiempoMedio, periodo);
                                 })
                                 .toList();
         }

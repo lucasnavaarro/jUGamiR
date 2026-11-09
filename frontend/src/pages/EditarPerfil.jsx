@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../services/api';
 
 function Campo({ label, name, type = 'text', form, setForm }) {
+    const id = useId();
     return (
         <>
-            <label className="gestion__label">{label}</label>
-            <input
+            <label htmlFor={id} className="gestion__label">{label}</label>
+            <input id={id} name={name}
                 className="gestion__input"
                 type={type}
                 value={form[name]}

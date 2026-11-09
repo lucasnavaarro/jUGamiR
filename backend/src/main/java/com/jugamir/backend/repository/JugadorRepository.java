@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JugadorRepository extends JpaRepository<Jugador, Long> {
 
-    boolean existsByNick(String nick);
+    @org.springframework.data.jpa.repository.Query("select (count(j) > 0) from Jugador j where lower(trim(j.nick)) = lower(trim(:nick))")
+    boolean existsByNick(@org.springframework.data.repository.query.Param("nick") String nick);
 
     boolean existsByUsuario(Usuario usuario);
 
