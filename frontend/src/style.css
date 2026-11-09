@@ -3354,12 +3354,6 @@ button.crear-partida__back {
     text-align: left;
   }
 }
-.crear-partida__option:focus-within,
-.crear-partida__cat:focus-within,
-.entrenamiento__cat:focus-within {
-  outline: 3px solid var(--color-primary, #60a5fa);
-  outline-offset: 3px;
-}
 @media (max-width: 480px) {
   .stats { padding: var(--space-md); min-width: 0; }
   .stats__header, .stats__cat-header { flex-wrap: wrap; }
@@ -3379,7 +3373,6 @@ button.crear-partida__back {
 
 .crear-partida__option--active, .crear-partida__cat--active { color: #D4C5FF; }
 
-.scoreboard__turno-texto { font-size: 0.75em; color: var(--text-muted); }
 
 .dashboard__title { overflow-wrap: anywhere; }
 

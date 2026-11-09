@@ -16,7 +16,7 @@ await caseTest('UI-07','aspecto original: columnas arriba y resultado solo con c
   await start(g,actor);
   await page.goto(UI+`/partida/${g.idPartida}`);
   await page.getByRole('button',{name:'Girar Ruleta'}).waitFor();
-  assert.equal(await page.locator('.juego__estado').count(),0);
+  assert.equal(await page.locator('.juego__estado, .scoreboard__turno-texto').count(),0);
   const layout=await page.locator('.juego').evaluate(main=>{
     const top=main.getBoundingClientRect().top+parseFloat(getComputedStyle(main).paddingTop);
     return {top,left:main.querySelector('.juego__columna-izq').getBoundingClientRect().top,right:main.querySelector('.juego__columna-der').getBoundingClientRect().top};
