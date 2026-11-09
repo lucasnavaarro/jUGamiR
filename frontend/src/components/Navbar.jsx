@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import UserMenu from './UserMenu';
 
@@ -31,10 +30,7 @@ export default function Navbar() {
     return (
         <header className="navbar">
             <div className="container navbar__inner">
-                {isLoggedIn
-                    ? <div className="navbar__logo">{LogoContent}</div>
-                    : <Link to="/" className="navbar__logo" aria-label="Inicio jUGamiR">{LogoContent}</Link>
-                }
+                <Link to="/" className="navbar__logo" aria-label="Inicio jUGamiR">{LogoContent}</Link>
 
                 {!isAuthPage && (
                     <>
