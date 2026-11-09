@@ -31,6 +31,7 @@ await caseTest('UI-07','aspecto original: columnas arriba y resultado solo con c
   assert.equal(await page.locator('.respuesta-card--correcta').count(),1);
   assert.equal(await page.locator('.respuesta-card--incorrecta').count(),1);
   assert.equal(await page.locator('.respuesta-card__estado, .juego__estado').count(),0);
+  await page.waitForFunction(()=>getComputedStyle(document.querySelector('.respuesta-card--correcta')).borderColor==='rgb(34, 197, 94)'&&getComputedStyle(document.querySelector('.respuesta-card--incorrecta')).borderColor==='rgb(239, 68, 68)');
   assert.equal(await page.locator('.respuesta-card--correcta').evaluate(el=>getComputedStyle(el).borderColor),'rgb(34, 197, 94)');
   assert.equal(await page.locator('.respuesta-card--incorrecta').evaluate(el=>getComputedStyle(el).borderColor),'rgb(239, 68, 68)');
   await page.screenshot({path:OUT+'/answer-original-colors.png',fullPage:true});
