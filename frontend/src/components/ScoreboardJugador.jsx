@@ -3,7 +3,6 @@ export default function ScoreboardJugador({ nick, quesitos, progreso = [], categ
     return (
         <div className={`scoreboard__jugador ${esTurno ? 'scoreboard__jugador--turno' : ''} ${abandonado ? 'scoreboard__jugador--abandonado' : ''}`}>
             <span className="scoreboard__nick">{nick}</span>
-            {esTurno && <span className="scoreboard__turno-texto">Turno actual</span>}
             {abandonado
                 ? <span className="scoreboard__abandonado-texto">Abandonado</span>
                 : (
