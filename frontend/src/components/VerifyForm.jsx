@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function VerifyForm({ email, challengeId, onRestart }) {
     const [codigo, setCodigo] = useState('');
@@ -94,7 +94,7 @@ export default function VerifyForm({ email, challengeId, onRestart }) {
             <button type="button" className="auth-link resend-button" onClick={handleResend} disabled={resending}>
                 ¿No has recibido ningún correo? Volver a enviar.
             </button>
-            <button type="button" className="auth-link" onClick={onRestart}>Volver al inicio de sesión</button>
+            <Link to="/login" className="auth-link" onClick={onRestart}>Volver al inicio de sesión</Link>
         </div>
     );
 }

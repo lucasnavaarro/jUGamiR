@@ -314,12 +314,6 @@ export default function JuegoEnCurso({ lobby }) {
 
     return (
         <main className={`juego ${imagenesActuales.length > 0 && fase !== 'GIRANDO_RULETA' ? 'juego--con-imagen' : ''}`}>
-            <p className="juego__estado" role="status" aria-live="polite" aria-atomic="true">
-                {fase === 'MOSTRANDO_RESULTADO' && (resultado?.esCorrecta ? 'Respuesta correcta' : 'Respuesta incorrecta')}
-                {fase === 'GIRANDO_RULETA' && 'Preparando la pregunta'}
-                {fase === 'MOSTRANDO_PREGUNTA' && 'Pregunta disponible'}
-                {fase === 'ESPERANDO_TIRADA' && (esMiTurno ? 'Es tu turno' : `Turno de ${jugadorDelTurno?.nick || 'otro jugador'}`)}
-            </p>
             {error && <p>{error}</p>}
             <div className="juego__columna-izq">
                 {/* Marcadores de jugadores */}
